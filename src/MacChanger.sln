@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger", "MacChanger\MacChanger.csproj", "{505010CE-D639-4937-88A6-9E67C12B7F02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.App", "MacChanger.App\MacChanger.App.csproj", "{83CE0618-51E0-4069-8482-085AE26E3055}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Cli", "MacChanger.App\MacChanger.Cli.csproj", "{83CE0618-51E0-4069-8482-085AE26E3055}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Tests", "MacChanger.Tests\MacChanger.Tests.csproj", "{B4136349-A1E2-4DB3-8618-CB8D55639ECC}"
 EndProject

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MacChanger.App
+namespace MacChanger.Cli
 {
     internal static class Program
     {

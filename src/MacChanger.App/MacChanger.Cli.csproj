@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{83CE0618-51E0-4069-8482-085AE26E3055}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>MacChanger.App</RootNamespace>
-    <AssemblyName>MacChanger.App</AssemblyName>
+    <RootNamespace>MacChanger.Cli</RootNamespace>
+    <AssemblyName>MacChanger.Cli</AssemblyName>
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -31,6 +31,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>MacChanger.App.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
