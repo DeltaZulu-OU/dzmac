@@ -11,8 +11,8 @@ namespace MacChanger.Gui
         public string Name { get; set; }
         public string Changed { get; set; }
         public PhysicalAddress MacAddress { get; set; }
-        public string LinkStatus { get; set; }
-        public string Speed { get; set; }
+        public string LinkStatus => Adapter.ManagedAdapter.OperationalStatus.ToString();
+        public string Speed => ReadableSpeed(Adapter.ManagedAdapter.Speed);
 
         internal Adapter Adapter { get; set; }
 
@@ -22,31 +22,27 @@ namespace MacChanger.Gui
             Name = adapter.ManagedAdapter.Name;
             Changed = "No"; // TODO: Keep state of changes
             MacAddress = adapter.MacAddress;
-            LinkStatus = adapter.ManagedAdapter.OperationalStatus.ToString();
-            Speed = ReadableSpeed(adapter.ManagedAdapter.Speed.ToString());
             Adapter = adapter;
         }
 
-        private string ReadableSpeed(string speed)
+        private string ReadableSpeed(long speed)
         {
-            var s = long.Parse(speed);
-
-            if (s >= 1000000000)
+            if (speed >= 1000000000)
             {
-                float v = s / 1000000000;
+                float v = speed / 1000000000;
                 return $"{v:F2} Gbps";
             }
-            else if (s >= 1000000)
+            else if (speed >= 1000000)
             {
-                float v = s / 1000000;
+                float v = speed / 1000000;
                 return $"{v:F2} Mbps";
             }
-            else if (s >= 1000)
+            else if (speed >= 1000)
             {
-                float v = s / 1000;
+                float v = speed / 1000;
                 return $"{v:F2} Kbps";
             }
-            else if (s == -1)
+            else if (speed == -1)
             {
                 return "0 bps";
             }
