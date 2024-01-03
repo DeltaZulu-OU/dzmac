@@ -46,8 +46,10 @@ namespace MacChanger.Gui
             {
                 return "0 bps";
             }
-
-            return speed;
+            else
+            {
+                return $"{speed} bps";
+            }
         }
 
         protected virtual void Dispose(bool disposing)
