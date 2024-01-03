@@ -52,47 +52,9 @@ namespace MacChanger.Gui
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
 
-        private NetworkConnection Map(Adapter adapter) => new NetworkConnection
-        {
-            Enabled = true,
-            Name = adapter.ManagedAdapter.Name,
-            Changed = "No",
-            MacAddress = adapter.Mac,
-            LinkStatus = adapter.ManagedAdapter.OperationalStatus.ToString(),
-            Speed = ReadableSpeed(adapter.ManagedAdapter.Speed.ToString()),
-            Adapter = adapter
-        };
-
         private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void OptionsMenu_Click(object sender, EventArgs e) => NotImplemented();
-
-        private string ReadableSpeed(string speed)
-        {
-            var s = long.Parse(speed);
-
-            if (s > 1000000000)
-            {
-                float v = s / 1000000000;
-                return $"{v:F2} Gbps";
-            }
-            else if (s > 1000000)
-            {
-                float v = s / 1000000;
-                return $"{v:F2} Mbps";
-            }
-            else if (s > 1000)
-            {
-                float v = s / 1000;
-                return $"{v:F2} Kbps";
-            }
-            else if (s == -1)
-            {
-                return "0 bps";
-            }
-
-            return speed;
-        }
 
         private void RefreshConnections()
         {
@@ -101,7 +63,7 @@ namespace MacChanger.Gui
             NetworkConnections = new List<NetworkConnection>();
             foreach (var adapter in adapters)
             {
-                NetworkConnections.Add(Map(adapter));
+                NetworkConnections.Add(new NetworkConnection(adapter));
             }
             ConnectionsGrid.DataSource = NetworkConnections;
             ConnectionsGrid.EndUpdate();
