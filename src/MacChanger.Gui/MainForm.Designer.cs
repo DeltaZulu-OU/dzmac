@@ -34,6 +34,14 @@ namespace MacChanger.Gui
             this.MainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.InfoTabs = new System.Windows.Forms.TabControl();
             this.InformationPage = new System.Windows.Forms.TabPage();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.ConnectionDetailsGroup = new System.Windows.Forms.GroupBox();
+            this.DeviceLabel = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.ConnectionNameLabel = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
+            this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
@@ -66,20 +74,13 @@ namespace MacChanger.Gui
             this.DeleteItem = new System.Windows.Forms.MenuItem();
             this.OptionsMenu = new System.Windows.Forms.MenuItem();
             this.HelpMenu = new System.Windows.Forms.MenuItem();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.ConnectionDetailsGroup = new System.Windows.Forms.GroupBox();
-            this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
-            this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.ConnectionNameLabel = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.DeviceLabel = new System.Windows.Forms.Label();
+            this.MainStatusBar = new System.Windows.Forms.StatusBar();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.ConnectionDetailsGroup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // MainTableLayoutPanel
@@ -122,6 +123,85 @@ namespace MacChanger.Gui
             this.InformationPage.TabIndex = 0;
             this.InformationPage.Text = "Information";
             this.InformationPage.UseVisualStyleBackColor = true;
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.ConnectionDetailsGroup);
+            this.flowLayoutPanel1.Controls.Add(this.ChangeMacAddressGroup);
+            this.flowLayoutPanel1.Controls.Add(this.PerformanceCounterGroup);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 353);
+            this.flowLayoutPanel1.TabIndex = 0;
+            // 
+            // ConnectionDetailsGroup
+            // 
+            this.ConnectionDetailsGroup.Controls.Add(this.DeviceLabel);
+            this.ConnectionDetailsGroup.Controls.Add(this.label2);
+            this.ConnectionDetailsGroup.Controls.Add(this.ConnectionNameLabel);
+            this.ConnectionDetailsGroup.Controls.Add(this.label1);
+            this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
+            this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
+            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(858, 151);
+            this.ConnectionDetailsGroup.TabIndex = 0;
+            this.ConnectionDetailsGroup.TabStop = false;
+            this.ConnectionDetailsGroup.Text = "Connection Details";
+            // 
+            // DeviceLabel
+            // 
+            this.DeviceLabel.AutoSize = true;
+            this.DeviceLabel.Location = new System.Drawing.Point(84, 37);
+            this.DeviceLabel.Name = "DeviceLabel";
+            this.DeviceLabel.Size = new System.Drawing.Size(16, 13);
+            this.DeviceLabel.TabIndex = 3;
+            this.DeviceLabel.Text = "...";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(6, 37);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(47, 13);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Device";
+            // 
+            // ConnectionNameLabel
+            // 
+            this.ConnectionNameLabel.AutoSize = true;
+            this.ConnectionNameLabel.Location = new System.Drawing.Point(84, 20);
+            this.ConnectionNameLabel.Name = "ConnectionNameLabel";
+            this.ConnectionNameLabel.Size = new System.Drawing.Size(16, 13);
+            this.ConnectionNameLabel.TabIndex = 1;
+            this.ConnectionNameLabel.Text = "...";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(6, 20);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(71, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Connection";
+            // 
+            // ChangeMacAddressGroup
+            // 
+            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 160);
+            this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
+            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(400, 175);
+            this.ChangeMacAddressGroup.TabIndex = 1;
+            this.ChangeMacAddressGroup.TabStop = false;
+            this.ChangeMacAddressGroup.Text = "Change Mac Address";
+            // 
+            // PerformanceCounterGroup
+            // 
+            this.PerformanceCounterGroup.Location = new System.Drawing.Point(409, 160);
+            this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
+            this.PerformanceCounterGroup.Size = new System.Drawing.Size(452, 175);
+            this.PerformanceCounterGroup.TabIndex = 2;
+            this.PerformanceCounterGroup.TabStop = false;
             // 
             // IPAddressPage
             // 
@@ -367,90 +447,20 @@ namespace MacChanger.Gui
             this.HelpMenu.Text = "Help";
             this.HelpMenu.Click += new System.EventHandler(this.HelpMenu_Click);
             // 
-            // flowLayoutPanel1
+            // MainStatusBar
             // 
-            this.flowLayoutPanel1.Controls.Add(this.ConnectionDetailsGroup);
-            this.flowLayoutPanel1.Controls.Add(this.ChangeMacAddressGroup);
-            this.flowLayoutPanel1.Controls.Add(this.PerformanceCounterGroup);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 353);
-            this.flowLayoutPanel1.TabIndex = 0;
-            // 
-            // ConnectionDetailsGroup
-            // 
-            this.ConnectionDetailsGroup.Controls.Add(this.DeviceLabel);
-            this.ConnectionDetailsGroup.Controls.Add(this.label2);
-            this.ConnectionDetailsGroup.Controls.Add(this.ConnectionNameLabel);
-            this.ConnectionDetailsGroup.Controls.Add(this.label1);
-            this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
-            this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
-            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(858, 151);
-            this.ConnectionDetailsGroup.TabIndex = 0;
-            this.ConnectionDetailsGroup.TabStop = false;
-            this.ConnectionDetailsGroup.Text = "Connection Details";
-            // 
-            // ChangeMacAddressGroup
-            // 
-            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 160);
-            this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
-            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(400, 187);
-            this.ChangeMacAddressGroup.TabIndex = 1;
-            this.ChangeMacAddressGroup.TabStop = false;
-            this.ChangeMacAddressGroup.Text = "Change Mac Address";
-            // 
-            // PerformanceCounterGroup
-            // 
-            this.PerformanceCounterGroup.Location = new System.Drawing.Point(409, 160);
-            this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
-            this.PerformanceCounterGroup.Size = new System.Drawing.Size(452, 187);
-            this.PerformanceCounterGroup.TabIndex = 2;
-            this.PerformanceCounterGroup.TabStop = false;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(6, 20);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(71, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Connection";
-            // 
-            // ConnectionNameLabel
-            // 
-            this.ConnectionNameLabel.AutoSize = true;
-            this.ConnectionNameLabel.Location = new System.Drawing.Point(84, 20);
-            this.ConnectionNameLabel.Name = "ConnectionNameLabel";
-            this.ConnectionNameLabel.Size = new System.Drawing.Size(16, 13);
-            this.ConnectionNameLabel.TabIndex = 1;
-            this.ConnectionNameLabel.Text = "...";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(6, 37);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(47, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Device";
-            // 
-            // DeviceLabel
-            // 
-            this.DeviceLabel.AutoSize = true;
-            this.DeviceLabel.Location = new System.Drawing.Point(84, 37);
-            this.DeviceLabel.Name = "DeviceLabel";
-            this.DeviceLabel.Size = new System.Drawing.Size(16, 13);
-            this.DeviceLabel.TabIndex = 3;
-            this.DeviceLabel.Text = "...";
+            this.MainStatusBar.Location = new System.Drawing.Point(0, 499);
+            this.MainStatusBar.Name = "MainStatusBar";
+            this.MainStatusBar.Size = new System.Drawing.Size(884, 22);
+            this.MainStatusBar.TabIndex = 1;
+            this.MainStatusBar.Text = "Ready";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 521);
+            this.Controls.Add(this.MainStatusBar);
             this.Controls.Add(this.MainTableLayoutPanel);
             this.Menu = this.MainMenu;
             this.Name = "MainForm";
@@ -460,10 +470,10 @@ namespace MacChanger.Gui
             this.MainTableLayoutPanel.ResumeLayout(false);
             this.InfoTabs.ResumeLayout(false);
             this.InformationPage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.ConnectionDetailsGroup.ResumeLayout(false);
             this.ConnectionDetailsGroup.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -514,6 +524,7 @@ namespace MacChanger.Gui
         private System.Windows.Forms.Label ConnectionNameLabel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label DeviceLabel;
+        private System.Windows.Forms.StatusBar MainStatusBar;
     }
 }
 

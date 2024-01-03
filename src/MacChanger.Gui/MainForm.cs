@@ -58,6 +58,7 @@ namespace MacChanger.Gui
 
         private void RefreshConnections()
         {
+            MainStatusBar.Text = "Refreshing network interface data...";
             ConnectionsGrid.BeginUpdate();
             var adapters = AdapterFactory.GetAdapters().ToList();
             NetworkConnections = new List<NetworkConnection>();
@@ -68,6 +69,7 @@ namespace MacChanger.Gui
             ConnectionsGrid.DataSource = NetworkConnections;
             ConnectionsGrid.EndUpdate();
             ConnectionsGrid.AutoResizeColumns();
+            MainStatusBar.Text = "Ready";
         }
 
         private void RefreshConnectionsBackground() => _ = Task.Factory.StartNew(() => ConnectionsGrid.BeginInvoke(new Action(RefreshConnections))).ConfigureAwait(false);

@@ -1,9 +1,12 @@
-﻿using System.Net.NetworkInformation;
+﻿using System;
+using System.Net.NetworkInformation;
 
 namespace MacChanger.Gui
 {
-    internal class NetworkConnection
+    internal class NetworkConnection : IDisposable
     {
+        private bool disposedValue;
+
         public bool Enabled { get; set; }
         public string Name { get; set; }
         public string Changed { get; set; }
@@ -15,10 +18,10 @@ namespace MacChanger.Gui
 
         public NetworkConnection(Adapter adapter)
         {
-            Enabled = true; // TODO: How to read status and disable when needed?
+            Enabled = adapter.Enabled;
             Name = adapter.ManagedAdapter.Name;
             Changed = "No"; // TODO: Keep state of changes
-            MacAddress = PhysicalAddress.Parse(adapter.Mac);
+            MacAddress = adapter.MacAddress;
             LinkStatus = adapter.ManagedAdapter.OperationalStatus.ToString();
             Speed = ReadableSpeed(adapter.ManagedAdapter.Speed.ToString());
             Adapter = adapter;
@@ -28,17 +31,17 @@ namespace MacChanger.Gui
         {
             var s = long.Parse(speed);
 
-            if (s > 1000000000)
+            if (s >= 1000000000)
             {
                 float v = s / 1000000000;
                 return $"{v:F2} Gbps";
             }
-            else if (s > 1000000)
+            else if (s >= 1000000)
             {
                 float v = s / 1000000;
                 return $"{v:F2} Mbps";
             }
-            else if (s > 1000)
+            else if (s >= 1000)
             {
                 float v = s / 1000;
                 return $"{v:F2} Kbps";
@@ -49,6 +52,26 @@ namespace MacChanger.Gui
             }
 
             return speed;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Adapter?.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

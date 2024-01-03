@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>MacChanger.App.Program</StartupObject>
+    <StartupObject>MacChanger.Cli.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

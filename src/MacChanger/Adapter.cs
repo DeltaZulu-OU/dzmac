@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
@@ -15,172 +14,63 @@ namespace MacChanger
     /// <remarks>
     /// The <see cref="Adapter"/> implementation is adapted from <see href="https://github.com/sietseringers/MACAddressTool"/>.
     /// </remarks>
-    public sealed class Adapter : IDisposable
+    public class Adapter : IDisposable
     {
-        private ManagementObject _adapter;
-        private readonly string _adapterName;
-        private readonly string _customName;
-        private readonly int _deviceNumber;
-        private static readonly Regex _regex = new Regex("^[0-9A-F]*$");
-
-        internal Adapter(ManagementObject adapter, string adapterName, string customName, int deviceNumber)
-        {
-            _adapter = adapter;
-            _adapterName = adapterName;
-            _customName = customName;
-            _deviceNumber = deviceNumber;
-        }
-
         /// <summary>
-        ///     Network adapter instance with the specified name.
+        /// Get the MAC address as reported by the adapter.
         /// </summary>
-        /// <exception cref="NetworkInformationException"></exception>
-        internal Adapter(NetworkInterface i) : this(i.Description) { }
+        public PhysicalAddress MacAddress => GetMacAddress();
 
-        /// <summary>
-        ///     Network adapter instance with the specified name.
-        /// </summary>
-        /// <param name="adapterName">Network adapter name to query</param>
-        /// <exception cref="NetworkInformationException"></exception>
-        internal Adapter(string adapterName)
+        private PhysicalAddress GetMacAddress()
         {
-            _adapterName = adapterName;
-
-            var searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_NetworkAdapter WHERE Name='{_adapterName}'");
-            var found = searcher.Get();
-            _adapter = found.Cast<ManagementObject>().FirstOrDefault();
-
-            // Extract adapter number; this should correspond to the keys under
-            // HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}
             try
             {
-                var match = Regex.Match(_adapter.Path.RelativePath, "\\\"(\\d+)\\\"$");
-                _deviceNumber = int.Parse(match.Groups[1].Value);
+                return ManagedAdapter.GetPhysicalAddress();
             }
-            catch
-            {
-                return;
-            }
-
-            // Find the name the user gave to it in "Network Adapters"
-            _customName = NetworkInterface.GetAllNetworkInterfaces().Where(
-                i => i.Description == adapterName
-            ).Select(
-                i => " (" + i.Name + ")"
-            ).FirstOrDefault();
+            catch { return null; }
         }
 
         /// <summary>
         /// Get the .NET managed adapter.
         /// </summary>
         /// <exception cref="NetworkInformationException" accessor="get"></exception>
-        public NetworkInterface ManagedAdapter => Array
-            .Find(NetworkInterface.GetAllNetworkInterfaces(), nic => nic.Description == _adapterName);
-
-        /// <summary>
-        /// Get the MAC address as reported by the adapter.
-        /// </summary>
-        public string Mac
-        {
-            get
-            {
-                try
-                {
-                    return BitConverter.ToString(ManagedAdapter.GetPhysicalAddress().GetAddressBytes()).Replace("-", "").ToUpper();
-                }
-                catch { return null; }
-            }
-        }
+        public NetworkInterface ManagedAdapter { get; }
 
         /// <summary>
         /// Get the registry key associated to this adapter.
         /// </summary>
-        public string RegistryKey => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{_deviceNumber:D4}";
+        public string RegistryKey => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{ExtractDeviceNumber():D4}";
 
         /// <summary>
         /// Get the NetworkAddress registry value of this adapter.
         /// </summary>B
-        public string RegistryMac
+        public string RegistryMac => FindRegistryMac();
+
+        public bool Enabled { get; }
+
+        private static readonly Regex _regex = new Regex("^[0-9A-F]*$");
+
+        private ManagementObject _adapter;
+        private bool disposedValue;
+
+        public Adapter(ManagementObject adapter, NetworkInterface managedAdapter)
         {
-            get
-            {
-                try
-                {
-                    using (var regkey = Registry.LocalMachine.OpenSubKey(RegistryKey, false))
-                    {
-                        return regkey.GetValue("NetworkAddress").ToString();
-                    }
-                }
-                catch
-                {
-                    return null;
-                }
-            }
+            ManagedAdapter = managedAdapter;
+            _adapter = adapter;
+            Enabled = GetEnabled(adapter);
         }
 
-        /// <summary>
-        /// Sets the NetworkAddress registry value of this adapter.
-        /// </summary>
-        /// <param name="value">The value. Should be EITHER a string of 12 hexadecimal digits, uppercase, without dashes, dots or anything else, OR an empty string (clears the registry value).</param>
-        /// <returns>true if successful, false otherwise</returns>
-        /// <exception cref="MacChangerException"></exception>
-        public bool SetRegistryMac(string value)
+        private static bool GetEnabled(ManagementObject adapter)
         {
-            var shouldReenable = false;
-
             try
             {
-                // If the value is not the empty string, we want to set NetworkAddress to it,
-                // so it had better be valid
-                if (value.Length > 0 && !IsValidMac(value))
-                    throw new MacChangerException(value + " is not a valid mac address");
-
-                using (var regkey = Registry.LocalMachine.OpenSubKey(RegistryKey, true))
-                {
-                    if (regkey == null)
-                        throw new MacChangerException("Failed to open the registry key");
-
-                    // Sanity check
-                    if (regkey.GetValue("AdapterModel") as string != _adapterName
-                        && regkey.GetValue("DriverDesc") as string != _adapterName)
-                    {
-                        throw new MacChangerException("Adapter not found in registry");
-                    }
-
-                    // Attempt to disable the adapter
-                    var result = (uint)_adapter.InvokeMethod("Disable", null);
-                    if (result != 0)
-                        throw new MacChangerException("Failed to disable network adapter.");
-
-                    // If we're here the adapter has been disabled, so we set the flag that will re-enable it in the finally block
-                    shouldReenable = true;
-
-                    // If we're here everything is OK; update or clear the registry value
-                    if (value.Length > 0)
-                        regkey.SetValue("NetworkAddress", value, RegistryValueKind.String);
-                    else
-                        regkey.DeleteValue("NetworkAddress");
-
-                    return true;
-                }
+                return (bool)adapter.GetPropertyValue("NetEnabled");
             }
-            catch (Exception ex)
+            catch
             {
-                throw new MacChangerException(ex.ToString());
-                //return false;
-            }
-            finally
-            {
-                if (shouldReenable)
-                {
-                    var result = (uint)_adapter.InvokeMethod("Enable", null);
-                    if (result != 0)
-                        throw new MacChangerException("Failed to re-enable network adapter.");
-                }
+                return false;
             }
         }
-
-        public override string ToString() => _adapterName + _customName;
 
         /// <summary>
         /// Get a random (locally administered) MAC address.
@@ -257,6 +147,70 @@ namespace MacChanger
         public static string MacToString(byte[] macAsBytes) => BitConverter.ToString(macAsBytes).Replace("-", "").ToUpper();
 
         /// <summary>
+        /// Sets the NetworkAddress registry value of this adapter.
+        /// </summary>
+        /// <param name="value">The value. Should be EITHER a string of 12 hexadecimal digits, uppercase, without dashes, dots or anything else, OR an empty string (clears the registry value).</param>
+        /// <returns>true if successful, false otherwise</returns>
+        /// <exception cref="MacChangerException"></exception>
+        public bool SetRegistryMac(string value)
+        {
+            var shouldReenable = false;
+
+            try
+            {
+                // If the value is not the empty string, we want to set NetworkAddress to it,
+                // so it had better be valid
+                if (value.Length > 0 && !IsValidMac(value))
+                    throw new MacChangerException(value + " is not a valid mac address");
+
+                using (var regkey = Registry.LocalMachine.OpenSubKey(RegistryKey, true))
+                {
+                    if (regkey == null)
+                        throw new MacChangerException("Failed to open the registry key");
+
+                    // Sanity check
+                    if (regkey.GetValue("AdapterModel") as string != ManagedAdapter.Description
+                        && regkey.GetValue("DriverDesc") as string != ManagedAdapter.Description)
+                    {
+                        throw new MacChangerException("Adapter not found in registry");
+                    }
+
+                    // Attempt to disable the adapter
+                    var result = (uint)_adapter.InvokeMethod("Disable", null);
+                    if (result != 0)
+                        throw new MacChangerException("Failed to disable network adapter.");
+
+                    // If we're here the adapter has been disabled, so we set the flag that will re-enable it in the finally block
+                    shouldReenable = true;
+
+                    // If we're here everything is OK; update or clear the registry value
+                    if (value.Length > 0)
+                        regkey.SetValue("NetworkAddress", value, RegistryValueKind.String);
+                    else
+                        regkey.DeleteValue("NetworkAddress");
+
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new MacChangerException(ex.ToString());
+                //return false;
+            }
+            finally
+            {
+                if (shouldReenable)
+                {
+                    var result = (uint)_adapter.InvokeMethod("Enable", null);
+                    if (result != 0)
+                        throw new MacChangerException("Failed to re-enable network adapter.");
+                }
+            }
+        }
+
+        public override string ToString() => $"{ManagedAdapter.Description} ({ManagedAdapter.Name})";
+
+        /// <summary>
         ///     Gets a string comprised of hexadecimal values, and converts it into a byte array
         /// </summary>
         /// <param name="hexString">String consists of hexadecimal characters</param>
@@ -295,10 +249,60 @@ namespace MacChanger
             return combinedArray;
         }
 
+        private int ExtractDeviceNumber()
+        {
+            // Extract adapter number; this should correspond to the keys under
+            // HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}
+            var deviceNumber = -1;
+            try
+            {
+                var match = Regex.Match(_adapter.Path.RelativePath, "\\\"(\\d+)\\\"$");
+                deviceNumber = int.Parse(match.Groups[1].Value);
+            }
+            catch
+            {
+            }
+
+            return deviceNumber;
+        }
+
+        private string FindRegistryMac()
+        {
+            try
+            {
+                using (var regkey = Registry.LocalMachine.OpenSubKey(RegistryKey, false))
+                {
+                    return regkey.GetValue("NetworkAddress").ToString();
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        #region Dispose
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _adapter?.Dispose();
+                }
+
+                _adapter = null;
+
+                disposedValue = true;
+            }
+        }
+
         public void Dispose()
         {
-            _adapter?.Dispose();
-            _adapter = null;
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
+        #endregion
     }
 }

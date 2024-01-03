@@ -15,10 +15,10 @@ namespace MacChanger.Cli
             {
                 Console.WriteLine(adapter.ToString());
 
-                Console.WriteLine($"MAC: {adapter.Mac}");
+                Console.WriteLine($"MAC: {adapter.MacAddress}");
 
                 var vendor = "Unknown";
-                if (list.TryGetValue(adapter.Mac.Substring(0, OuiLength), out var vendorNames))
+                if (list.TryGetValue(adapter.MacAddress.ToString().Substring(0, OuiLength), out var vendorNames))
                 {
                     vendor = string.Join(", ", vendorNames);
                 }
