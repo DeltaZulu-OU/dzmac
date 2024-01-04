@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MacChanger.Gui.DTO;
 
-namespace MacChanger.Gui
+namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
@@ -19,6 +20,28 @@ namespace MacChanger.Gui
 
         private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+        private void RefreshConnections()
+        {
+            ConnectionsGrid.BeginUpdate();
+            var adapters = NetworkAdapterFactory.GetNetworkAdapters().ToList();
+            NetworkConnections = new List<NetworkConnection>();
+            foreach (var adapter in adapters)
+            {
+                NetworkConnections.Add(new NetworkConnection(adapter));
+            }
+            ConnectionsGrid.DataSource = NetworkConnections;
+            ConnectionsGrid.EndUpdate();
+            ConnectionsGrid.AutoResizeColumns();
+        }
+
+        private void RefreshConnectionsBackground()
+        {
+            MainStatusBar.Text = "Refreshing network interface data...";
+            _ = Task.Factory.StartNew(() => ConnectionsGrid.BeginInvoke(new Action(RefreshConnections))).ConfigureAwait(false);
+            MainStatusBar.Text = "Ready";
+        }
+
+        #region EventHandlers
         private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void ConnectionsGrid_SelectedIndexChanged(object sender, EventArgs e)
@@ -44,8 +67,6 @@ namespace MacChanger.Gui
 
         private void ExportReportItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void HelpMenu_Click(object sender, EventArgs e) => NotImplemented();
-
         private void ImportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void MainForm_Load(object sender, EventArgs e) => RefreshConnectionsBackground();
@@ -56,25 +77,22 @@ namespace MacChanger.Gui
 
         private void OptionsMenu_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void RefreshConnections()
-        {
-            MainStatusBar.Text = "Refreshing network interface data...";
-            ConnectionsGrid.BeginUpdate();
-            var adapters = NetworkAdapterFactory.GetNetworkAdapters().ToList();
-            NetworkConnections = new List<NetworkConnection>();
-            foreach (var adapter in adapters)
-            {
-                NetworkConnections.Add(new NetworkConnection(adapter));
-            }
-            ConnectionsGrid.DataSource = NetworkConnections;
-            ConnectionsGrid.EndUpdate();
-            ConnectionsGrid.AutoResizeColumns();
-            MainStatusBar.Text = "Ready";
-        }
-
-        private void RefreshConnectionsBackground() => _ = Task.Factory.StartNew(() => ConnectionsGrid.BeginInvoke(new Action(RefreshConnections))).ConfigureAwait(false);
         private void RefreshItem_Click(object sender, EventArgs e) => RefreshConnectionsBackground();
+
         private void SavePresetAsItem_Click(object sender, EventArgs e) => NotImplemented();
+
         private void SavePresetItem_Click(object sender, EventArgs e) => NotImplemented();
+
+        private void HelpTopicsItem_Click(object sender, EventArgs e) => System.Diagnostics.Process.Start("https://github.com/zbalkan/MacChanger");
+
+        private void CliParamsHelpItem_Click(object sender, EventArgs e) => NotImplemented();
+
+        private void CheckUpdateItem_Click(object sender, EventArgs e) => NotImplemented();
+
+        private void UpdateOuiItem_Click(object sender, EventArgs e) => NotImplemented();
+
+        private void AboutItem_Click(object sender, EventArgs e) => new AboutBox().Show(this);
+
+        #endregion EventHandlers
     }
 }

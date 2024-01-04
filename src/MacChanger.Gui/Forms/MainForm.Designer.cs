@@ -1,6 +1,6 @@
 ﻿using BrightIdeasSoftware;
 
-namespace MacChanger.Gui
+namespace MacChanger.Gui.Forms
 {
     partial class MainForm
     {
@@ -74,6 +74,13 @@ namespace MacChanger.Gui
             this.DeleteItem = new System.Windows.Forms.MenuItem();
             this.OptionsMenu = new System.Windows.Forms.MenuItem();
             this.HelpMenu = new System.Windows.Forms.MenuItem();
+            this.HelpTopicsItem = new System.Windows.Forms.MenuItem();
+            this.CliParamsHelpItem = new System.Windows.Forms.MenuItem();
+            this.menuItem4 = new System.Windows.Forms.MenuItem();
+            this.CheckUpdateItem = new System.Windows.Forms.MenuItem();
+            this.UpdateOuiItem = new System.Windows.Forms.MenuItem();
+            this.menuItem7 = new System.Windows.Forms.MenuItem();
+            this.AboutItem = new System.Windows.Forms.MenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
@@ -444,8 +451,56 @@ namespace MacChanger.Gui
             // HelpMenu
             // 
             this.HelpMenu.Index = 3;
+            this.HelpMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.HelpTopicsItem,
+            this.CliParamsHelpItem,
+            this.menuItem4,
+            this.CheckUpdateItem,
+            this.UpdateOuiItem,
+            this.menuItem7,
+            this.AboutItem});
             this.HelpMenu.Text = "Help";
-            this.HelpMenu.Click += new System.EventHandler(this.HelpMenu_Click);
+            // 
+            // HelpTopicsItem
+            // 
+            this.HelpTopicsItem.Index = 0;
+            this.HelpTopicsItem.Shortcut = System.Windows.Forms.Shortcut.F1;
+            this.HelpTopicsItem.Text = "Help Topics";
+            this.HelpTopicsItem.Click += new System.EventHandler(this.HelpTopicsItem_Click);
+            // 
+            // CliParamsHelpItem
+            // 
+            this.CliParamsHelpItem.Index = 1;
+            this.CliParamsHelpItem.Text = "Command Line Parameters Help";
+            this.CliParamsHelpItem.Click += new System.EventHandler(this.CliParamsHelpItem_Click);
+            // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 2;
+            this.menuItem4.Text = "-";
+            // 
+            // CheckUpdateItem
+            // 
+            this.CheckUpdateItem.Index = 3;
+            this.CheckUpdateItem.Text = "Check For Software Updates";
+            this.CheckUpdateItem.Click += new System.EventHandler(this.CheckUpdateItem_Click);
+            // 
+            // UpdateOuiItem
+            // 
+            this.UpdateOuiItem.Index = 4;
+            this.UpdateOuiItem.Text = "Update Vendors List (OUI) from IEEE";
+            this.UpdateOuiItem.Click += new System.EventHandler(this.UpdateOuiItem_Click);
+            // 
+            // menuItem7
+            // 
+            this.menuItem7.Index = 5;
+            this.menuItem7.Text = "-";
+            // 
+            // AboutItem
+            // 
+            this.AboutItem.Index = 6;
+            this.AboutItem.Text = "About MacChanger";
+            this.AboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // MainStatusBar
             // 
@@ -525,6 +580,13 @@ namespace MacChanger.Gui
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label DeviceLabel;
         private System.Windows.Forms.StatusBar MainStatusBar;
+        private System.Windows.Forms.MenuItem HelpTopicsItem;
+        private System.Windows.Forms.MenuItem CliParamsHelpItem;
+        private System.Windows.Forms.MenuItem menuItem4;
+        private System.Windows.Forms.MenuItem CheckUpdateItem;
+        private System.Windows.Forms.MenuItem UpdateOuiItem;
+        private System.Windows.Forms.MenuItem menuItem7;
+        private System.Windows.Forms.MenuItem AboutItem;
     }
 }
 

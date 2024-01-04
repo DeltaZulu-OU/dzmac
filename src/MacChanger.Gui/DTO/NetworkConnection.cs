@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 
-namespace MacChanger.Gui
+namespace MacChanger.Gui.DTO
 {
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     internal class NetworkConnection : IDisposable
     {
         private bool disposedValue;
@@ -71,5 +73,7 @@ namespace MacChanger.Gui
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        private string GetDebuggerDisplay() => Name;
     }
 }
