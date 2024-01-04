@@ -26,10 +26,19 @@ namespace MacChanger
         internal VendorList()
         {
             _cache = new Cache(_databaseFile);
-            if (_cache.IsEmpty())
+            if (_cache.IsEmpty)
             {
                 _cache.AddRange(Downloader.GetAll());
             }
+        }
+
+        public void Refresh()
+        {
+            if (!_cache.IsEmpty)
+            {
+                _cache.Clear();
+            }
+            _cache.AddRange(Downloader.GetAll());
         }
 
         public IEnumerable<Vendor> Get(string oui) => _cache.Get(oui);

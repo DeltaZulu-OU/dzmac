@@ -22,11 +22,16 @@ namespace MacChanger
             _databaseFile = databaseFile;
             _connection = CreateConnection();
             CreateTableIfNotExists();
-            Count = UpdateCount();
+            UpdateCount();
         }
 
         public IEnumerable<Vendor> this[string oui] => Get(oui);
 
+        /// <summary>
+        ///     Add an instance of Vendors to the database
+        /// </summary>
+        /// <param name="oui">The OUI for vendor</param>
+        /// <param name="vendor">Vendor name</param>
         public void Add(string oui, string vendor)
         {
             Debug.WriteLine($"Updating database (OUI: {oui}, Vendor: {vendor})...");
@@ -36,9 +41,13 @@ namespace MacChanger
             command.Parameters.AddWithValue("$vendor", vendor);
             command.ExecuteNonQuery();
 
-            Count = UpdateCount();
+            UpdateCount();
         }
 
+        /// <summary>
+        ///     Add a collection of Vendors to the database
+        /// </summary>
+        /// <param name="vendors">A collection of Vendor instances</param>
         public void AddRange(IEnumerable<Vendor> vendors)
         {
             Debug.WriteLine("Populating database...");
@@ -56,7 +65,7 @@ namespace MacChanger
                 transaction.Commit();
             }
 
-            Count = UpdateCount();
+            UpdateCount();
         }
 
         /// <summary>
@@ -87,6 +96,10 @@ namespace MacChanger
             return vs.AsReadOnly();
         }
 
+        /// <summary>
+        ///     Queries the cache for all vendor records and converts into a collection of Vendor instances.
+        /// </summary>
+        /// <returns>A collection of Vendor instances</returns>
         public IEnumerable<Vendor> GetAll()
         {
             Debug.WriteLine("Querying database (ALL)...");
@@ -99,14 +112,35 @@ namespace MacChanger
             }
         }
 
-        public bool IsEmpty()
+        public void Clear()
         {
-            Debug.WriteLine("Querying database if empty...");
-            var command = _connection.CreateCommand();
-            command.CommandText = "SELECT COUNT(*) FROM vendors";
-            var reader = command.ExecuteReader();
-            reader.Read();
-            return reader.GetInt32(0) == 0;
+            Debug.WriteLine("Clearing database...");
+            using (var transaction = _connection.BeginTransaction())
+            {
+                var command = _connection.CreateCommand();
+                command.CommandText = "DELETE FROM vendors;";
+                command.ExecuteNonQuery();
+                transaction.Commit();
+            }
+
+            UpdateCount();
+        }
+
+        /// <summary>
+        ///     Checks if the cache is empty.
+        /// </summary>
+        /// <returns>True if cache has no vendor records.</returns>
+        public bool IsEmpty
+        {
+            get
+            {
+                Debug.WriteLine("Querying database if empty...");
+                var command = _connection.CreateCommand();
+                command.CommandText = "SELECT COUNT(*) FROM vendors";
+                var reader = command.ExecuteReader();
+                reader.Read();
+                return reader.GetInt32(0) == 0;
+            }
         }
 
         private SQLiteConnection CreateConnection()
@@ -126,11 +160,16 @@ namespace MacChanger
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        ///     Get the item from database by an index
+        /// </summary>
+        /// <param name="index">Index to the item</param>
+        /// <exception cref="IndexOutOfRangeException"></exception>
         private Vendor GetByIndex(int index)
         {
             Debug.WriteLine($"Querying database (index: {index})...");
 
-            if(index > Count)
+            if (index > Count)
             {
                 throw new IndexOutOfRangeException();
             }
@@ -145,16 +184,14 @@ namespace MacChanger
             return new Vendor(oui, vendorName);
         }
 
-        private int UpdateCount()
+        private void UpdateCount()
         {
             Debug.WriteLine("Querying database for record count...");
             var command = _connection.CreateCommand();
             command.CommandText = "SELECT COUNT(*) FROM vendors";
             var reader = command.ExecuteReader();
             reader.Read();
-            var count = reader.GetInt32(0);
-
-            return count;
+            Count = reader.GetInt32(0);
         }
 
         protected virtual void Dispose(bool disposing)

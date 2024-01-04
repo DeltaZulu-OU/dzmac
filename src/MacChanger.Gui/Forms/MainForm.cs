@@ -11,10 +11,12 @@ namespace MacChanger.Gui.Forms
     {
         internal List<NetworkConnection> NetworkConnections { get; set; }
 
-        private NetworkConnection selected;
+        private NetworkConnection _selected;
+        private readonly VendorManager _vm;
 
         public MainForm()
         {
+            _vm = new VendorManager();
             InitializeComponent();
         }
 
@@ -34,12 +36,9 @@ namespace MacChanger.Gui.Forms
             ConnectionsGrid.AutoResizeColumns();
         }
 
-        private void RefreshConnectionsBackground()
-        {
-            MainStatusBar.Text = "Refreshing network interface data...";
-            _ = Task.Factory.StartNew(() => ConnectionsGrid.BeginInvoke(new Action(RefreshConnections))).ConfigureAwait(false);
-            MainStatusBar.Text = "Ready";
-        }
+        private Task RefreshConnectionsBackground() => Task.Factory.StartNew(() => Invoke(new Action(RefreshConnections)));
+
+        private void UpdateVendorList() => _vm.Refresh();
 
         #region EventHandlers
         private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
@@ -52,9 +51,9 @@ namespace MacChanger.Gui.Forms
                 // and the second is the actual value.
                 if (ConnectionsGrid.SelectedItem.Index != -1)
                 {
-                    selected = ConnectionsGrid.SelectedItem.RowObject as NetworkConnection;
-                    ConnectionNameLabel.Text = selected.Name;
-                    DeviceLabel.Text = selected.Adapter.ManagedAdapter.Description;
+                    _selected = ConnectionsGrid.SelectedItem.RowObject as NetworkConnection;
+                    ConnectionNameLabel.Text = _selected.Name;
+                    DeviceLabel.Text = _selected.Adapter.ManagedAdapter.Description;
                 }
             }
         }
@@ -77,7 +76,12 @@ namespace MacChanger.Gui.Forms
 
         private void OptionsMenu_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void RefreshItem_Click(object sender, EventArgs e) => RefreshConnectionsBackground();
+        private async void RefreshItem_Click(object sender, EventArgs e)
+        {
+            MainStatusBar.Text = "Refreshing network interface data...";
+            await RefreshConnectionsBackground();
+            MainStatusBar.Text = "Ready";
+        }
 
         private void SavePresetAsItem_Click(object sender, EventArgs e) => NotImplemented();
 
@@ -89,10 +93,29 @@ namespace MacChanger.Gui.Forms
 
         private void CheckUpdateItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void UpdateOuiItem_Click(object sender, EventArgs e) => NotImplemented();
+        private async void UpdateOuiItem_Click(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show("Vendor list update will take some time and the UI will be frozen in the meantime.\n\nAre you sure?", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.YesNo);
+
+            if (result != DialogResult.Yes)
+            {
+                return;
+            }
+
+            MainStatusBar.Text = "Downloading OUI data...";
+            await Task.Factory.StartNew(() => BeginInvoke(new Action(UpdateVendorList)));
+            MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
+            MainStatusBar.Text = "Ready";
+        }
 
         private void AboutItem_Click(object sender, EventArgs e) => new AboutBox().Show(this);
 
         #endregion EventHandlers
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            _selected?.Dispose();
+            _vm?.Dispose();
+        }
     }
 }
