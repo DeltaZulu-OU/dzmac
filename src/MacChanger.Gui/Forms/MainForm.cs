@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -52,8 +53,12 @@ namespace MacChanger.Gui.Forms
                 if (ConnectionsGrid.SelectedItem.Index != -1)
                 {
                     _selected = ConnectionsGrid.SelectedItem.RowObject as NetworkConnection;
-                    ConnectionNameLabel.Text = _selected.Name;
-                    DeviceLabel.Text = _selected.Adapter.ManagedAdapter.Description;
+                    ConnectionValueTextbox.Text = _selected.Name;
+                    DeviceValueTextbox.Text = _selected.Adapter.ManagedAdapter.Description;
+                    HardwareIdValueTextbox.Text = _selected.Adapter.HardwareId;
+                    ConfigIdValueTextbox.Text = _selected.Adapter.ManagedAdapter.Id;
+                    Ipv4ValueTextbox.Text = _selected.Adapter.IsIPv4Enabled ? "Enabled" : "Disabled";
+                    Ipv6ValueTextbox.Text = _selected.Adapter.IsIPv6Enabled ? "Enabled" : "Disabled";
                 }
             }
         }
@@ -68,7 +73,21 @@ namespace MacChanger.Gui.Forms
 
         private void ImportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void MainForm_Load(object sender, EventArgs e) => RefreshConnectionsBackground();
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            ConnectionValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            DeviceValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            HardwareIdValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            ConfigIdValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            Ipv4ValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            Ipv6ValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            OriginalMacValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            OriginalMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            ActiveMacValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+            ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
+
+            RefreshConnectionsBackground();
+        }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
 

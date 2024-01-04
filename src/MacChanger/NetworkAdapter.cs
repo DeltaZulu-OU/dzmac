@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
@@ -32,6 +33,8 @@ namespace MacChanger
         /// <exception cref="NetworkInformationException" accessor="get"></exception>
         public NetworkInterface ManagedAdapter { get; }
 
+        public string HardwareId { get; }
+
         /// <summary>
         /// Get the registry key associated to this adapter.
         /// </summary>
@@ -42,11 +45,20 @@ namespace MacChanger
         /// </summary>B
         public string RegistryMac => FindRegistryMac();
 
+        public bool IsIPv4Enabled { get; }
+
+        public bool IsIPv6Enabled { get; }
+
         public NetworkAdapter(ManagementObject adapterObject, NetworkInterface networkInterface)
         {
             ManagedAdapter = networkInterface;
             _adapter = adapterObject;
             Enabled = GetEnabled();
+            HardwareId = GetHardwareId();
+            var props = ManagedAdapter.GetIPProperties();
+            var ads = props.UnicastAddresses;
+            IsIPv4Enabled = ads.Any(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+            IsIPv6Enabled = ads.Any(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6);
         }
 
         /// <summary>
@@ -189,6 +201,16 @@ namespace MacChanger
         {
             var enabled = _adapter["NetEnabled"];
             return enabled != null && (bool)enabled;
+        }
+
+        private string GetHardwareId()
+        {
+            var enabled = _adapter["PNPDeviceID"];
+            if (enabled != null)
+            {
+                return (string)enabled;
+            }
+            return string.Empty;
         }
 
         private PhysicalAddress GetMacAddress()
