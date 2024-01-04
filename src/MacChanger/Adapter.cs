@@ -16,7 +16,10 @@ namespace MacChanger
     /// </remarks>
     public class Adapter : IDisposable
     {
-        private static readonly Regex _regex = new Regex("^[0-9A-F]*$");
+        // 6 bytes == 12 hex characters (without dashes/dots/anything else)
+        // Should be uppercase
+        // Should not contain anything other than hexadecimal digits
+        private static readonly Regex _regex = new Regex("^[0-9A-F]{12}$", RegexOptions.Compiled);
 
         private ManagementObject _adapter;
 
@@ -94,22 +97,7 @@ namespace MacChanger
         /// <param name="mac">The string.</param>
         /// <returns>true if the string is a valid MAC address, false otherwise.</returns>
         /// <exception cref="RegexMatchTimeoutException"></exception>
-        public static bool IsValidMac(string mac)
-        {
-            // 6 bytes == 12 hex characters (without dashes/dots/anything else)
-            if (mac.Length != 12)
-                return false;
-
-            // Should be uppercase
-            if (mac != mac.ToUpper())
-                return false;
-
-            // Should not contain anything other than hexadecimal digits
-            if (!_regex.IsMatch(mac))
-                return false;
-
-            return true;
-        }
+        public static bool IsValidMac(string mac) => _regex.IsMatch(mac);
 
         /// <summary>
         /// Verifies that a given MAC address is valid.
@@ -144,7 +132,6 @@ namespace MacChanger
 
             var result = _adapter.InvokeMethod("Disable", null);
             return (int)result == 0;
-
         }
 
         /// <summary>
