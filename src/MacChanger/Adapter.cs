@@ -16,19 +16,18 @@ namespace MacChanger
     /// </remarks>
     public class Adapter : IDisposable
     {
+        private static readonly Regex _regex = new Regex("^[0-9A-F]*$");
+
+        private ManagementObject _adapter;
+
+        private bool disposedValue;
+
+        public bool Enabled { get; }
+
         /// <summary>
         /// Get the MAC address as reported by the adapter.
         /// </summary>
         public PhysicalAddress MacAddress => GetMacAddress();
-
-        private PhysicalAddress GetMacAddress()
-        {
-            try
-            {
-                return ManagedAdapter.GetPhysicalAddress();
-            }
-            catch { return null; }
-        }
 
         /// <summary>
         /// Get the .NET managed adapter.
@@ -46,30 +45,11 @@ namespace MacChanger
         /// </summary>B
         public string RegistryMac => FindRegistryMac();
 
-        public bool Enabled { get; }
-
-        private static readonly Regex _regex = new Regex("^[0-9A-F]*$");
-
-        private ManagementObject _adapter;
-        private bool disposedValue;
-
         public Adapter(ManagementObject adapter, NetworkInterface managedAdapter)
         {
             ManagedAdapter = managedAdapter;
             _adapter = adapter;
-            Enabled = GetEnabled(adapter);
-        }
-
-        private static bool GetEnabled(ManagementObject adapter)
-        {
-            try
-            {
-                return (bool)adapter.GetPropertyValue("NetEnabled");
-            }
-            catch
-            {
-                return false;
-            }
+            Enabled = GetEnabled();
         }
 
         /// <summary>
@@ -145,6 +125,47 @@ namespace MacChanger
         /// <param name="macAsBytes">The bytes to convert.</param>
         /// <returns>The MAC address.</returns>
         public static string MacToString(byte[] macAsBytes) => BitConverter.ToString(macAsBytes).Replace("-", "").ToUpper();
+
+        /// <summary>
+        /// Disables the network adapter
+        /// If the adapter is already disabled, it will return false.
+        /// If the disable operation fails, it will return false.
+        /// </summary>
+        /// <returns>
+        /// True if the disable operation succees.
+        /// False if the adapter is already disabled or the operation is failed.
+        /// </returns>
+        public bool TryDisable()
+        {
+            if (!Enabled)
+            {
+                return false;
+            }
+
+            var result = _adapter.InvokeMethod("Disable", null);
+            return (int)result == 0;
+
+        }
+
+        /// <summary>
+        /// Enables the network adapter
+        /// If the adapter is already enabled, it will return false.
+        /// If the enable operation fails, it will return false.
+        /// </summary>
+        /// <returns>
+        /// True if the enable operation succees.
+        /// False if the adapter is already enabled or the operation is failed.
+        /// </returns>
+        public bool TryEnable()
+        {
+            if (Enabled)
+            {
+                return false;
+            }
+
+            var result = _adapter.InvokeMethod("Enable", null);
+            return (int)result == 0;
+        }
 
         /// <summary>
         /// Sets the NetworkAddress registry value of this adapter.
@@ -281,7 +302,28 @@ namespace MacChanger
             }
         }
 
+        private bool GetEnabled()
+        {
+            var enabled = _adapter["NetEnabled"];
+            return enabled != null && (bool)enabled;
+        }
+
+        private PhysicalAddress GetMacAddress()
+        {
+            try
+            {
+                return ManagedAdapter.GetPhysicalAddress();
+            }
+            catch { return null; }
+        }
         #region Dispose
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         private void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -295,13 +337,6 @@ namespace MacChanger
 
                 disposedValue = true;
             }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
         #endregion
     }
