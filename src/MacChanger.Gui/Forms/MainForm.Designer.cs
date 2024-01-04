@@ -1,4 +1,5 @@
 ﻿using BrightIdeasSoftware;
+using System.Windows.Forms;
 
 namespace MacChanger.Gui.Forms
 {
@@ -30,7 +31,6 @@ namespace MacChanger.Gui.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.MainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.InfoTabs = new System.Windows.Forms.TabControl();
             this.InformationPage = new System.Windows.Forms.TabPage();
@@ -45,42 +45,41 @@ namespace MacChanger.Gui.Forms
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
-            this.MainMenu = new System.Windows.Forms.MainMenu(this.components);
-            this.FileMenu = new System.Windows.Forms.MenuItem();
-            this.ExportReportItem = new System.Windows.Forms.MenuItem();
-            this.menuItem14 = new System.Windows.Forms.MenuItem();
-            this.OpenPresetItem = new System.Windows.Forms.MenuItem();
-            this.SavePresetItem = new System.Windows.Forms.MenuItem();
-            this.SavePresetAsItem = new System.Windows.Forms.MenuItem();
-            this.menuItem15 = new System.Windows.Forms.MenuItem();
-            this.ImportPresetItem = new System.Windows.Forms.MenuItem();
-            this.ExportPresetItem = new System.Windows.Forms.MenuItem();
-            this.menuItem16 = new System.Windows.Forms.MenuItem();
-            this.AssociateItem = new System.Windows.Forms.MenuItem();
-            this.menuItem17 = new System.Windows.Forms.MenuItem();
-            this.ExitItem = new System.Windows.Forms.MenuItem();
-            this.ActionMenu = new System.Windows.Forms.MenuItem();
-            this.RefreshItem = new System.Windows.Forms.MenuItem();
-            this.menuItem19 = new System.Windows.Forms.MenuItem();
-            this.Dhcp4Item = new System.Windows.Forms.MenuItem();
-            this.Dhcp4EnabledItem = new System.Windows.Forms.MenuItem();
-            this.Dhcp4ReleaseIpItem = new System.Windows.Forms.MenuItem();
-            this.Dhcp4RenewIpItem = new System.Windows.Forms.MenuItem();
-            this.Dhcp6Item = new System.Windows.Forms.MenuItem();
-            this.Dhcp6EnabledItem = new System.Windows.Forms.MenuItem();
-            this.Dhcp6ReleaseIpItem = new System.Windows.Forms.MenuItem();
-            this.Dhcp6RenewItem = new System.Windows.Forms.MenuItem();
-            this.menuItem20 = new System.Windows.Forms.MenuItem();
-            this.DeleteItem = new System.Windows.Forms.MenuItem();
-            this.OptionsMenu = new System.Windows.Forms.MenuItem();
-            this.HelpMenu = new System.Windows.Forms.MenuItem();
-            this.HelpTopicsItem = new System.Windows.Forms.MenuItem();
-            this.CliParamsHelpItem = new System.Windows.Forms.MenuItem();
-            this.menuItem4 = new System.Windows.Forms.MenuItem();
-            this.CheckUpdateItem = new System.Windows.Forms.MenuItem();
-            this.UpdateOuiItem = new System.Windows.Forms.MenuItem();
-            this.menuItem7 = new System.Windows.Forms.MenuItem();
-            this.AboutItem = new System.Windows.Forms.MenuItem();
+            this.Toolbar = new System.Windows.Forms.MenuStrip();
+            this.FileMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.ExportReportItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.OpenPresetItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SavePresetItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SavePresetAsItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.ImportPresetItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ExportPresetItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AssociateItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.ExitItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ActionMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.RefreshItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.Dhcp4Item = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp4EnabledItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp4ReleaseIpItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp4RenewIpItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp6Item = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp6EnabledItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp6ReleaseIpItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dhcp6RenewItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.DeleteItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OptionsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.HelpMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.HelpTopicsItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.CliParamsHelpItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.CheckUpdateItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.UpdateOuiItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
@@ -88,24 +87,26 @@ namespace MacChanger.Gui.Forms
             this.flowLayoutPanel1.SuspendLayout();
             this.ConnectionDetailsGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
+            this.Toolbar.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainTableLayoutPanel
             // 
             this.MainTableLayoutPanel.AutoSize = true;
             this.MainTableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.MainTableLayoutPanel.CausesValidation = false;
             this.MainTableLayoutPanel.ColumnCount = 1;
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.MainTableLayoutPanel.Controls.Add(this.InfoTabs, 0, 1);
             this.MainTableLayoutPanel.Controls.Add(this.ConnectionsGrid, 0, 0);
             this.MainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.MainTableLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.MainTableLayoutPanel.Location = new System.Drawing.Point(0, 24);
             this.MainTableLayoutPanel.Name = "MainTableLayoutPanel";
             this.MainTableLayoutPanel.RowCount = 2;
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.MainTableLayoutPanel.Size = new System.Drawing.Size(884, 521);
+            this.MainTableLayoutPanel.Size = new System.Drawing.Size(884, 497);
             this.MainTableLayoutPanel.TabIndex = 0;
             // 
             // InfoTabs
@@ -114,10 +115,10 @@ namespace MacChanger.Gui.Forms
             this.InfoTabs.Controls.Add(this.IPAddressPage);
             this.InfoTabs.Controls.Add(this.PresetsPage);
             this.InfoTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.InfoTabs.Location = new System.Drawing.Point(3, 133);
+            this.InfoTabs.Location = new System.Drawing.Point(3, 127);
             this.InfoTabs.Name = "InfoTabs";
             this.InfoTabs.SelectedIndex = 0;
-            this.InfoTabs.Size = new System.Drawing.Size(878, 385);
+            this.InfoTabs.Size = new System.Drawing.Size(878, 367);
             this.InfoTabs.TabIndex = 0;
             // 
             // InformationPage
@@ -126,7 +127,7 @@ namespace MacChanger.Gui.Forms
             this.InformationPage.Location = new System.Drawing.Point(4, 22);
             this.InformationPage.Name = "InformationPage";
             this.InformationPage.Padding = new System.Windows.Forms.Padding(3);
-            this.InformationPage.Size = new System.Drawing.Size(870, 359);
+            this.InformationPage.Size = new System.Drawing.Size(870, 341);
             this.InformationPage.TabIndex = 0;
             this.InformationPage.Text = "Information";
             this.InformationPage.UseVisualStyleBackColor = true;
@@ -139,7 +140,7 @@ namespace MacChanger.Gui.Forms
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 353);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 335);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // ConnectionDetailsGroup
@@ -215,7 +216,7 @@ namespace MacChanger.Gui.Forms
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
-            this.IPAddressPage.Size = new System.Drawing.Size(870, 359);
+            this.IPAddressPage.Size = new System.Drawing.Size(870, 341);
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
@@ -225,14 +226,14 @@ namespace MacChanger.Gui.Forms
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PresetsPage.Size = new System.Drawing.Size(870, 359);
+            this.PresetsPage.Size = new System.Drawing.Size(870, 341);
             this.PresetsPage.TabIndex = 2;
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
             // 
             // ConnectionsGrid
             // 
-            this.ConnectionsGrid.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ConnectionsGrid.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
             this.ConnectionsGrid.CausesValidation = false;
             this.ConnectionsGrid.CellEditUseWholeCell = false;
             this.ConnectionsGrid.DataSource = null;
@@ -242,12 +243,13 @@ namespace MacChanger.Gui.Forms
             this.ConnectionsGrid.HeaderUsesThemes = true;
             this.ConnectionsGrid.HideSelection = false;
             this.ConnectionsGrid.Location = new System.Drawing.Point(3, 3);
-            this.ConnectionsGrid.MinimumSize = new System.Drawing.Size(800, 2);
+            this.ConnectionsGrid.MinimumSize = new System.Drawing.Size(800, 4);
             this.ConnectionsGrid.MultiSelect = false;
             this.ConnectionsGrid.Name = "ConnectionsGrid";
             this.ConnectionsGrid.RenderNonEditableCheckboxesAsDisabled = true;
             this.ConnectionsGrid.ShowGroups = false;
-            this.ConnectionsGrid.Size = new System.Drawing.Size(878, 124);
+            this.ConnectionsGrid.ShowItemToolTips = true;
+            this.ConnectionsGrid.Size = new System.Drawing.Size(878, 118);
             this.ConnectionsGrid.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.ConnectionsGrid.SpaceBetweenGroups = 1;
             this.ConnectionsGrid.TabIndex = 1;
@@ -256,249 +258,280 @@ namespace MacChanger.Gui.Forms
             this.ConnectionsGrid.View = System.Windows.Forms.View.Details;
             this.ConnectionsGrid.SelectedIndexChanged += new System.EventHandler(this.ConnectionsGrid_SelectedIndexChanged);
             // 
-            // MainMenu
+            // Toolbar
             // 
-            this.MainMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.Toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FileMenu,
             this.ActionMenu,
             this.OptionsMenu,
             this.HelpMenu});
+            this.Toolbar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.Toolbar.Location = new System.Drawing.Point(0, 0);
+            this.Toolbar.Name = "Toolbar";
+            this.Toolbar.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.Toolbar.Size = new System.Drawing.Size(884, 24);
+            this.Toolbar.TabIndex = 0;
             // 
             // FileMenu
             // 
-            this.FileMenu.Index = 0;
-            this.FileMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.FileMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ExportReportItem,
-            this.menuItem14,
+            this.toolStripSeparator1,
             this.OpenPresetItem,
             this.SavePresetItem,
             this.SavePresetAsItem,
-            this.menuItem15,
+            this.toolStripSeparator2,
             this.ImportPresetItem,
             this.ExportPresetItem,
-            this.menuItem16,
             this.AssociateItem,
-            this.menuItem17,
+            this.toolStripSeparator3,
             this.ExitItem});
-            this.FileMenu.Text = "File";
+            this.FileMenu.Name = "FileMenu";
+            this.FileMenu.Size = new System.Drawing.Size(37, 20);
+            this.FileMenu.Text = "&File";
             // 
             // ExportReportItem
             // 
-            this.ExportReportItem.Index = 0;
+            this.ExportReportItem.Name = "ExportReportItem";
+            this.ExportReportItem.Size = new System.Drawing.Size(240, 22);
             this.ExportReportItem.Text = "Export Text Report";
             this.ExportReportItem.Click += new System.EventHandler(this.ExportReportItem_Click);
             // 
-            // menuItem14
+            // toolStripSeparator1
             // 
-            this.menuItem14.Index = 1;
-            this.menuItem14.Text = "-";
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(237, 6);
             // 
             // OpenPresetItem
             // 
-            this.OpenPresetItem.Index = 2;
-            this.OpenPresetItem.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
+            this.OpenPresetItem.Name = "OpenPresetItem";
+            this.OpenPresetItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.OpenPresetItem.Size = new System.Drawing.Size(240, 22);
             this.OpenPresetItem.Text = "Open Preset";
             this.OpenPresetItem.Click += new System.EventHandler(this.OpenPresetItem_Click);
             // 
             // SavePresetItem
             // 
-            this.SavePresetItem.Index = 3;
-            this.SavePresetItem.Shortcut = System.Windows.Forms.Shortcut.CtrlS;
+            this.SavePresetItem.Name = "SavePresetItem";
+            this.SavePresetItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.SavePresetItem.Size = new System.Drawing.Size(240, 22);
             this.SavePresetItem.Text = "Save Preset";
             this.SavePresetItem.Click += new System.EventHandler(this.SavePresetItem_Click);
             // 
             // SavePresetAsItem
             // 
-            this.SavePresetAsItem.Index = 4;
+            this.SavePresetAsItem.Name = "SavePresetAsItem";
+            this.SavePresetAsItem.Size = new System.Drawing.Size(240, 22);
             this.SavePresetAsItem.Text = "Save Preset As";
             this.SavePresetAsItem.Click += new System.EventHandler(this.SavePresetAsItem_Click);
             // 
-            // menuItem15
+            // toolStripSeparator2
             // 
-            this.menuItem15.Index = 5;
-            this.menuItem15.Text = "-";
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(237, 6);
             // 
             // ImportPresetItem
             // 
-            this.ImportPresetItem.Index = 6;
+            this.ImportPresetItem.Name = "ImportPresetItem";
+            this.ImportPresetItem.Size = new System.Drawing.Size(240, 22);
             this.ImportPresetItem.Text = "Import Preset";
             this.ImportPresetItem.Click += new System.EventHandler(this.ImportPresetItem_Click);
             // 
             // ExportPresetItem
             // 
-            this.ExportPresetItem.Index = 7;
+            this.ExportPresetItem.Name = "ExportPresetItem";
+            this.ExportPresetItem.Size = new System.Drawing.Size(240, 22);
             this.ExportPresetItem.Text = "Export Preset";
             this.ExportPresetItem.Click += new System.EventHandler(this.ExportPresetItem_Click);
             // 
-            // menuItem16
-            // 
-            this.menuItem16.Index = 8;
-            this.menuItem16.Text = "-";
-            // 
             // AssociateItem
             // 
-            this.AssociateItem.Index = 9;
+            this.AssociateItem.Name = "AssociateItem";
+            this.AssociateItem.Size = new System.Drawing.Size(240, 22);
             this.AssociateItem.Text = "Associate with Preset Files (.tpf)";
             this.AssociateItem.Click += new System.EventHandler(this.AssociateItem_Click);
             // 
-            // menuItem17
+            // toolStripSeparator3
             // 
-            this.menuItem17.Index = 10;
-            this.menuItem17.Text = "-";
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(237, 6);
             // 
             // ExitItem
             // 
-            this.ExitItem.Index = 11;
-            this.ExitItem.Shortcut = System.Windows.Forms.Shortcut.CtrlQ;
+            this.ExitItem.Name = "ExitItem";
+            this.ExitItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
+            this.ExitItem.Size = new System.Drawing.Size(240, 22);
             this.ExitItem.Text = "Exit";
             this.ExitItem.Click += new System.EventHandler(this.ExitItem_Click);
             // 
             // ActionMenu
             // 
-            this.ActionMenu.Index = 1;
-            this.ActionMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.ActionMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.RefreshItem,
-            this.menuItem19,
+            this.toolStripSeparator4,
             this.Dhcp4Item,
             this.Dhcp6Item,
-            this.menuItem20,
+            this.toolStripSeparator7,
             this.DeleteItem});
-            this.ActionMenu.Text = "Action";
+            this.ActionMenu.Name = "ActionMenu";
+            this.ActionMenu.Size = new System.Drawing.Size(54, 20);
+            this.ActionMenu.Text = "&Action";
             // 
             // RefreshItem
             // 
-            this.RefreshItem.Index = 0;
-            this.RefreshItem.Shortcut = System.Windows.Forms.Shortcut.F5;
+            this.RefreshItem.Name = "RefreshItem";
+            this.RefreshItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.RefreshItem.Size = new System.Drawing.Size(274, 22);
             this.RefreshItem.Text = "Refresh";
             this.RefreshItem.Click += new System.EventHandler(this.RefreshItem_Click);
             // 
-            // menuItem19
+            // toolStripSeparator4
             // 
-            this.menuItem19.Index = 1;
-            this.menuItem19.Text = "-";
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(271, 6);
             // 
             // Dhcp4Item
             // 
-            this.Dhcp4Item.Index = 2;
-            this.Dhcp4Item.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.Dhcp4Item.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Dhcp4EnabledItem,
             this.Dhcp4ReleaseIpItem,
             this.Dhcp4RenewIpItem});
+            this.Dhcp4Item.Name = "Dhcp4Item";
+            this.Dhcp4Item.Size = new System.Drawing.Size(274, 22);
             this.Dhcp4Item.Text = "DHCPv4";
             // 
             // Dhcp4EnabledItem
             // 
-            this.Dhcp4EnabledItem.Index = 0;
-            this.Dhcp4EnabledItem.RadioCheck = true;
+            this.Dhcp4EnabledItem.Checked = true;
+            this.Dhcp4EnabledItem.CheckOnClick = true;
+            this.Dhcp4EnabledItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.Dhcp4EnabledItem.Name = "Dhcp4EnabledItem";
+            this.Dhcp4EnabledItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp4EnabledItem.Text = "DHCPv4 Enabled";
             // 
             // Dhcp4ReleaseIpItem
             // 
             this.Dhcp4ReleaseIpItem.Enabled = false;
-            this.Dhcp4ReleaseIpItem.Index = 1;
+            this.Dhcp4ReleaseIpItem.Name = "Dhcp4ReleaseIpItem";
+            this.Dhcp4ReleaseIpItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp4ReleaseIpItem.Text = "Release IP";
             // 
             // Dhcp4RenewIpItem
             // 
             this.Dhcp4RenewIpItem.Enabled = false;
-            this.Dhcp4RenewIpItem.Index = 2;
+            this.Dhcp4RenewIpItem.Name = "Dhcp4RenewIpItem";
+            this.Dhcp4RenewIpItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp4RenewIpItem.Text = "Renew IP";
             // 
             // Dhcp6Item
             // 
-            this.Dhcp6Item.Index = 3;
-            this.Dhcp6Item.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.Dhcp6Item.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Dhcp6EnabledItem,
             this.Dhcp6ReleaseIpItem,
             this.Dhcp6RenewItem});
+            this.Dhcp6Item.Name = "Dhcp6Item";
+            this.Dhcp6Item.Size = new System.Drawing.Size(274, 22);
             this.Dhcp6Item.Text = "DHCPv6";
             // 
             // Dhcp6EnabledItem
             // 
-            this.Dhcp6EnabledItem.Index = 0;
-            this.Dhcp6EnabledItem.RadioCheck = true;
+            this.Dhcp6EnabledItem.Checked = true;
+            this.Dhcp6EnabledItem.CheckOnClick = true;
+            this.Dhcp6EnabledItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.Dhcp6EnabledItem.Name = "Dhcp6EnabledItem";
+            this.Dhcp6EnabledItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp6EnabledItem.Text = "DHCPv6 Enabled";
             // 
             // Dhcp6ReleaseIpItem
             // 
             this.Dhcp6ReleaseIpItem.Enabled = false;
-            this.Dhcp6ReleaseIpItem.Index = 1;
+            this.Dhcp6ReleaseIpItem.Name = "Dhcp6ReleaseIpItem";
+            this.Dhcp6ReleaseIpItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp6ReleaseIpItem.Text = "Release IP";
             // 
             // Dhcp6RenewItem
             // 
             this.Dhcp6RenewItem.Enabled = false;
-            this.Dhcp6RenewItem.Index = 2;
+            this.Dhcp6RenewItem.Name = "Dhcp6RenewItem";
+            this.Dhcp6RenewItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp6RenewItem.Text = "Renew IP";
             // 
-            // menuItem20
+            // toolStripSeparator7
             // 
-            this.menuItem20.Index = 4;
-            this.menuItem20.Text = "-";
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(271, 6);
             // 
             // DeleteItem
             // 
-            this.DeleteItem.Index = 5;
+            this.DeleteItem.Name = "DeleteItem";
+            this.DeleteItem.Size = new System.Drawing.Size(274, 22);
             this.DeleteItem.Text = "Delete Network Adapter from Registry";
             this.DeleteItem.Click += new System.EventHandler(this.DeleteItem_Click);
             // 
             // OptionsMenu
             // 
-            this.OptionsMenu.Index = 2;
-            this.OptionsMenu.Text = "Options";
+            this.OptionsMenu.Name = "OptionsMenu";
+            this.OptionsMenu.Size = new System.Drawing.Size(61, 20);
+            this.OptionsMenu.Text = "&Options";
             this.OptionsMenu.Click += new System.EventHandler(this.OptionsMenu_Click);
             // 
             // HelpMenu
             // 
-            this.HelpMenu.Index = 3;
-            this.HelpMenu.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.HelpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.HelpTopicsItem,
             this.CliParamsHelpItem,
-            this.menuItem4,
+            this.toolStripSeparator6,
             this.CheckUpdateItem,
             this.UpdateOuiItem,
-            this.menuItem7,
+            this.toolStripSeparator5,
             this.AboutItem});
-            this.HelpMenu.Text = "Help";
+            this.HelpMenu.Name = "HelpMenu";
+            this.HelpMenu.Size = new System.Drawing.Size(44, 20);
+            this.HelpMenu.Text = "&Help";
             // 
             // HelpTopicsItem
             // 
-            this.HelpTopicsItem.Index = 0;
-            this.HelpTopicsItem.Shortcut = System.Windows.Forms.Shortcut.F1;
+            this.HelpTopicsItem.Name = "HelpTopicsItem";
+            this.HelpTopicsItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
+            this.HelpTopicsItem.Size = new System.Drawing.Size(262, 22);
             this.HelpTopicsItem.Text = "Help Topics";
             this.HelpTopicsItem.Click += new System.EventHandler(this.HelpTopicsItem_Click);
             // 
             // CliParamsHelpItem
             // 
-            this.CliParamsHelpItem.Index = 1;
+            this.CliParamsHelpItem.Name = "CliParamsHelpItem";
+            this.CliParamsHelpItem.Size = new System.Drawing.Size(262, 22);
             this.CliParamsHelpItem.Text = "Command Line Parameters Help";
             this.CliParamsHelpItem.Click += new System.EventHandler(this.CliParamsHelpItem_Click);
             // 
-            // menuItem4
+            // toolStripSeparator6
             // 
-            this.menuItem4.Index = 2;
-            this.menuItem4.Text = "-";
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(259, 6);
             // 
             // CheckUpdateItem
             // 
-            this.CheckUpdateItem.Index = 3;
+            this.CheckUpdateItem.Name = "CheckUpdateItem";
+            this.CheckUpdateItem.Size = new System.Drawing.Size(262, 22);
             this.CheckUpdateItem.Text = "Check For Software Updates";
             this.CheckUpdateItem.Click += new System.EventHandler(this.CheckUpdateItem_Click);
             // 
             // UpdateOuiItem
             // 
-            this.UpdateOuiItem.Index = 4;
+            this.UpdateOuiItem.Name = "UpdateOuiItem";
+            this.UpdateOuiItem.Size = new System.Drawing.Size(262, 22);
             this.UpdateOuiItem.Text = "Update Vendors List (OUI) from IEEE";
             this.UpdateOuiItem.Click += new System.EventHandler(this.UpdateOuiItem_Click);
             // 
-            // menuItem7
+            // toolStripSeparator5
             // 
-            this.menuItem7.Index = 5;
-            this.menuItem7.Text = "-";
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(259, 6);
             // 
             // AboutItem
             // 
-            this.AboutItem.Index = 6;
+            this.AboutItem.Name = "AboutItem";
+            this.AboutItem.Size = new System.Drawing.Size(262, 22);
             this.AboutItem.Text = "About MacChanger";
             this.AboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
@@ -517,7 +550,8 @@ namespace MacChanger.Gui.Forms
             this.ClientSize = new System.Drawing.Size(884, 521);
             this.Controls.Add(this.MainStatusBar);
             this.Controls.Add(this.MainTableLayoutPanel);
-            this.Menu = this.MainMenu;
+            this.Controls.Add(this.Toolbar);
+            this.MainMenuStrip = this.Toolbar;
             this.Name = "MainForm";
             this.Text = "MacChanger GUI";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -530,6 +564,8 @@ namespace MacChanger.Gui.Forms
             this.ConnectionDetailsGroup.ResumeLayout(false);
             this.ConnectionDetailsGroup.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).EndInit();
+            this.Toolbar.ResumeLayout(false);
+            this.Toolbar.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -543,35 +579,29 @@ namespace MacChanger.Gui.Forms
         private System.Windows.Forms.TabPage IPAddressPage;
         private System.Windows.Forms.TabPage PresetsPage;
         private DataListView ConnectionsGrid;
-        private System.Windows.Forms.MainMenu MainMenu;
-        private System.Windows.Forms.MenuItem FileMenu;
-        private System.Windows.Forms.MenuItem ExportReportItem;
-        private System.Windows.Forms.MenuItem OpenPresetItem;
-        private System.Windows.Forms.MenuItem SavePresetItem;
-        private System.Windows.Forms.MenuItem SavePresetAsItem;
-        private System.Windows.Forms.MenuItem ImportPresetItem;
-        private System.Windows.Forms.MenuItem ExportPresetItem;
-        private System.Windows.Forms.MenuItem ActionMenu;
-        private System.Windows.Forms.MenuItem OptionsMenu;
-        private System.Windows.Forms.MenuItem HelpMenu;
-        private System.Windows.Forms.MenuItem menuItem14;
-        private System.Windows.Forms.MenuItem menuItem15;
-        private System.Windows.Forms.MenuItem menuItem16;
-        private System.Windows.Forms.MenuItem AssociateItem;
-        private System.Windows.Forms.MenuItem menuItem17;
-        private System.Windows.Forms.MenuItem ExitItem;
-        private System.Windows.Forms.MenuItem RefreshItem;
-        private System.Windows.Forms.MenuItem menuItem19;
-        private System.Windows.Forms.MenuItem Dhcp4Item;
-        private System.Windows.Forms.MenuItem Dhcp6Item;
-        private System.Windows.Forms.MenuItem menuItem20;
-        private System.Windows.Forms.MenuItem DeleteItem;
-        private System.Windows.Forms.MenuItem Dhcp4EnabledItem;
-        private System.Windows.Forms.MenuItem Dhcp4ReleaseIpItem;
-        private System.Windows.Forms.MenuItem Dhcp4RenewIpItem;
-        private System.Windows.Forms.MenuItem Dhcp6EnabledItem;
-        private System.Windows.Forms.MenuItem Dhcp6ReleaseIpItem;
-        private System.Windows.Forms.MenuItem Dhcp6RenewItem;
+        private System.Windows.Forms.MenuStrip Toolbar;
+        private System.Windows.Forms.ToolStripMenuItem FileMenu;
+        private System.Windows.Forms.ToolStripMenuItem ExportReportItem;
+        private System.Windows.Forms.ToolStripMenuItem OpenPresetItem;
+        private System.Windows.Forms.ToolStripMenuItem SavePresetItem;
+        private System.Windows.Forms.ToolStripMenuItem SavePresetAsItem;
+        private System.Windows.Forms.ToolStripMenuItem ImportPresetItem;
+        private System.Windows.Forms.ToolStripMenuItem ExportPresetItem;
+        private System.Windows.Forms.ToolStripMenuItem ActionMenu;
+        private System.Windows.Forms.ToolStripMenuItem OptionsMenu;
+        private System.Windows.Forms.ToolStripMenuItem HelpMenu;
+        private System.Windows.Forms.ToolStripMenuItem AssociateItem;
+        private System.Windows.Forms.ToolStripMenuItem ExitItem;
+        private System.Windows.Forms.ToolStripMenuItem RefreshItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp4Item;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp6Item;
+        private System.Windows.Forms.ToolStripMenuItem DeleteItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp4EnabledItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp4ReleaseIpItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp4RenewIpItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp6EnabledItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp6ReleaseIpItem;
+        private System.Windows.Forms.ToolStripMenuItem Dhcp6RenewItem;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.GroupBox ConnectionDetailsGroup;
         private System.Windows.Forms.Label label1;
@@ -581,13 +611,18 @@ namespace MacChanger.Gui.Forms
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label DeviceLabel;
         private System.Windows.Forms.StatusBar MainStatusBar;
-        private System.Windows.Forms.MenuItem HelpTopicsItem;
-        private System.Windows.Forms.MenuItem CliParamsHelpItem;
-        private System.Windows.Forms.MenuItem menuItem4;
-        private System.Windows.Forms.MenuItem CheckUpdateItem;
-        private System.Windows.Forms.MenuItem UpdateOuiItem;
-        private System.Windows.Forms.MenuItem menuItem7;
-        private System.Windows.Forms.MenuItem AboutItem;
+        private System.Windows.Forms.ToolStripMenuItem HelpTopicsItem;
+        private System.Windows.Forms.ToolStripMenuItem CliParamsHelpItem;
+        private System.Windows.Forms.ToolStripMenuItem CheckUpdateItem;
+        private System.Windows.Forms.ToolStripMenuItem UpdateOuiItem;
+        private System.Windows.Forms.ToolStripMenuItem AboutItem;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripSeparator toolStripSeparator3;
+        private ToolStripSeparator toolStripSeparator4;
+        private ToolStripSeparator toolStripSeparator6;
+        private ToolStripSeparator toolStripSeparator5;
+        private ToolStripSeparator toolStripSeparator7;
     }
 }
 
