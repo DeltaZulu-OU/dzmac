@@ -60,7 +60,7 @@ namespace MacChanger.Gui
         {
             MainStatusBar.Text = "Refreshing network interface data...";
             ConnectionsGrid.BeginUpdate();
-            var adapters = AdapterFactory.GetAdapters().ToList();
+            var adapters = NetworkAdapterFactory.GetNetworkAdapters().ToList();
             NetworkConnections = new List<NetworkConnection>();
             foreach (var adapter in adapters)
             {

@@ -7,10 +7,10 @@ namespace MacChanger.Tests
     [TestClass]
     public class AdapterTests
     {
-        private IEnumerable<Adapter> _adapters;
+        private IEnumerable<NetworkAdapter> _adapters;
 
         [TestInitialize]
-        public void Initialize() => _adapters = AdapterFactory.GetAdapters();
+        public void Initialize() => _adapters = NetworkAdapterFactory.GetNetworkAdapters();
 
         [TestMethod]
         public void AdapterListShouldNotBeNull() => Assert.IsNotNull(_adapters);

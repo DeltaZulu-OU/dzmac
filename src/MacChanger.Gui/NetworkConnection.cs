@@ -14,9 +14,9 @@ namespace MacChanger.Gui
         public string LinkStatus => Adapter.ManagedAdapter.OperationalStatus.ToString();
         public string Speed => ReadableSpeed(Adapter.ManagedAdapter.Speed);
 
-        internal Adapter Adapter { get; set; }
+        internal NetworkAdapter Adapter { get; set; }
 
-        public NetworkConnection(Adapter adapter)
+        public NetworkConnection(NetworkAdapter adapter)
         {
             Enabled = adapter.Enabled;
             Name = adapter.ManagedAdapter.Name;

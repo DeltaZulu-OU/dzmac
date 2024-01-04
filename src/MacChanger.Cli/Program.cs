@@ -11,7 +11,7 @@ namespace MacChanger.Cli
             var manager = new VendorManager();
             var list = manager.GetVendorList();
 
-            foreach (var adapter in AdapterFactory.GetAdapters())
+            foreach (var adapter in NetworkAdapterFactory.GetNetworkAdapters())
             {
                 Console.WriteLine(adapter.ToString());
 

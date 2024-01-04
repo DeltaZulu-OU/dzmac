@@ -8,7 +8,7 @@ namespace MacChanger
     /// <summary>
     ///     Adapter data collection class
     /// </summary>
-    public static class AdapterFactory
+    public static class NetworkAdapterFactory
     {
         /// <summary>
         ///     Collect all network adapters
@@ -16,18 +16,18 @@ namespace MacChanger
         /// <returns></returns>
         /// /// <exception cref="NetworkInformationException"></exception>
         // ExceptionAdjustment: M:System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces -T:System.Net.NetworkInformation.NetworkInformationException
-        public static IEnumerable<Adapter> GetAdapters()
+        public static IEnumerable<NetworkAdapter> GetNetworkAdapters()
         {
             var managementObjects = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapter").Get().Cast<ManagementObject>();
             var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
-                                                     .Where(a => Adapter.IsValidMac(a.GetPhysicalAddress().GetAddressBytes()))
+                                                     .Where(a => MacAddress.IsValidMac(a.GetPhysicalAddress().GetAddressBytes()))
                                                      .OrderByDescending(a => a.Description);
 
             foreach (var networkInterface in networkInterfaces)
             {
-                var adapter = managementObjects.FirstOrDefault(obj => obj.GetPropertyValue("Name").Equals(networkInterface.Description));
+                var adapterObject = managementObjects.FirstOrDefault(obj => obj.GetPropertyValue("Name").Equals(networkInterface.Description));
 
-                yield return new Adapter(adapter, networkInterface);
+                yield return new NetworkAdapter(adapterObject, networkInterface);
             }
         }
     }

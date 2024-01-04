@@ -63,11 +63,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Adapter.cs" />
-    <Compile Include="AdapterFactory.cs" />
+    <Compile Include="MacAddress.cs" />
+    <Compile Include="NetworkAdapter.cs" />
+    <Compile Include="NetworkAdapterFactory.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="Downloader.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MacChangerException.cs" />
     <Compile Include="Vendor.cs" />
     <Compile Include="VendorManager.cs" />
