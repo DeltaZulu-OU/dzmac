@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MacChanger
 {
@@ -14,6 +15,12 @@ namespace MacChanger
         private bool disposedValue;
 
         public VendorList GetVendorList() => Vendors;
+
+        public IEnumerable<Vendor> FindByMac(string macAddress)
+        {
+            var oui = macAddress.Substring(0, 6);
+            return Vendors.Get(oui);
+        }
 
         public void Refresh() => Vendors.Refresh();
 
@@ -32,7 +39,6 @@ namespace MacChanger
                 if (disposing)
                 {
                     _vendors?.Dispose();
-                    Vendors?.Dispose();
                 }
 
                 _vendors = null;

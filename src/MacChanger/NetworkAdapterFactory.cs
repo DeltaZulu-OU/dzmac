@@ -13,10 +13,10 @@ namespace MacChanger
         /// <summary>
         ///     Collect all network adapters
         /// </summary>
-        /// <returns></returns>
-        /// /// <exception cref="NetworkInformationException"></exception>
-        // ExceptionAdjustment: M:System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces -T:System.Net.NetworkInformation.NetworkInformationException
-        public static IEnumerable<NetworkAdapter> GetNetworkAdapters()
+        /// <param name="vendorManager">Proide this parameter if there is a need to query vendor name from registry MAC value</param>
+        /// <returns>Instances of <see cref="NetworkAdapter"/>.</returns>
+        /// <exception cref="NetworkInformationException"></exception>
+        public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorManager vendorManager = null)
         {
             var managementObjects = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapter").Get().Cast<ManagementObject>();
             var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
@@ -27,7 +27,7 @@ namespace MacChanger
             {
                 var adapterObject = managementObjects.FirstOrDefault(obj => obj.GetPropertyValue("Name").Equals(networkInterface.Description));
 
-                yield return new NetworkAdapter(adapterObject, networkInterface);
+                yield return new NetworkAdapter(adapterObject, networkInterface, vendorManager);
             }
         }
     }

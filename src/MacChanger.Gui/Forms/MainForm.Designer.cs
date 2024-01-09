@@ -121,7 +121,7 @@ namespace MacChanger.Gui.Forms
             this.MainTableLayoutPanel.RowCount = 2;
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.MainTableLayoutPanel.Size = new System.Drawing.Size(884, 497);
+            this.MainTableLayoutPanel.Size = new System.Drawing.Size(884, 524);
             this.MainTableLayoutPanel.TabIndex = 0;
             // 
             // InfoTabs
@@ -130,10 +130,10 @@ namespace MacChanger.Gui.Forms
             this.InfoTabs.Controls.Add(this.IPAddressPage);
             this.InfoTabs.Controls.Add(this.PresetsPage);
             this.InfoTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.InfoTabs.Location = new System.Drawing.Point(3, 127);
+            this.InfoTabs.Location = new System.Drawing.Point(3, 134);
             this.InfoTabs.Name = "InfoTabs";
             this.InfoTabs.SelectedIndex = 0;
-            this.InfoTabs.Size = new System.Drawing.Size(878, 367);
+            this.InfoTabs.Size = new System.Drawing.Size(878, 387);
             this.InfoTabs.TabIndex = 0;
             // 
             // InformationPage
@@ -142,7 +142,7 @@ namespace MacChanger.Gui.Forms
             this.InformationPage.Location = new System.Drawing.Point(4, 22);
             this.InformationPage.Name = "InformationPage";
             this.InformationPage.Padding = new System.Windows.Forms.Padding(3);
-            this.InformationPage.Size = new System.Drawing.Size(870, 341);
+            this.InformationPage.Size = new System.Drawing.Size(870, 361);
             this.InformationPage.TabIndex = 0;
             this.InformationPage.Text = "Information";
             this.InformationPage.UseVisualStyleBackColor = true;
@@ -155,7 +155,7 @@ namespace MacChanger.Gui.Forms
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 335);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 355);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // ConnectionDetailsGroup
@@ -187,27 +187,27 @@ namespace MacChanger.Gui.Forms
             // 
             // ActiveMacVendorTextbox
             // 
-            this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(418, 126);
+            this.ActiveMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.ActiveMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(551, 107);
             this.ActiveMacVendorTextbox.Name = "ActiveMacVendorTextbox";
+            this.ActiveMacVendorTextbox.ReadOnly = true;
             this.ActiveMacVendorTextbox.Size = new System.Drawing.Size(300, 13);
             this.ActiveMacVendorTextbox.TabIndex = 17;
-            this.ActiveMacVendorTextbox.Text = "...";
-            this.ActiveMacVendorTextbox.ReadOnly = true;
-            this.ActiveMacVendorTextbox.BorderStyle = BorderStyle.None;
-            this.ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
             this.ActiveMacVendorTextbox.TabStop = false;
+            this.ActiveMacVendorTextbox.Text = "...";
             // 
             // ActiveMacValueTextbox
             // 
-            this.ActiveMacValueTextbox.Location = new System.Drawing.Point(418, 105);
+            this.ActiveMacValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.ActiveMacValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ActiveMacValueTextbox.Location = new System.Drawing.Point(421, 107);
             this.ActiveMacValueTextbox.Name = "ActiveMacValueTextbox";
-            this.ActiveMacValueTextbox.Size = new System.Drawing.Size(300, 13);
-            this.ActiveMacValueTextbox.TabIndex = 16;
-            this.ActiveMacValueTextbox.Text = "...";
             this.ActiveMacValueTextbox.ReadOnly = true;
-            this.ActiveMacValueTextbox.BorderStyle = BorderStyle.None;
-            this.ActiveMacValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
+            this.ActiveMacValueTextbox.Size = new System.Drawing.Size(124, 13);
+            this.ActiveMacValueTextbox.TabIndex = 16;
             this.ActiveMacValueTextbox.TabStop = false;
+            this.ActiveMacValueTextbox.Text = "...";
             // 
             // ActiveMacLabel
             // 
@@ -221,33 +221,33 @@ namespace MacChanger.Gui.Forms
             // 
             // OriginalMacVendorTextbox
             // 
-            this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(418, 62);
+            this.OriginalMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.OriginalMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(551, 41);
             this.OriginalMacVendorTextbox.Name = "OriginalMacVendorTextbox";
+            this.OriginalMacVendorTextbox.ReadOnly = true;
             this.OriginalMacVendorTextbox.Size = new System.Drawing.Size(300, 13);
             this.OriginalMacVendorTextbox.TabIndex = 14;
-            this.OriginalMacVendorTextbox.Text = "...";
-            this.OriginalMacVendorTextbox.ReadOnly = true;
-            this.OriginalMacVendorTextbox.BorderStyle = BorderStyle.None;
-            this.OriginalMacVendorTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
             this.OriginalMacVendorTextbox.TabStop = false;
+            this.OriginalMacVendorTextbox.Text = "...";
             // 
             // OriginalMacValueTextbox
             // 
-            this.OriginalMacValueTextbox.Location = new System.Drawing.Point(418, 41);
+            this.OriginalMacValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.OriginalMacValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.OriginalMacValueTextbox.Location = new System.Drawing.Point(421, 41);
             this.OriginalMacValueTextbox.Name = "OriginalMacValueTextbox";
-            this.OriginalMacValueTextbox.Size = new System.Drawing.Size(300, 13);
-            this.OriginalMacValueTextbox.TabIndex = 13;
-            this.OriginalMacValueTextbox.Text = "...";
             this.OriginalMacValueTextbox.ReadOnly = true;
-            this.OriginalMacValueTextbox.BorderStyle = BorderStyle.None;
-            this.OriginalMacValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
+            this.OriginalMacValueTextbox.Size = new System.Drawing.Size(124, 13);
+            this.OriginalMacValueTextbox.TabIndex = 13;
             this.OriginalMacValueTextbox.TabStop = false;
+            this.OriginalMacValueTextbox.Text = "...";
             // 
             // OriginalMacLabel
             // 
             this.OriginalMacLabel.AutoSize = true;
             this.OriginalMacLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.OriginalMacLabel.Location = new System.Drawing.Point(418, 20);
+            this.OriginalMacLabel.Location = new System.Drawing.Point(418, 16);
             this.OriginalMacLabel.Name = "OriginalMacLabel";
             this.OriginalMacLabel.Size = new System.Drawing.Size(127, 13);
             this.OriginalMacLabel.TabIndex = 12;
@@ -255,16 +255,15 @@ namespace MacChanger.Gui.Forms
             // 
             // Ipv6ValueTextbox
             // 
+            this.Ipv6ValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.Ipv6ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.Ipv6ValueTextbox.Location = new System.Drawing.Point(260, 110);
             this.Ipv6ValueTextbox.Name = "Ipv6ValueTextbox";
-            this.Ipv6ValueTextbox.Size = new System.Drawing.Size(60, 13);
-            this.Ipv6ValueTextbox.TabIndex = 11;
-            this.Ipv6ValueTextbox.Text = "...";
-            this.Ipv6ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.Ipv6ValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
             this.Ipv6ValueTextbox.ReadOnly = true;
+            this.Ipv6ValueTextbox.Size = new System.Drawing.Size(60, 13);
             this.Ipv6ValueTextbox.TabIndex = 5;
             this.Ipv6ValueTextbox.TabStop = false;
+            this.Ipv6ValueTextbox.Text = "...";
             // 
             // Ipv6Label
             // 
@@ -278,16 +277,15 @@ namespace MacChanger.Gui.Forms
             // 
             // Ipv4ValueTextbox
             // 
+            this.Ipv4ValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.Ipv4ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.Ipv4ValueTextbox.Location = new System.Drawing.Point(103, 110);
             this.Ipv4ValueTextbox.Name = "Ipv4ValueTextbox";
-            this.Ipv4ValueTextbox.Size = new System.Drawing.Size(60, 13);
-            this.Ipv4ValueTextbox.TabIndex = 9;
-            this.Ipv4ValueTextbox.Text = "...";
-            this.Ipv4ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.Ipv4ValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
             this.Ipv4ValueTextbox.ReadOnly = true;
+            this.Ipv4ValueTextbox.Size = new System.Drawing.Size(60, 13);
             this.Ipv4ValueTextbox.TabIndex = 5;
             this.Ipv4ValueTextbox.TabStop = false;
+            this.Ipv4ValueTextbox.Text = "...";
             // 
             // Ipv4Label
             // 
@@ -301,17 +299,15 @@ namespace MacChanger.Gui.Forms
             // 
             // ConfigIdValueTextbox
             // 
+            this.ConfigIdValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.ConfigIdValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ConfigIdValueTextbox.Location = new System.Drawing.Point(103, 84);
             this.ConfigIdValueTextbox.Name = "ConfigIdValueTextbox";
-            this.ConfigIdValueTextbox.Size = new System.Drawing.Size(300, 13);
-            this.ConfigIdValueTextbox.TabIndex = 7;
-            this.ConfigIdValueTextbox.Text = "...";
-            this.ConfigIdValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.ConfigIdValueTextbox.ReadOnly = true;
+            this.ConfigIdValueTextbox.Size = new System.Drawing.Size(300, 13);
             this.ConfigIdValueTextbox.TabIndex = 5;
             this.ConfigIdValueTextbox.TabStop = false;
-            this.ConfigIdValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
-
+            this.ConfigIdValueTextbox.Text = "...";
             // 
             // ConfigIdLabel
             // 
@@ -334,8 +330,6 @@ namespace MacChanger.Gui.Forms
             this.HardwareIdValueTextbox.TabIndex = 5;
             this.HardwareIdValueTextbox.TabStop = false;
             this.HardwareIdValueTextbox.Text = "...";
-            this.HardwareIdValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
-
             // 
             // HardwareIdLabel
             // 
@@ -358,8 +352,6 @@ namespace MacChanger.Gui.Forms
             this.DeviceValueTextbox.TabIndex = 18;
             this.DeviceValueTextbox.TabStop = false;
             this.DeviceValueTextbox.Text = "...";
-            this.DeviceValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
-
             // 
             // DeviceLabel
             // 
@@ -382,8 +374,6 @@ namespace MacChanger.Gui.Forms
             this.ConnectionValueTextbox.TabIndex = 1;
             this.ConnectionValueTextbox.TabStop = false;
             this.ConnectionValueTextbox.Text = "...";
-            this.ConnectionValueTextbox.BackColor = Color.FromArgb(255, this.InformationPage.BackColor.R, this.InformationPage.BackColor.G, this.InformationPage.BackColor.B);
-
             // 
             // ConnectionLabel
             // 
@@ -450,7 +440,7 @@ namespace MacChanger.Gui.Forms
             this.ConnectionsGrid.RenderNonEditableCheckboxesAsDisabled = true;
             this.ConnectionsGrid.ShowGroups = false;
             this.ConnectionsGrid.ShowItemToolTips = true;
-            this.ConnectionsGrid.Size = new System.Drawing.Size(878, 118);
+            this.ConnectionsGrid.Size = new System.Drawing.Size(878, 125);
             this.ConnectionsGrid.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.ConnectionsGrid.SpaceBetweenGroups = 1;
             this.ConnectionsGrid.TabIndex = 1;
@@ -738,7 +728,7 @@ namespace MacChanger.Gui.Forms
             // 
             // MainStatusBar
             // 
-            this.MainStatusBar.Location = new System.Drawing.Point(0, 499);
+            this.MainStatusBar.Location = new System.Drawing.Point(0, 526);
             this.MainStatusBar.Name = "MainStatusBar";
             this.MainStatusBar.Size = new System.Drawing.Size(884, 22);
             this.MainStatusBar.TabIndex = 1;
@@ -746,9 +736,9 @@ namespace MacChanger.Gui.Forms
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(884, 521);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.ClientSize = new System.Drawing.Size(884, 548);
             this.Controls.Add(this.MainStatusBar);
             this.Controls.Add(this.MainTableLayoutPanel);
             this.Controls.Add(this.Toolbar);
