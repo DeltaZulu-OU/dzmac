@@ -10,7 +10,7 @@ namespace MacChanger.Gui.Forms
     public partial class MainForm : Form
     {
         private readonly VendorManager _vm;
-        private NetworkConnectionAdvanced _selected;
+        private NetworkConnectionDetail _selected;
         internal List<NetworkConnection> NetworkConnections { get; set; }
         public MainForm()
         {
@@ -41,10 +41,12 @@ namespace MacChanger.Gui.Forms
         private void UpdateVendorList() => _vm.Refresh();
 
         #region EventHandlers
+
         private void AboutItem_Click(object sender, EventArgs e) => new AboutBox().Show(this);
 
         private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
 
+        private void checkBox1_CheckedChanged(object sender, EventArgs e) => NotImplemented();
         private void CheckUpdateItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void CliParamsHelpItem_Click(object sender, EventArgs e) => NotImplemented();
@@ -58,7 +60,7 @@ namespace MacChanger.Gui.Forms
                 if (ConnectionsGrid.SelectedItem.Index != -1)
                 {
                     var row = ConnectionsGrid.SelectedItem.RowObject as NetworkConnection;
-                    _selected = row.Advanced;
+                    _selected = row.Detail;
                     ConnectionValueTextbox.Text = _selected.Name;
                     DeviceValueTextbox.Text = _selected.Device;
                     HardwareIdValueTextbox.Text = _selected.HardwareId;
@@ -138,5 +140,6 @@ namespace MacChanger.Gui.Forms
             MainStatusBar.Text = "Ready";
         }
         #endregion EventHandlers
+
     }
 }

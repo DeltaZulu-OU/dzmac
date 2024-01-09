@@ -4,8 +4,11 @@ using MacChanger.Gui.Utils;
 
 namespace MacChanger.Gui.DTO
 {
+    /// <summary>
+    ///     A DTO for MacChanger GUI detailed information
+    /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    internal class NetworkConnectionAdvanced : IDisposable
+    internal class NetworkConnectionDetail : IDisposable
     {
         private readonly NetworkAdapter _adapter;
         private readonly MacFormatter formatter = new MacFormatter();
@@ -26,7 +29,7 @@ namespace MacChanger.Gui.DTO
         public string IPv4Status => _adapter.IsIPv4Enabled ? "Enabled" : "Disabled";
         public string IPv6Status => _adapter.IsIPv6Enabled ? "Enabled" : "Disabled";
 
-        public NetworkConnectionAdvanced(NetworkAdapter adapter)
+        public NetworkConnectionDetail(NetworkAdapter adapter)
         {
             _adapter = adapter;
         }

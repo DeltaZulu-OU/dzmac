@@ -1,20 +1,23 @@
 ﻿namespace MacChanger.Gui.DTO
 {
+    /// <summary>
+    ///     A DTO for MacChanger datagrid which includes basic information
+    /// </summary>
     internal class NetworkConnection
     {
-        public string ConnectionName => Advanced.Name;
-        public string Changed => Advanced.Changed;
-        public string MacAddress => Advanced.ActiveMac;
-        public string LinkStatus => Advanced.LinkStatus;
-        public string Speed => Advanced.Speed;
+        public string ConnectionName => Detail.Name;
+        public string Changed => Detail.Changed;
+        public string MacAddress => Detail.ActiveMac;
+        public string LinkStatus => Detail.LinkStatus;
+        public string Speed => Detail.Speed;
 
-        internal NetworkConnectionAdvanced Advanced { get; set; }
-        public NetworkConnection(NetworkConnectionAdvanced advanced)
+        internal NetworkConnectionDetail Detail { get; set; }
+        public NetworkConnection(NetworkConnectionDetail advanced)
         {
-            Advanced = advanced;
+            Detail = advanced;
         }
 
-        public NetworkConnection(NetworkAdapter adapter) : this(new NetworkConnectionAdvanced(adapter))
+        public NetworkConnection(NetworkAdapter adapter) : this(new NetworkConnectionDetail(adapter))
         {
         }
     }

@@ -96,11 +96,20 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
+            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.ConnectionDetailsGroup.SuspendLayout();
+            this.ChangeMacAddressGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
             this.Toolbar.SuspendLayout();
             this.SuspendLayout();
@@ -180,7 +189,7 @@ namespace MacChanger.Gui.Forms
             this.ConnectionDetailsGroup.Controls.Add(this.ConnectionLabel);
             this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
             this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
-            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(858, 151);
+            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(858, 135);
             this.ConnectionDetailsGroup.TabIndex = 0;
             this.ConnectionDetailsGroup.TabStop = false;
             this.ConnectionDetailsGroup.Text = "Connection Details";
@@ -387,18 +396,26 @@ namespace MacChanger.Gui.Forms
             // 
             // ChangeMacAddressGroup
             // 
-            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 160);
+            this.ChangeMacAddressGroup.Controls.Add(this.button3);
+            this.ChangeMacAddressGroup.Controls.Add(this.button2);
+            this.ChangeMacAddressGroup.Controls.Add(this.checkBox3);
+            this.ChangeMacAddressGroup.Controls.Add(this.checkBox2);
+            this.ChangeMacAddressGroup.Controls.Add(this.checkBox1);
+            this.ChangeMacAddressGroup.Controls.Add(this.comboBox1);
+            this.ChangeMacAddressGroup.Controls.Add(this.button1);
+            this.ChangeMacAddressGroup.Controls.Add(this.macTextBox1);
+            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 144);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
-            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(400, 175);
+            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(400, 193);
             this.ChangeMacAddressGroup.TabIndex = 1;
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
             // 
             // PerformanceCounterGroup
             // 
-            this.PerformanceCounterGroup.Location = new System.Drawing.Point(409, 160);
+            this.PerformanceCounterGroup.Location = new System.Drawing.Point(409, 144);
             this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
-            this.PerformanceCounterGroup.Size = new System.Drawing.Size(452, 175);
+            this.PerformanceCounterGroup.Size = new System.Drawing.Size(452, 193);
             this.PerformanceCounterGroup.TabIndex = 2;
             this.PerformanceCounterGroup.TabStop = false;
             // 
@@ -407,7 +424,7 @@ namespace MacChanger.Gui.Forms
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
-            this.IPAddressPage.Size = new System.Drawing.Size(870, 341);
+            this.IPAddressPage.Size = new System.Drawing.Size(870, 361);
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
@@ -417,7 +434,7 @@ namespace MacChanger.Gui.Forms
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PresetsPage.Size = new System.Drawing.Size(870, 341);
+            this.PresetsPage.Size = new System.Drawing.Size(870, 361);
             this.PresetsPage.TabIndex = 2;
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
@@ -734,6 +751,78 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
+            // macTextBox1
+            // 
+            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox1.Name = "macTextBox1";
+            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox1.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(235, 19);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(159, 24);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Random MAC Address";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(6, 58);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(388, 21);
+            this.comboBox1.TabIndex = 2;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.Location = new System.Drawing.Point(7, 92);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(387, 17);
+            this.checkBox1.TabIndex = 3;
+            this.checkBox1.Text = "Automatically restart network connection to apply changes";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // checkBox2
+            // 
+            this.checkBox2.Location = new System.Drawing.Point(6, 115);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(388, 17);
+            this.checkBox2.TabIndex = 4;
+            this.checkBox2.Text = "Make new MAC address persistent";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.Location = new System.Drawing.Point(6, 138);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(388, 17);
+            this.checkBox3.TabIndex = 5;
+            this.checkBox3.Text = "Use \'02\' as first octet of MAC address";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(6, 161);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(171, 23);
+            this.button2.TabIndex = 6;
+            this.button2.Text = "&Change Now!";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(223, 161);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(171, 23);
+            this.button3.TabIndex = 7;
+            this.button3.Text = "Restore &Original";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -754,6 +843,7 @@ namespace MacChanger.Gui.Forms
             this.flowLayoutPanel1.ResumeLayout(false);
             this.ConnectionDetailsGroup.ResumeLayout(false);
             this.ConnectionDetailsGroup.PerformLayout();
+            this.ChangeMacAddressGroup.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).EndInit();
             this.Toolbar.ResumeLayout(false);
             this.Toolbar.PerformLayout();
@@ -828,6 +918,14 @@ namespace MacChanger.Gui.Forms
         private TextBox ActiveMacVendorTextbox;
         private TextBox ActiveMacValueTextbox;
         private Label ActiveMacLabel;
+        private Button button3;
+        private Button button2;
+        private CheckBox checkBox3;
+        private CheckBox checkBox2;
+        private CheckBox checkBox1;
+        private ComboBox comboBox1;
+        private Button button1;
+        private Controls.MacTextBox macTextBox1;
     }
 }
 
