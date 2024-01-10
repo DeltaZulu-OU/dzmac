@@ -19,6 +19,6 @@ namespace MacChanger
 
         public bool Equals(Vendor other) => Oui == other.Oui && VendorName == other.VendorName;
 
-        public override string ToString() => $"{VendorName}";
+        public override string ToString() => $"[{Oui}] {VendorName}";
     }
 }

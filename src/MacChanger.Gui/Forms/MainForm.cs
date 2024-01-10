@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MacChanger.Gui.DTO;
+using static System.Windows.Forms.LinkLabel;
 
 namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
         private readonly VendorManager _vm;
+        private bool _locallyAdministered;
         private NetworkConnectionDetail _selected;
         internal List<NetworkConnection> NetworkConnections { get; set; }
         public MainForm()
@@ -109,6 +113,10 @@ namespace MacChanger.Gui.Forms
             ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
 
             RefreshConnectionsBackground();
+
+            // Fill in vendor combobox
+            VendorComboBox.DataSource = _vm.GetVendorList().ToList();
+            VendorComboBox.SelectedItem = null;
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
@@ -119,7 +127,27 @@ namespace MacChanger.Gui.Forms
 
         private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
 
-        private void RandomMacButton_Click(object sender, EventArgs e) => NotImplemented();
+        private void RandomMacButton_Click(object sender, EventArgs e)
+        {
+            var randomVendor = _vm.GetRandom();
+            var randomMac = _selected.GetRandom(randomVendor.Oui);
+
+            var vendors = _vm.FindByMac(randomMac).ToList();
+            if (vendors.Count == 0)
+            {
+                VendorComboBox.SelectedItem = null;
+            }
+            else
+            {
+                VendorComboBox.SelectedItem = vendors[0];
+            }
+
+            if (_locallyAdministered)
+            {
+                randomMac.SetAsLocallyAdministered();
+            }
+            macTextBox1.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);
+        }
 
         private async void RefreshItem_Click(object sender, EventArgs e)
         {
@@ -147,7 +175,16 @@ namespace MacChanger.Gui.Forms
             MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
             MainStatusBar.Text = "Ready";
         }
-        private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
+        private void WikiLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            // Specify that the link was visited.
+            this.WikiLink.LinkVisited = true;
+
+            // Navigate to a URL.
+            System.Diagnostics.Process.Start("https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage");
+        }
+
+        private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => _locallyAdministered = ZeroTwoCheckBox.Checked;
         #endregion EventHandlers
     }
 }

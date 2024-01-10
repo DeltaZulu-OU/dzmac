@@ -61,7 +61,7 @@ namespace MacChanger.Gui.Forms
             this.ZeroTwoCheckBox = new System.Windows.Forms.CheckBox();
             this.PersistentAddressCheckBox = new System.Windows.Forms.CheckBox();
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
             this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
@@ -104,6 +104,7 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
+            this.WikiLink = new System.Windows.Forms.LinkLabel();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -396,12 +397,13 @@ namespace MacChanger.Gui.Forms
             // 
             // ChangeMacAddressGroup
             // 
+            this.ChangeMacAddressGroup.Controls.Add(this.WikiLink);
             this.ChangeMacAddressGroup.Controls.Add(this.RestoreMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.ChangeMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.ZeroTwoCheckBox);
             this.ChangeMacAddressGroup.Controls.Add(this.PersistentAddressCheckBox);
             this.ChangeMacAddressGroup.Controls.Add(this.AutoStartCheckBox);
-            this.ChangeMacAddressGroup.Controls.Add(this.comboBox1);
+            this.ChangeMacAddressGroup.Controls.Add(this.VendorComboBox);
             this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.macTextBox1);
             this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 144);
@@ -461,13 +463,13 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox.UseVisualStyleBackColor = true;
             this.AutoStartCheckBox.CheckedChanged += new System.EventHandler(this.AutoStartCheckBox_CheckedChanged);
             // 
-            // comboBox1
+            // VendorComboBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(6, 58);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(388, 21);
-            this.comboBox1.TabIndex = 2;
+            this.VendorComboBox.FormattingEnabled = true;
+            this.VendorComboBox.Location = new System.Drawing.Point(6, 58);
+            this.VendorComboBox.Name = "VendorComboBox";
+            this.VendorComboBox.Size = new System.Drawing.Size(388, 21);
+            this.VendorComboBox.TabIndex = 2;
             // 
             // RandomMacButton
             // 
@@ -829,6 +831,16 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
+            // WikiLink
+            // 
+            this.WikiLink.Location = new System.Drawing.Point(207, 139);
+            this.WikiLink.Name = "WikiLink";
+            this.WikiLink.Size = new System.Drawing.Size(67, 15);
+            this.WikiLink.TabIndex = 8;
+            this.WikiLink.TabStop = true;
+            this.WikiLink.Text = "Why?";
+            this.WikiLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.WikiLink_LinkClicked);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -929,9 +941,10 @@ namespace MacChanger.Gui.Forms
         private CheckBox ZeroTwoCheckBox;
         private CheckBox PersistentAddressCheckBox;
         private CheckBox AutoStartCheckBox;
-        private ComboBox comboBox1;
+        private ComboBox VendorComboBox;
         private Button RandomMacButton;
         private Controls.MacTextBox macTextBox1;
+        private LinkLabel WikiLink;
     }
 }
 

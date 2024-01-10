@@ -70,13 +70,18 @@ namespace MacChanger.Gui.Controls
         {
             get
             {
-                return string.Format("{0}:{1}:{2}:{3}:{4}:{5}", Box1.Text, Box2.Text, Box3.Text, Box4.Text, Box5.Text, Box6.Text);
+                return string.Format("{0}-{1}-{2}-{3}-{4}-{5}", Box1.Text, Box2.Text, Box3.Text, Box4.Text, Box5.Text, Box6.Text);
             }
             set
             {
                 if (value != "" && value != null)
                 {
-                    var pieces = value.Split(":".ToCharArray(), 6);
+                    string[] pieces;
+                    if (value.Contains("-"))
+                        pieces = value.Split("-".ToCharArray(), 6);
+                    else
+                        pieces = value.Split(":".ToCharArray(), 6);
+
                     Box1.Text = pieces[0];
                     Box2.Text = pieces[1];
                     Box3.Text = pieces[2];

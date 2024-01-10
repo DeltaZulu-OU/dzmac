@@ -47,6 +47,8 @@ namespace MacChanger.Gui.DTO
             _adapter = adapter;
         }
 
+        public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);
+
         private string GetDebuggerDisplay() => Name;
 
         private string ReadableSpeed(long speed)

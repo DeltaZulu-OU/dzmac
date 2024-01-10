@@ -17,7 +17,7 @@ namespace MacChanger
         /// <summary>
         ///     Internally we keep the address with no puncuation marks.
         /// </summary>
-        private readonly string _macAddress;
+        private string _macAddress;
 
         private readonly MacFormatter formatter = new MacFormatter();
 
@@ -56,7 +56,7 @@ namespace MacChanger
         /// Get a random (locally administered) MAC address.
         /// </summary>
         /// <returns>A MAC address having 01 as the least significant bits of the first byte, but otherwise random.</returns>
-        public static string GetNewMac()
+        public static MacAddress GetNewMac()
         {
             var r = new Random();
 
@@ -68,7 +68,7 @@ namespace MacChanger
             // Set first bit to 0
             bytes[0] = (byte)(bytes[0] & 0xfe);
 
-            return MacToString(bytes);
+            return new MacAddress(MacToString(bytes));
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace MacChanger
         /// </summary>
         /// <param name="oui">OUI of the vendor</param>
         /// <returns>A MAC address with the specified OUI.</returns>
-        public static string GetNewMac(string oui)
+        public static MacAddress GetNewMac(string oui)
         {
             var ouiOctet = ConvertHexStringToByteArray(oui);
 
@@ -85,8 +85,15 @@ namespace MacChanger
             r.NextBytes(nicSpecificOctet);
 
             var newMac = MergeByteArrays(ouiOctet, nicSpecificOctet);
+            return new MacAddress(MacToString(newMac));
+        }
 
-            return MacToString(newMac);
+        public void SetAsLocallyAdministered()
+        {
+            var tempArray = _macAddress.ToCharArray();
+            tempArray[1] = '2';
+
+            _macAddress = new string(tempArray);
         }
 
         /// <summary>

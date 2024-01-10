@@ -11,12 +11,10 @@ namespace MacChanger
     /// </summary>
     public class VendorManager : IDisposable
     {
-        internal VendorList Vendors => _vendors ??= new VendorList();
         private static VendorList? _vendors;
+        private readonly Random _random = new Random();
         private bool disposedValue;
-
-        public VendorList GetVendorList() => Vendors;
-
+        internal VendorList Vendors => _vendors ??= new VendorList();
         /// <summary>
         ///     Checks if a vendor with the provided OUI exists.
         ///     There may be more than one vendors as OUIs are not unique.
@@ -44,6 +42,18 @@ namespace MacChanger
             return Vendors.Get(oui);
         }
 
+        public Vendor GetRandom()
+        {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var max = _vendors.Count;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+            var offset = _random.Next(max);
+            var selected = _vendors[offset];
+            return selected;
+        }
+
+        public VendorList GetVendorList() => Vendors;
         public void Refresh() => Vendors.Refresh();
 
         #region Dispose
