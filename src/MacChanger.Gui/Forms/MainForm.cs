@@ -46,7 +46,9 @@ namespace MacChanger.Gui.Forms
 
         private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e) => NotImplemented();
+        private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
+        private void ChangeMacButton_Click(object sender, EventArgs e) => NotImplemented();
+
         private void CheckUpdateItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void CliParamsHelpItem_Click(object sender, EventArgs e) => NotImplemented();
@@ -115,12 +117,18 @@ namespace MacChanger.Gui.Forms
 
         private void OptionsMenu_Click(object sender, EventArgs e) => NotImplemented();
 
+        private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
+
+        private void RandomMacButton_Click(object sender, EventArgs e) => NotImplemented();
+
         private async void RefreshItem_Click(object sender, EventArgs e)
         {
             MainStatusBar.Text = "Refreshing network interface data...";
             await RefreshConnectionsBackground();
             MainStatusBar.Text = "Ready";
         }
+
+        private void RestoreMacButton_Click(object sender, EventArgs e) => NotImplemented();
 
         private void SavePresetAsItem_Click(object sender, EventArgs e) => NotImplemented();
 
@@ -139,7 +147,7 @@ namespace MacChanger.Gui.Forms
             MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
             MainStatusBar.Text = "Ready";
         }
+        private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
         #endregion EventHandlers
-
     }
 }

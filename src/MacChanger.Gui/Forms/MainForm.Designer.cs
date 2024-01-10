@@ -56,6 +56,14 @@ namespace MacChanger.Gui.Forms
             this.ConnectionValueTextbox = new System.Windows.Forms.TextBox();
             this.ConnectionLabel = new System.Windows.Forms.Label();
             this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
+            this.RestoreMacButton = new System.Windows.Forms.Button();
+            this.ChangeMacButton = new System.Windows.Forms.Button();
+            this.ZeroTwoCheckBox = new System.Windows.Forms.CheckBox();
+            this.PersistentAddressCheckBox = new System.Windows.Forms.CheckBox();
+            this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.RandomMacButton = new System.Windows.Forms.Button();
+            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
@@ -96,14 +104,6 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -396,13 +396,13 @@ namespace MacChanger.Gui.Forms
             // 
             // ChangeMacAddressGroup
             // 
-            this.ChangeMacAddressGroup.Controls.Add(this.button3);
-            this.ChangeMacAddressGroup.Controls.Add(this.button2);
-            this.ChangeMacAddressGroup.Controls.Add(this.checkBox3);
-            this.ChangeMacAddressGroup.Controls.Add(this.checkBox2);
-            this.ChangeMacAddressGroup.Controls.Add(this.checkBox1);
+            this.ChangeMacAddressGroup.Controls.Add(this.RestoreMacButton);
+            this.ChangeMacAddressGroup.Controls.Add(this.ChangeMacButton);
+            this.ChangeMacAddressGroup.Controls.Add(this.ZeroTwoCheckBox);
+            this.ChangeMacAddressGroup.Controls.Add(this.PersistentAddressCheckBox);
+            this.ChangeMacAddressGroup.Controls.Add(this.AutoStartCheckBox);
             this.ChangeMacAddressGroup.Controls.Add(this.comboBox1);
-            this.ChangeMacAddressGroup.Controls.Add(this.button1);
+            this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.macTextBox1);
             this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 144);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
@@ -410,6 +410,83 @@ namespace MacChanger.Gui.Forms
             this.ChangeMacAddressGroup.TabIndex = 1;
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
+            // 
+            // RestoreMacButton
+            // 
+            this.RestoreMacButton.Location = new System.Drawing.Point(210, 161);
+            this.RestoreMacButton.Name = "RestoreMacButton";
+            this.RestoreMacButton.Size = new System.Drawing.Size(184, 23);
+            this.RestoreMacButton.TabIndex = 7;
+            this.RestoreMacButton.Text = "Restore &Original";
+            this.RestoreMacButton.UseVisualStyleBackColor = true;
+            this.RestoreMacButton.Click += new System.EventHandler(this.RestoreMacButton_Click);
+            // 
+            // ChangeMacButton
+            // 
+            this.ChangeMacButton.Location = new System.Drawing.Point(6, 161);
+            this.ChangeMacButton.Name = "ChangeMacButton";
+            this.ChangeMacButton.Size = new System.Drawing.Size(184, 23);
+            this.ChangeMacButton.TabIndex = 6;
+            this.ChangeMacButton.Text = "&Change Now!";
+            this.ChangeMacButton.UseVisualStyleBackColor = true;
+            this.ChangeMacButton.Click += new System.EventHandler(this.ChangeMacButton_Click);
+            // 
+            // ZeroTwoCheckBox
+            // 
+            this.ZeroTwoCheckBox.Location = new System.Drawing.Point(6, 138);
+            this.ZeroTwoCheckBox.Name = "ZeroTwoCheckBox";
+            this.ZeroTwoCheckBox.Size = new System.Drawing.Size(388, 17);
+            this.ZeroTwoCheckBox.TabIndex = 5;
+            this.ZeroTwoCheckBox.Text = "Use \'02\' as first octet of MAC address";
+            this.ZeroTwoCheckBox.UseVisualStyleBackColor = true;
+            this.ZeroTwoCheckBox.CheckedChanged += new System.EventHandler(this.ZeroTwoCheckBox_CheckedChanged);
+            // 
+            // PersistentAddressCheckBox
+            // 
+            this.PersistentAddressCheckBox.Location = new System.Drawing.Point(6, 115);
+            this.PersistentAddressCheckBox.Name = "PersistentAddressCheckBox";
+            this.PersistentAddressCheckBox.Size = new System.Drawing.Size(388, 17);
+            this.PersistentAddressCheckBox.TabIndex = 4;
+            this.PersistentAddressCheckBox.Text = "Make new MAC address persistent";
+            this.PersistentAddressCheckBox.UseVisualStyleBackColor = true;
+            this.PersistentAddressCheckBox.CheckedChanged += new System.EventHandler(this.PersistentAddressCheckBox_CheckedChanged);
+            // 
+            // AutoStartCheckBox
+            // 
+            this.AutoStartCheckBox.Location = new System.Drawing.Point(7, 92);
+            this.AutoStartCheckBox.Name = "AutoStartCheckBox";
+            this.AutoStartCheckBox.Size = new System.Drawing.Size(387, 17);
+            this.AutoStartCheckBox.TabIndex = 3;
+            this.AutoStartCheckBox.Text = "Automatically restart network connection to apply changes";
+            this.AutoStartCheckBox.UseVisualStyleBackColor = true;
+            this.AutoStartCheckBox.CheckedChanged += new System.EventHandler(this.AutoStartCheckBox_CheckedChanged);
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(6, 58);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(388, 21);
+            this.comboBox1.TabIndex = 2;
+            // 
+            // RandomMacButton
+            // 
+            this.RandomMacButton.Location = new System.Drawing.Point(184, 19);
+            this.RandomMacButton.Name = "RandomMacButton";
+            this.RandomMacButton.Size = new System.Drawing.Size(210, 24);
+            this.RandomMacButton.TabIndex = 1;
+            this.RandomMacButton.Text = "Random MAC Address";
+            this.RandomMacButton.UseVisualStyleBackColor = true;
+            this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
+            // 
+            // macTextBox1
+            // 
+            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox1.Name = "macTextBox1";
+            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox1.TabIndex = 0;
             // 
             // PerformanceCounterGroup
             // 
@@ -468,6 +545,7 @@ namespace MacChanger.Gui.Forms
             // 
             // Toolbar
             // 
+            this.Toolbar.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.Toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FileMenu,
             this.ActionMenu,
@@ -751,78 +829,6 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
-            // macTextBox1
-            // 
-            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox1.Name = "macTextBox1";
-            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox1.TabIndex = 0;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(235, 19);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(159, 24);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "Random MAC Address";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(6, 58);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(388, 21);
-            this.comboBox1.TabIndex = 2;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.Location = new System.Drawing.Point(7, 92);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(387, 17);
-            this.checkBox1.TabIndex = 3;
-            this.checkBox1.Text = "Automatically restart network connection to apply changes";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
-            // checkBox2
-            // 
-            this.checkBox2.Location = new System.Drawing.Point(6, 115);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(388, 17);
-            this.checkBox2.TabIndex = 4;
-            this.checkBox2.Text = "Make new MAC address persistent";
-            this.checkBox2.UseVisualStyleBackColor = true;
-            // 
-            // checkBox3
-            // 
-            this.checkBox3.Location = new System.Drawing.Point(6, 138);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(388, 17);
-            this.checkBox3.TabIndex = 5;
-            this.checkBox3.Text = "Use \'02\' as first octet of MAC address";
-            this.checkBox3.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(6, 161);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(171, 23);
-            this.button2.TabIndex = 6;
-            this.button2.Text = "&Change Now!";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(223, 161);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(171, 23);
-            this.button3.TabIndex = 7;
-            this.button3.Text = "Restore &Original";
-            this.button3.UseVisualStyleBackColor = true;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -918,13 +924,13 @@ namespace MacChanger.Gui.Forms
         private TextBox ActiveMacVendorTextbox;
         private TextBox ActiveMacValueTextbox;
         private Label ActiveMacLabel;
-        private Button button3;
-        private Button button2;
-        private CheckBox checkBox3;
-        private CheckBox checkBox2;
-        private CheckBox checkBox1;
+        private Button RestoreMacButton;
+        private Button ChangeMacButton;
+        private CheckBox ZeroTwoCheckBox;
+        private CheckBox PersistentAddressCheckBox;
+        private CheckBox AutoStartCheckBox;
         private ComboBox comboBox1;
-        private Button button1;
+        private Button RandomMacButton;
         private Controls.MacTextBox macTextBox1;
     }
 }
