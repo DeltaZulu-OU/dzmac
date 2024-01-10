@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MacChanger.Gui.DTO;
-using static System.Windows.Forms.LinkLabel;
 
 namespace MacChanger.Gui.Forms
 {
@@ -178,7 +176,7 @@ namespace MacChanger.Gui.Forms
         private void WikiLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // Specify that the link was visited.
-            this.WikiLink.LinkVisited = true;
+            WikiLink.LinkVisited = true;
 
             // Navigate to a URL.
             System.Diagnostics.Process.Start("https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage");

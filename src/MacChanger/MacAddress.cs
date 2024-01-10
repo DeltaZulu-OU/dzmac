@@ -1,12 +1,23 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 
 namespace MacChanger
 {
+    /// <summary>
+    ///     A class to wrap MAC address with formatting and validation logic.
+    /// </summary>
+    [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     public partial class MacAddress
     {
+        /// <summary>
+        ///     Use 02 as the first octet to mark the MAC address as locally administered.
+        ///     <see href="https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage"/>
+        /// </summary>
+        private const string locallyAdministeredOctet = "02";
+
         /// <summary>
         ///     6 bytes == 12 hex characters (without dashes/dots/anything else)
         ///     Should be uppercase
@@ -14,12 +25,12 @@ namespace MacChanger
         /// </summary>
         private static readonly Regex _macAddressPattern = new Regex("^[0-9A-F]{12}$", RegexOptions.Compiled);
 
+        private readonly MacFormatter formatter = new MacFormatter();
+
         /// <summary>
         ///     Internally we keep the address with no puncuation marks.
         /// </summary>
         private string _macAddress;
-
-        private readonly MacFormatter formatter = new MacFormatter();
 
         /// <summary>
         ///     Create an instance of <see cref="MacAddress"/> using a string.
@@ -27,6 +38,7 @@ namespace MacChanger
         /// <param name="macAddress">Mac address with no punctuation marks.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="RegexMatchTimeoutException"></exception>
         public MacAddress(string macAddress)
         {
             if (macAddress == null)
@@ -42,6 +54,12 @@ namespace MacChanger
             _macAddress = macAddress;
         }
 
+        /// <summary>
+        ///     Create an instance of <see cref="MacAddress"/> using an instance of
+        ///     <see cref="PhysicalAddress"/>.
+        /// </summary>
+        /// <param name="macAddress">Mac address with no punctuation marks.</param>
+        /// <exception cref="ArgumentNullException"></exception>
         public MacAddress(PhysicalAddress macAddress)
         {
             if (macAddress == null)
@@ -53,9 +71,10 @@ namespace MacChanger
         }
 
         /// <summary>
-        /// Get a random (locally administered) MAC address.
+        ///     Get a random (locally administered) MAC address.
         /// </summary>
         /// <returns>A MAC address having 01 as the least significant bits of the first byte, but otherwise random.</returns>
+        /// <exception cref="RegexMatchTimeoutException"></exception>
         public static MacAddress GetNewMac()
         {
             var r = new Random();
@@ -72,10 +91,13 @@ namespace MacChanger
         }
 
         /// <summary>
-        /// Get a MAC address for the provided OUI.
+        ///     Get a MAC address for the provided OUI.
         /// </summary>
         /// <param name="oui">OUI of the vendor</param>
         /// <returns>A MAC address with the specified OUI.</returns>
+        /// <exception cref="RegexMatchTimeoutException"></exception>
+        /// <exception cref="FormatException"></exception>
+        /// <exception cref="OverflowException"></exception>
         public static MacAddress GetNewMac(string oui)
         {
             var ouiOctet = ConvertHexStringToByteArray(oui);
@@ -88,16 +110,8 @@ namespace MacChanger
             return new MacAddress(MacToString(newMac));
         }
 
-        public void SetAsLocallyAdministered()
-        {
-            var tempArray = _macAddress.ToCharArray();
-            tempArray[1] = '2';
-
-            _macAddress = new string(tempArray);
-        }
-
         /// <summary>
-        /// Verifies that a given string is a valid MAC address.
+        ///     Verifies that a given string is a valid MAC address.
         /// </summary>
         /// <param name="mac">MAC address as string.</param>
         /// <returns>true if the string is a valid MAC address, false otherwise.</returns>
@@ -105,7 +119,7 @@ namespace MacChanger
         public static bool IsValidMac(string mac) => _macAddressPattern.IsMatch(mac);
 
         /// <summary>
-        /// Verifies that a given MAC address is valid.
+        ///     Verifies that a given MAC address is valid.
         /// </summary>
         /// <param name="macAsBytes">The address.</param>
         /// <returns>true if valid, false otherwise.</returns>
@@ -113,14 +127,52 @@ namespace MacChanger
         public static bool IsValidMac(byte[] macAsBytes) => IsValidMac(MacAddress.MacToString(macAsBytes));
 
         /// <summary>
-        /// Converts a byte array of length 6 to a MAC address (i.e. string of hexadecimal digits).
+        ///     Converts a byte array of length 6 to a MAC address (i.e. string of hexadecimal digits).
         /// </summary>
-        /// <param name="macAsBytes">The bytes to convert.</param>
-        /// <returns>The MAC address.</returns>
+        /// <param name="macAsBytes">MAC address in the format of <see cref="Array"/> of <see cref="byte"/>s</param>
+        /// <returns>The MAC address as <see cref="string"/> without delimiters.</returns>
         public static string MacToString(byte[] macAsBytes) => BitConverter.ToString(macAsBytes).Replace("-", "").ToUpper();
 
+        public static bool operator !=(MacAddress obj1, MacAddress obj2) => !(obj1 == obj2);
+
+        public static bool operator ==(MacAddress obj1, MacAddress obj2)
+        {
+            if (ReferenceEquals(obj1, obj2))
+            {
+                return true;
+            }
+
+            if (obj1 is null)
+            {
+                return false;
+            }
+
+            if (obj2 is null)
+            {
+                return false;
+            }
+
+            return obj1.Equals(obj2);
+        }
+
+        public override bool Equals(object obj) => Equals((MacAddress)obj);
+
+        public override int GetHashCode() => _macAddress.GetHashCode();
+
+        /// <summary>
+        ///     Mark the MAC address as locally administered.
+        ///     <see href="https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage"/>
+        /// </summary>
+        public void SetAsLocallyAdministered() => _macAddress = locallyAdministeredOctet + _macAddress.Substring(2);
+
+        /// <inheritdoc/>
         public override string ToString() => ToString(MacDelimiter.None);
 
+        /// <summary>
+        ///     Format the MAC as dash or colon delimited octets
+        /// </summary>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="FormatException"></exception>
         public string ToString(MacDelimiter delimiter) => delimiter switch
         {
             MacDelimiter.None => _macAddress,
@@ -159,6 +211,7 @@ namespace MacChanger
         /// <param name="firstArray">The first byte array used for OUI</param>
         /// <param name="secondArray">Second byte array randomly generated</param>
         /// <returns>A generated MAC address as byte array</returns>
+        /// <exception cref="OverflowException"></exception>
         private static byte[] MergeByteArrays(byte[] firstArray, byte[] secondArray)
         {
             var combinedArray = new byte[firstArray.Length + secondArray.Length];
@@ -166,29 +219,6 @@ namespace MacChanger
             Buffer.BlockCopy(secondArray, 0, combinedArray, firstArray.Length, secondArray.Length);
             return combinedArray;
         }
-
-        public static bool operator ==(MacAddress obj1, MacAddress obj2)
-        {
-            if (ReferenceEquals(obj1, obj2))
-            {
-                return true;
-            }
-
-            if (obj1 is null)
-            {
-                return false;
-            }
-
-            if (obj2 is null)
-            {
-                return false;
-            }
-
-            return obj1.Equals(obj2);
-        }
-
-        public static bool operator !=(MacAddress obj1, MacAddress obj2) => !(obj1 == obj2);
-
         bool Equals(MacAddress other)
         {
             if (other is null)
@@ -198,8 +228,6 @@ namespace MacChanger
             return _macAddress.Equals(other._macAddress);
         }
 
-        public override bool Equals(object obj) => Equals((MacAddress)obj);
-
-        public override int GetHashCode() => _macAddress.GetHashCode();
+        private string GetDebuggerDisplay() => ToString();
     }
 }

@@ -18,12 +18,6 @@ namespace MacChanger
     /// </remarks>
     public class NetworkAdapter : IDisposable
     {
-        private const string UnknownVendorIdentifier = "Unkown Vendor";
-        private readonly VendorManager? _manager;
-        private readonly NetworkInterface _networkInterface;
-        private ManagementObject? _adapter;
-        private bool disposedValue;
-
         /// <summary>
         ///     Gets the identifier of the network adapter.
         /// </summary>
@@ -45,9 +39,7 @@ namespace MacChanger
         public string HardwareId { get; }
 
         public bool IsIPv4Enabled { get; }
-
         public bool IsIPv6Enabled { get; }
-
         /// <summary>
         ///     Gets the current operational state of the network connection.
         /// </summary>
@@ -62,6 +54,7 @@ namespace MacChanger
         ///     Gets the MAC address as reported by the adapter.
         /// </summary>
         public MacAddress OriginalMacAddress { get; }
+
         /// <summary>
         ///     Gets the vendor of the network adapter.
         /// </summary>
@@ -82,6 +75,11 @@ namespace MacChanger
         /// </summary>
         public long Speed => _networkInterface.Speed;
 
+        private const string UnknownVendorIdentifier = "Unkown Vendor";
+        private readonly VendorManager? _manager;
+        private readonly NetworkInterface _networkInterface;
+        private ManagementObject? _adapter;
+        private bool disposedValue;
         public NetworkAdapter(ManagementObject adapterObject, NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
             _adapter = adapterObject;
@@ -131,6 +129,7 @@ namespace MacChanger
             }
         }
 
+        ///  <inheritdoc/>
         public override string ToString() => $"{_networkInterface.Description} ({_networkInterface.Name})";
 
         /// <summary>
