@@ -56,6 +56,7 @@ namespace MacChanger.Gui.Forms
             this.ConnectionValueTextbox = new System.Windows.Forms.TextBox();
             this.ConnectionLabel = new System.Windows.Forms.Label();
             this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
+            this.WikiLink = new System.Windows.Forms.LinkLabel();
             this.RestoreMacButton = new System.Windows.Forms.Button();
             this.ChangeMacButton = new System.Windows.Forms.Button();
             this.ZeroTwoCheckBox = new System.Windows.Forms.CheckBox();
@@ -63,7 +64,6 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
-            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
@@ -104,7 +104,7 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this.WikiLink = new System.Windows.Forms.LinkLabel();
+            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -413,6 +413,16 @@ namespace MacChanger.Gui.Forms
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
             // 
+            // WikiLink
+            // 
+            this.WikiLink.Location = new System.Drawing.Point(207, 139);
+            this.WikiLink.Name = "WikiLink";
+            this.WikiLink.Size = new System.Drawing.Size(67, 15);
+            this.WikiLink.TabIndex = 8;
+            this.WikiLink.TabStop = true;
+            this.WikiLink.Text = "Why?";
+            this.WikiLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.WikiLink_LinkClicked);
+            // 
             // RestoreMacButton
             // 
             this.RestoreMacButton.Location = new System.Drawing.Point(210, 161);
@@ -481,15 +491,6 @@ namespace MacChanger.Gui.Forms
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
             // 
-            // macTextBox1
-            // 
-            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox1.Name = "macTextBox1";
-            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox1.TabIndex = 0;
-            // 
             // PerformanceCounterGroup
             // 
             this.PerformanceCounterGroup.Location = new System.Drawing.Point(409, 144);
@@ -521,27 +522,22 @@ namespace MacChanger.Gui.Forms
             // ConnectionsGrid
             // 
             this.ConnectionsGrid.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
+            this.ConnectionsGrid.AllowColumnReorder = true;
             this.ConnectionsGrid.CausesValidation = false;
-            this.ConnectionsGrid.CellEditUseWholeCell = false;
             this.ConnectionsGrid.DataSource = null;
             this.ConnectionsGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectionsGrid.FullRowSelect = true;
-            this.ConnectionsGrid.HasCollapsibleGroups = false;
-            this.ConnectionsGrid.HeaderUsesThemes = true;
             this.ConnectionsGrid.HideSelection = false;
             this.ConnectionsGrid.Location = new System.Drawing.Point(3, 3);
             this.ConnectionsGrid.MinimumSize = new System.Drawing.Size(800, 4);
             this.ConnectionsGrid.MultiSelect = false;
             this.ConnectionsGrid.Name = "ConnectionsGrid";
-            this.ConnectionsGrid.RenderNonEditableCheckboxesAsDisabled = true;
             this.ConnectionsGrid.ShowGroups = false;
             this.ConnectionsGrid.ShowItemToolTips = true;
             this.ConnectionsGrid.Size = new System.Drawing.Size(878, 125);
-            this.ConnectionsGrid.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.ConnectionsGrid.SpaceBetweenGroups = 1;
             this.ConnectionsGrid.TabIndex = 1;
             this.ConnectionsGrid.UseCompatibleStateImageBehavior = false;
-            this.ConnectionsGrid.UseExplorerTheme = true;
             this.ConnectionsGrid.View = System.Windows.Forms.View.Details;
             this.ConnectionsGrid.SelectedIndexChanged += new System.EventHandler(this.ConnectionsGrid_SelectedIndexChanged);
             // 
@@ -831,15 +827,14 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
-            // WikiLink
+            // macTextBox1
             // 
-            this.WikiLink.Location = new System.Drawing.Point(207, 139);
-            this.WikiLink.Name = "WikiLink";
-            this.WikiLink.Size = new System.Drawing.Size(67, 15);
-            this.WikiLink.TabIndex = 8;
-            this.WikiLink.TabStop = true;
-            this.WikiLink.Text = "Why?";
-            this.WikiLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.WikiLink_LinkClicked);
+            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox1.Name = "macTextBox1";
+            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox1.TabIndex = 0;
             // 
             // MainForm
             // 
