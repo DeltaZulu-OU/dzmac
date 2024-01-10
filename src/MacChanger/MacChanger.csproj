@@ -64,6 +64,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MacAddress.cs" />
+    <Compile Include="MacAddress.MacDelimiter.cs" />
+    <Compile Include="MacFormatter.cs" />
     <Compile Include="NetworkAdapter.cs" />
     <Compile Include="NetworkAdapterFactory.cs" />
     <Compile Include="Cache.cs" />
@@ -78,12 +80,12 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <PropertyGroup> 
+  <PropertyGroup>
     <ContentSQLiteInteropFiles>true</ContentSQLiteInteropFiles>
     <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
     <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
     <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
- </PropertyGroup>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

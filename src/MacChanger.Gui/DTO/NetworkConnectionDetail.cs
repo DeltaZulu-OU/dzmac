@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using MacChanger.Gui.Utils;
 
 namespace MacChanger.Gui.DTO
 {
@@ -11,23 +10,56 @@ namespace MacChanger.Gui.DTO
     internal class NetworkConnectionDetail : IDisposable
     {
         private readonly NetworkAdapter _adapter;
-        private readonly MacFormatter formatter = new MacFormatter();
+        private bool? _isChanged;
         private bool disposedValue;
-        public string ActiveMac => Changed == "Yes" ? string.Format(formatter, "{0}", _adapter.RegistryMacAddress) + " (Changed)" : OriginalMac;
-        public string Changed => _adapter.RegistryMacAddress != null ? "Yes" : "No";
+        public string ActiveMac
+        {
+            get
+            {
+                if (IsChanged)
+                {
+                    return _adapter.RegistryMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)";
+                }
+                else
+                {
+                    return OriginalMac;
+                }
+            }
+        }
+
+        public string ActiveVendor => IsChanged ? string.Empty : OriginalVendor;
+        public string Changed => IsChanged ? "Yes" : "No";
         public string ConfigId => _adapter.ConfigId;
         public string Device => _adapter.DeviceDescription;
         public bool Enabled => _adapter.Enabled;
         public string HardwareId => _adapter.HardwareId;
-        public string LinkStatus => _adapter.LinkStatus;
-        public string Name => _adapter.Name;
-        public string OriginalMac => string.Format(formatter, "{0}", _adapter.OriginalMacAddress);
-        public string Speed => ReadableSpeed(_adapter.Speed);
-        public string OriginalVendor => _adapter.OriginalVendor;
-        public string ActiveVendor => Changed == "Yes" ? string.Empty : OriginalVendor; // TODO: Query the vendor
-
         public string IPv4Status => _adapter.IsIPv4Enabled ? "Enabled" : "Disabled";
         public string IPv6Status => _adapter.IsIPv6Enabled ? "Enabled" : "Disabled";
+        public string LinkStatus => _adapter.LinkStatus;
+        public string Name => _adapter.Name;
+        public string OriginalMac => _adapter.OriginalMacAddress.ToString(MacAddress.MacDelimiter.Dash);
+        public string OriginalVendor => _adapter.OriginalVendor;
+        public string Speed => ReadableSpeed(_adapter.Speed);
+        internal bool IsChanged => _isChanged ?? (_isChanged = Test()).Value;
+
+        private bool Test()
+        {
+            if (_adapter.RegistryMacAddress != null)
+            {
+                if (_adapter.RegistryMacAddress == _adapter.OriginalMacAddress)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         public NetworkConnectionDetail(NetworkAdapter adapter)
         {

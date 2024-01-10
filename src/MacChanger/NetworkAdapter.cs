@@ -17,6 +17,7 @@ namespace MacChanger
     /// </remarks>
     public class NetworkAdapter : IDisposable
     {
+        private const string UnknownVendorIdentifier = "Unkown Vendor";
         private readonly VendorManager _manager;
         private readonly NetworkInterface _networkInterface;
         private ManagementObject _adapter;
@@ -59,7 +60,7 @@ namespace MacChanger
         /// <summary>
         ///     Gets the MAC address as reported by the adapter.
         /// </summary>
-        public string OriginalMacAddress { get; }
+        public MacAddress OriginalMacAddress { get; }
         /// <summary>
         ///     Gets the vendor of the network adapter.
         /// </summary>
@@ -68,7 +69,7 @@ namespace MacChanger
         /// <summary>
         ///     Gets the NetworkAddress registry value of this adapter.
         /// </summary>
-        public string RegistryMacAddress { get; }
+        public MacAddress RegistryMacAddress { get; }
 
         /// <summary>
         ///     Gets the vendor of the network adapter from registry.
@@ -196,12 +197,16 @@ namespace MacChanger
             return hardwareId == null ? string.Empty : (string)hardwareId;
         }
 
-        private string GetOriginalMacAddress() => _networkInterface.GetPhysicalAddress()?.ToString();
+        private MacAddress GetOriginalMacAddress() => new MacAddress(_networkInterface.GetPhysicalAddress());
 
         private string GetOriginalVendor()
         {
-            var vendor = _adapter["Manufacturer"];
-            return vendor == null ? "Unknown" : (string)vendor;
+            if (OriginalMacAddress == null) return null;
+            if (_manager == null) return null;
+            var vendors = _manager.FindByMac(OriginalMacAddress);
+            if (vendors.Any())
+                return string.Join(", ", vendors);
+            return UnknownVendorIdentifier;
         }
 
         /// <summary>
@@ -209,7 +214,7 @@ namespace MacChanger
         /// </summary>
         private string GetregistryKey() => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{ExtractDeviceNumber():D4}";
 
-        private string GetRegistryMac()
+        private MacAddress GetRegistryMac()
         {
             using (var regkey = Registry.LocalMachine.OpenSubKey(GetregistryKey(), false))
             {
@@ -219,7 +224,12 @@ namespace MacChanger
                 }
 
                 var address = regkey.GetValue("NetworkAddress");
-                return address?.ToString();
+                if (address == null)
+                {
+                    return null;
+                }
+                var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
+                return new MacAddress(macString);
             }
         }
 

@@ -53,7 +53,7 @@ namespace MacChanger
         ///     Hence, it returns an enumerable.
         /// </summary>
         /// <param name="oui">IEEE assigned OUI</param>
-        /// <param name="vendors">Mathced vendors from IEEE records</param>
+        /// <param name="vendors">Matched vendors from IEEE records</param>
         /// <returns>If OUI exists in the IEEE database</returns>
         public bool TryGetValue(string oui, out IEnumerable<Vendor> vendors)
         {

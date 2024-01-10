@@ -21,7 +21,7 @@ namespace MacChanger
             var managementObjects = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapter").Get().Cast<ManagementObject>();
             var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces()
                                                      .Where(a => MacAddress.IsValidMac(a.GetPhysicalAddress().GetAddressBytes()))
-                                                     .OrderByDescending(a => a.Description);
+                                                     .OrderByDescending(a => a.Name);
 
             foreach (var networkInterface in networkInterfaces)
             {

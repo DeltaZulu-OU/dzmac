@@ -16,9 +16,30 @@ namespace MacChanger
 
         public VendorList GetVendorList() => Vendors;
 
+        /// <summary>
+        ///     Checks if a vendor with the provided OUI exists.
+        ///     There may be more than one vendors as OUIs are not unique.
+        ///     Hence, it returns an enumerable.
+        /// </summary>
+        /// <param name="macAddress">MAC address of the adapter</param>
+        /// <returns>List of possible vendors or an empty list.</returns>
         public IEnumerable<Vendor> FindByMac(string macAddress)
         {
             var oui = macAddress.Substring(0, 6);
+            return Vendors.Get(oui);
+        }
+
+        /// <summary>
+        ///     Checks if a vendor with the provided OUI exists.
+        ///     There may be more than one vendors as OUIs are not unique.
+        ///     Hence, it returns an enumerable.
+        /// </summary>
+        /// <param name="macAddress">MAC address of the adapter</param>
+        /// <returns>List of possible vendors or an empty list.</returns>
+        public IEnumerable<Vendor> FindByMac(MacAddress macAddress)
+        {
+            var str = macAddress.ToString();
+            var oui = str.Substring(0, 6);
             return Vendors.Get(oui);
         }
 
