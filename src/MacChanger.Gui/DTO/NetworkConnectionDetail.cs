@@ -40,26 +40,7 @@ namespace MacChanger.Gui.DTO
         public string OriginalMac => _adapter.OriginalMacAddress.ToString(MacAddress.MacDelimiter.Dash);
         public string OriginalVendor => _adapter.OriginalVendor;
         public string Speed => ReadableSpeed(_adapter.Speed);
-        internal bool IsChanged => _isChanged ?? (_isChanged = Test()).Value;
-
-        private bool Test()
-        {
-            if (_adapter.RegistryMacAddress != null)
-            {
-                if (_adapter.RegistryMacAddress == _adapter.OriginalMacAddress)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
+        internal bool IsChanged => _isChanged ?? (_isChanged = _adapter.RegistryMacAddress != null && _adapter.RegistryMacAddress != _adapter.OriginalMacAddress).Value;
 
         public NetworkConnectionDetail(NetworkAdapter adapter)
         {

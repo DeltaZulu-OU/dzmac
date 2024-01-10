@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +13,20 @@ namespace MacChanger
     public class VendorList : IDisposable, IReadOnlyList<Vendor>
     {
         private const string _databaseFile = "oui.db";
-        private static Cache _cache;
+        private static Cache? _cache;
         private bool disposedValue;
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         public int Count => _cache.Count;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index];
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         public Vendor this[int index] => _cache[index];
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         public IEnumerable<Vendor> this[string oui] => Get(oui);
 
@@ -34,6 +41,9 @@ namespace MacChanger
 
         public void Refresh()
         {
+            // There must not be a possibility of empty cache but t is better to check
+            if (_cache is null) throw new MacChangerException("Cache object does not exist");
+
             if (!_cache.IsEmpty)
             {
                 _cache.Clear();
@@ -41,11 +51,17 @@ namespace MacChanger
             _cache.AddRange(Downloader.GetAll());
         }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         public IEnumerable<Vendor> Get(string oui) => _cache.Get(oui);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         public IEnumerator<Vendor> GetEnumerator() => _cache.GetAll().GetEnumerator();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         IEnumerator IEnumerable.GetEnumerator() => _cache.GetAll().GetEnumerator();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         /// <summary>
         ///     Checks if a vendor with the provided OUI exists.

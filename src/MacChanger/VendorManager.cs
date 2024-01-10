@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 
 namespace MacChanger
@@ -10,8 +11,8 @@ namespace MacChanger
     /// </summary>
     public class VendorManager : IDisposable
     {
-        internal VendorList Vendors => _vendors ?? (_vendors = new VendorList());
-        private static VendorList _vendors;
+        internal VendorList Vendors => _vendors ??= new VendorList();
+        private static VendorList? _vendors;
         private bool disposedValue;
 
         public VendorList GetVendorList() => Vendors;

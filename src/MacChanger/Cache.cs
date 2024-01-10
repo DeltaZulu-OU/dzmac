@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -9,7 +10,7 @@ namespace MacChanger
     internal class Cache : IDisposable
     {
         private readonly string _databaseFile;
-        private SQLiteConnection _connection;
+        private SQLiteConnection? _connection;
         private bool _disposedValue;
         private readonly Regex _pattern = new Regex("[0-9A-F]{6}");
 
@@ -35,7 +36,9 @@ namespace MacChanger
         public void Add(string oui, string vendor)
         {
             Debug.WriteLine($"Updating database (OUI: {oui}, Vendor: {vendor})...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "INSERT INTO vendors (oui, value) VALUES($oui, $vendor);";
             command.Parameters.AddWithValue("$oui", oui);
             command.Parameters.AddWithValue("$vendor", vendor);
@@ -51,6 +54,7 @@ namespace MacChanger
         public void AddRange(IEnumerable<Vendor> vendors)
         {
             Debug.WriteLine("Populating database...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             using (var transaction = _connection.BeginTransaction())
             {
                 var command = _connection.CreateCommand();
@@ -64,6 +68,7 @@ namespace MacChanger
                 }
                 transaction.Commit();
             }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             UpdateCount();
         }
@@ -82,7 +87,9 @@ namespace MacChanger
             }
 
             Debug.WriteLine($"Querying database (OUI: {oui})...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT vendor FROM vendors WHERE oui LIKE $oui";
             command.Parameters.AddWithValue("$oui", oui);
             var reader = command.ExecuteReader();
@@ -103,7 +110,9 @@ namespace MacChanger
         public IEnumerable<Vendor> GetAll()
         {
             Debug.WriteLine("Querying database (ALL)...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT oui,vendor FROM vendors";
             var reader = command.ExecuteReader();
             while (reader.Read())
@@ -115,6 +124,7 @@ namespace MacChanger
         public void Clear()
         {
             Debug.WriteLine("Clearing database...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             using (var transaction = _connection.BeginTransaction())
             {
                 var command = _connection.CreateCommand();
@@ -122,6 +132,7 @@ namespace MacChanger
                 command.ExecuteNonQuery();
                 transaction.Commit();
             }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             UpdateCount();
         }
@@ -135,7 +146,9 @@ namespace MacChanger
             get
             {
                 Debug.WriteLine("Querying database if empty...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 command.CommandText = "SELECT COUNT(*) FROM vendors";
                 var reader = command.ExecuteReader();
                 reader.Read();
@@ -155,7 +168,9 @@ namespace MacChanger
         {
             Debug.WriteLine("Creating vendor table (if not exists)...");
             const string newTableCommand = "CREATE TABLE IF NOT EXISTS vendors (oui VARCHAR(6), vendor VARCHAR(128))";
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = newTableCommand;
             command.ExecuteNonQuery();
         }
@@ -174,7 +189,9 @@ namespace MacChanger
                 throw new IndexOutOfRangeException();
             }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT * FROM vendors LIMIT 1 OFFSET $offset";
             command.Parameters.AddWithValue("$offset", index);
             var reader = command.ExecuteReader();
@@ -187,7 +204,9 @@ namespace MacChanger
         private void UpdateCount()
         {
             Debug.WriteLine("Querying database for record count...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT COUNT(*) FROM vendors";
             var reader = command.ExecuteReader();
             reader.Read();

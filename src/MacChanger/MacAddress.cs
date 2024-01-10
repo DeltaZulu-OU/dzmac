@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace MacChanger
 {
-    public partial class MacAddress : IEquatable<MacAddress>
+    public partial class MacAddress
     {
         /// <summary>
         ///     6 bytes == 12 hex characters (without dashes/dots/anything else)
@@ -29,14 +29,25 @@ namespace MacChanger
         /// <exception cref="ArgumentException"></exception>
         public MacAddress(string macAddress)
         {
-            if (macAddress == null) throw new ArgumentNullException(nameof(macAddress));
-            if (!IsValidMac(macAddress)) throw new ArgumentException(nameof(macAddress));
+            if (macAddress == null)
+            {
+                throw new ArgumentNullException(nameof(macAddress));
+            }
+
+            if (!IsValidMac(macAddress))
+            {
+                throw new ArgumentException(nameof(macAddress));
+            }
+
             _macAddress = macAddress;
         }
 
         public MacAddress(PhysicalAddress macAddress)
         {
-            if (macAddress == null) throw new ArgumentNullException(nameof(macAddress));
+            if (macAddress == null)
+            {
+                throw new ArgumentNullException(nameof(macAddress));
+            }
 
             _macAddress = macAddress.ToString().ToUpperInvariant().Replace("-", "");
         }
@@ -103,20 +114,13 @@ namespace MacChanger
 
         public override string ToString() => ToString(MacDelimiter.None);
 
-        public string ToString(MacDelimiter delimiter)
+        public string ToString(MacDelimiter delimiter) => delimiter switch
         {
-            switch (delimiter)
-            {
-                case MacDelimiter.None:
-                    return _macAddress;
-                case MacDelimiter.Dash:
-                    return string.Format(formatter, "{0:D}", _macAddress);
-                case MacDelimiter.Colon:
-                    return string.Format(formatter, "{0:C}", _macAddress);
-                default:
-                    throw new ArgumentException(nameof(delimiter));
-            }
-        }
+            MacDelimiter.None => _macAddress,
+            MacDelimiter.Dash => string.Format(formatter, "{0:D}", _macAddress),
+            MacDelimiter.Colon => string.Format(formatter, "{0:C}", _macAddress),
+            _ => throw new ArgumentException(nameof(delimiter)),
+        };
         /// <summary>
         ///     Gets a string comprised of hexadecimal values, and converts it into a byte array
         /// </summary>
@@ -158,17 +162,36 @@ namespace MacChanger
 
         public static bool operator ==(MacAddress obj1, MacAddress obj2)
         {
+            if (ReferenceEquals(obj1, obj2))
+            {
+                return true;
+            }
+
+            if (obj1 is null)
+            {
+                return false;
+            }
+
+            if (obj2 is null)
+            {
+                return false;
+            }
+
             return obj1.Equals(obj2);
         }
 
-        public static bool operator !=(MacAddress obj1, MacAddress obj2)
+        public static bool operator !=(MacAddress obj1, MacAddress obj2) => !(obj1 == obj2);
+
+        bool Equals(MacAddress other)
         {
-            return !obj1.Equals(obj2);
+            if (other is null)
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            return _macAddress.Equals(other._macAddress);
         }
 
-        bool IEquatable<MacAddress>.Equals(MacAddress other) => _macAddress.Equals(other._macAddress);
-
-        public override bool Equals(object obj) => obj != null && Equals((MacAddress)obj);
+        public override bool Equals(object obj) => Equals((MacAddress)obj);
 
         public override int GetHashCode() => _macAddress.GetHashCode();
     }
