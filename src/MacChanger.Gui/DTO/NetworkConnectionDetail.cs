@@ -10,7 +10,7 @@ namespace MacChanger.Gui.DTO
     internal class NetworkConnectionDetail : IDisposable
     {
         public string ActiveMac => GetActiveMac();
-        public string ActiveVendor => IsChanged ? string.Empty : OriginalVendor;
+        public string ActiveVendor => _adapter.ActiveVendor;
         public string Changed => IsChanged ? "Yes" : "No";
         public string ConfigId => _adapter.ConfigId;
         public string Device => _adapter.DeviceDescription;
@@ -23,9 +23,8 @@ namespace MacChanger.Gui.DTO
         public string OriginalMac => _adapter.OriginalMacAddress.ToString(MacAddress.MacDelimiter.Dash);
         public string OriginalVendor => _adapter.OriginalVendor;
         public string Speed => ReadableSpeed(_adapter.Speed);
-        internal bool IsChanged => _isChanged ?? (_isChanged = _adapter.RegistryMacAddress != null && _adapter.RegistryMacAddress != _adapter.OriginalMacAddress).Value;
+        internal bool IsChanged => _adapter.Changed;
         private readonly NetworkAdapter _adapter;
-        private bool? _isChanged;
         private bool disposedValue;
         public NetworkConnectionDetail(NetworkAdapter adapter)
         {
@@ -38,7 +37,11 @@ namespace MacChanger.Gui.DTO
 
         public bool TryDisable() => _adapter.TryDisable();
 
-        private string GetActiveMac() => IsChanged ? _adapter.RegistryMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)" : OriginalMac;
+        public bool TryUpdateMac(string mac) => _adapter.SetRegistryMac(new MacAddress(mac));
+
+        public bool TryReset() => _adapter.Changed && _adapter.TryResetMac();
+
+        private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)" : OriginalMac;
         private string GetDebuggerDisplay() => Name;
 
         private string ReadableSpeed(long speed)

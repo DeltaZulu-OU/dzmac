@@ -12,6 +12,7 @@ namespace MacChanger.Gui.Forms
     {
         private readonly VendorManager _vm;
         private bool _locallyAdministered;
+        private bool _reenableOnChange;
         private NetworkConnectionDetail _selected;
         internal List<NetworkConnection> NetworkConnections { get; set; }
         public MainForm()
@@ -48,8 +49,21 @@ namespace MacChanger.Gui.Forms
 
         private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
-        private void ChangeMacButton_Click(object sender, EventArgs e) => NotImplemented();
+        private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => _reenableOnChange = AutoStartCheckBox.Checked;
+
+        private void ChangeMacButton_Click(object sender, EventArgs e)
+        {
+            var targetMac = macTextBox1.Text;
+
+            if (_selected.TryUpdateMac(targetMac))
+            {
+                _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                _ = MessageBox.Show("Failed to update MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void CheckUpdateItem_Click(object sender, EventArgs e) => NotImplemented();
 
@@ -154,7 +168,23 @@ namespace MacChanger.Gui.Forms
             MainStatusBar.Text = "Ready";
         }
 
-        private void RestoreMacButton_Click(object sender, EventArgs e) => NotImplemented();
+        private void RestoreMacButton_Click(object sender, EventArgs e)
+        {
+            if (_selected.TryReset())
+            {
+                _ = MessageBox.Show("Successfully restored MAC address", "MAC Address Restore", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                if (_reenableOnChange && _selected.TryDisable())
+                {
+                    _ = _selected.TryEnable();
+                }
+                RefreshConnectionsBackground();
+            }
+            else
+            {
+                _ = MessageBox.Show("Failed to restore MAC address", "MAC Address Restore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void SavePresetAsItem_Click(object sender, EventArgs e) => NotImplemented();
 

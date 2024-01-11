@@ -46,6 +46,8 @@ namespace MacChanger
                 throw new ArgumentNullException(nameof(macAddress));
             }
 
+            macAddress = macAddress.Replace("-", string.Empty).Replace(":", string.Empty);
+
             if (!IsValidMac(macAddress))
             {
                 throw new ArgumentException(nameof(macAddress));
@@ -67,7 +69,7 @@ namespace MacChanger
                 throw new ArgumentNullException(nameof(macAddress));
             }
 
-            _macAddress = macAddress.ToString().ToUpperInvariant().Replace("-", "");
+            _macAddress = macAddress.ToString().ToUpperInvariant().Replace("-", string.Empty);
         }
 
         /// <summary>
@@ -131,7 +133,7 @@ namespace MacChanger
         /// </summary>
         /// <param name="macAsBytes">MAC address in the format of <see cref="Array"/> of <see cref="byte"/>s</param>
         /// <returns>The MAC address as <see cref="string"/> without delimiters.</returns>
-        public static string MacToString(byte[] macAsBytes) => BitConverter.ToString(macAsBytes).Replace("-", "").ToUpper();
+        public static string MacToString(byte[] macAsBytes) => BitConverter.ToString(macAsBytes).Replace("-", string.Empty).ToUpper();
 
         public static bool operator !=(MacAddress obj1, MacAddress obj2) => !(obj1 == obj2);
 

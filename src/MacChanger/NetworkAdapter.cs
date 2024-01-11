@@ -19,6 +19,11 @@ namespace MacChanger
     public class NetworkAdapter : IDisposable
     {
         /// <summary>
+        ///     Checks if there is a registry MAC address defined to override vendor-provided address
+        /// </summary>
+        public bool Changed => ActiveMacAddress != null;
+
+        /// <summary>
         ///     Gets the identifier of the network adapter.
         /// </summary>
         public string ConfigId => _networkInterface.Id;
@@ -63,12 +68,12 @@ namespace MacChanger
         /// <summary>
         ///     Gets the NetworkAddress registry value of this adapter.
         /// </summary>
-        public MacAddress? RegistryMacAddress { get; }
+        public MacAddress? ActiveMacAddress { get; }
 
         /// <summary>
         ///     Gets the vendor of the network adapter from registry.
         /// </summary>
-        public string? RegistryVendor { get; }
+        public string? ActiveVendor { get; }
 
         /// <summary>
         ///     Gets the speed of the network interface.
@@ -95,8 +100,8 @@ namespace MacChanger
             IsIPv6Enabled = ads.Any(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6);
             OriginalMacAddress = GetOriginalMacAddress();
             OriginalVendor = GetOriginalVendor();
-            RegistryMacAddress = GetRegistryMac();
-            RegistryVendor = GetRegistryVendor();
+            ActiveMacAddress = GetActiveMac();
+            ActiveVendor = GetActiveVendor();
         }
 
         /// <summary>
@@ -108,13 +113,13 @@ namespace MacChanger
         /// </param>
         /// <returns> true if successful, false otherwise </returns>
         /// <exception cref="MacChangerException"> </exception>
-        public bool SetRegistryMac(string value)
+        public bool SetRegistryMac(MacAddress value)
         {
             var shouldReenable = false;
 
             try
             {
-                return UpdateRegistryMac(GetregistryKey(), value, _networkInterface.Description, out shouldReenable);
+                return UpdateRegistryMac(GetRegistryKey(), value.ToString(), _networkInterface.Description, out shouldReenable);
             }
             catch (Exception ex)
             {
@@ -134,7 +139,7 @@ namespace MacChanger
 
         /// <summary>
         ///     Disables the network adapter If the adapter is already disabled, it will return
-        ///     false. If the disable operation fails, it will return false.
+        ///     true. If the disable operation fails, it will return false.
         /// </summary>
         /// <returns>
         ///     True if the disable operation succees. False if the adapter is already disabled or
@@ -144,20 +149,21 @@ namespace MacChanger
         {
             if (!Enabled)
             {
-                return false;
+                return true;
             }
-
             if (_adapter == null)
             {
                 return false;
             }
 
             var result = _adapter.InvokeMethod("Disable", null);
-            return (int)result == 0;
+            if (result == null)
+                return false;
+            return Convert.ToInt32(result) == 0;
         }
 
         /// <summary>
-        ///     Enables the network adapter If the adapter is already enabled, it will return false.
+        ///     Enables the network adapter If the adapter is already enabled, it will return true.
         ///     If the enable operation fails, it will return false.
         /// </summary>
         /// <returns>
@@ -168,7 +174,7 @@ namespace MacChanger
         {
             if (Enabled)
             {
-                return false;
+                return true;
             }
 
             if (_adapter == null)
@@ -177,9 +183,29 @@ namespace MacChanger
             }
 
             var result = _adapter.InvokeMethod("Enable", null);
-            return (int)result == 0;
+            if (result == null)
+                return false;
+            return Convert.ToInt32(result) == 0;
         }
 
+        public bool TryResetMac()
+        {
+            using var regkey = Registry.LocalMachine.OpenSubKey(GetRegistryKey(), true);
+            if (regkey == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                regkey.DeleteValue("NetworkAddress");
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         private int ExtractDeviceNumber()
         {
             if (_adapter == null)
@@ -211,7 +237,13 @@ namespace MacChanger
             return hardwareId == null ? string.Empty : (string)hardwareId;
         }
 
-        private MacAddress GetOriginalMacAddress() => new MacAddress(_networkInterface.GetPhysicalAddress());
+        private MacAddress GetOriginalMacAddress()
+        {
+            using var regkey = Registry.LocalMachine.OpenSubKey(GetRegistryKey(), false);
+            var address = regkey.GetValue("OriginalNetworkAddress");
+            var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
+            return new MacAddress(macString);
+        }
 
         private string? GetOriginalVendor()
         {
@@ -237,11 +269,11 @@ namespace MacChanger
         /// <summary>
         ///     Gets the registry key associated to this adapter.
         /// </summary>
-        private string GetregistryKey() => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{ExtractDeviceNumber():D4}";
+        private string GetRegistryKey() => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{ExtractDeviceNumber():D4}";
 
-        private MacAddress? GetRegistryMac()
+        private MacAddress? GetActiveMac()
         {
-            using var regkey = Registry.LocalMachine.OpenSubKey(GetregistryKey(), false);
+            using var regkey = Registry.LocalMachine.OpenSubKey(GetRegistryKey(), false);
             if (regkey == null)
             {
                 return null;
@@ -256,9 +288,9 @@ namespace MacChanger
             return new MacAddress(macString);
         }
 
-        private string? GetRegistryVendor()
+        private string? GetActiveVendor()
         {
-            if (RegistryMacAddress == null)
+            if (ActiveMacAddress == null)
             {
                 return null;
             }
@@ -268,8 +300,13 @@ namespace MacChanger
                 return null;
             }
 
-            var vendors = _manager.FindByMac(RegistryMacAddress);
-            return string.Join(", ", vendors);
+            var vendors = _manager.FindByMac(ActiveMacAddress);
+            if (vendors.Any())
+            {
+                return string.Join(", ", vendors);
+            }
+
+            return UnknownVendorIdentifier;
         }
         private bool UpdateRegistryMac(string registryKey, string newMac, string description, out bool shouldReenable)
         {
