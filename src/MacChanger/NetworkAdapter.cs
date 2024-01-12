@@ -254,7 +254,7 @@ namespace MacChanger
         {
             if (ActiveMacAddress == null)
             {
-                return null;
+                return OriginalVendor;
             }
 
             if (_manager == null)
