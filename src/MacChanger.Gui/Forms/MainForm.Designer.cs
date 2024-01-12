@@ -35,7 +35,7 @@ namespace MacChanger.Gui.Forms
             this.MainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.InfoTabs = new System.Windows.Forms.TabControl();
             this.InformationPage = new System.Windows.Forms.TabPage();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ConnectionDetailsGroup = new System.Windows.Forms.GroupBox();
             this.ActiveMacVendorTextbox = new System.Windows.Forms.TextBox();
             this.ActiveMacValueTextbox = new System.Windows.Forms.TextBox();
@@ -55,6 +55,7 @@ namespace MacChanger.Gui.Forms
             this.DeviceLabel = new System.Windows.Forms.Label();
             this.ConnectionValueTextbox = new System.Windows.Forms.TextBox();
             this.ConnectionLabel = new System.Windows.Forms.Label();
+            this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
             this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
             this.WikiLink = new System.Windows.Forms.LinkLabel();
             this.RestoreMacButton = new System.Windows.Forms.Button();
@@ -64,10 +65,10 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
-            this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.Toolbar = new System.Windows.Forms.MenuStrip();
             this.FileMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.ExportReportItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,7 +109,7 @@ namespace MacChanger.Gui.Forms
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.ConnectionDetailsGroup.SuspendLayout();
             this.ChangeMacAddressGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
@@ -131,7 +132,7 @@ namespace MacChanger.Gui.Forms
             this.MainTableLayoutPanel.RowCount = 2;
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.MainTableLayoutPanel.Size = new System.Drawing.Size(884, 524);
+            this.MainTableLayoutPanel.Size = new System.Drawing.Size(962, 503);
             this.MainTableLayoutPanel.TabIndex = 0;
             // 
             // InfoTabs
@@ -140,36 +141,44 @@ namespace MacChanger.Gui.Forms
             this.InfoTabs.Controls.Add(this.IPAddressPage);
             this.InfoTabs.Controls.Add(this.PresetsPage);
             this.InfoTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.InfoTabs.Location = new System.Drawing.Point(3, 134);
+            this.InfoTabs.Location = new System.Drawing.Point(3, 128);
             this.InfoTabs.Name = "InfoTabs";
             this.InfoTabs.SelectedIndex = 0;
-            this.InfoTabs.Size = new System.Drawing.Size(878, 387);
+            this.InfoTabs.Size = new System.Drawing.Size(956, 372);
             this.InfoTabs.TabIndex = 0;
             // 
             // InformationPage
             // 
-            this.InformationPage.Controls.Add(this.flowLayoutPanel1);
+            this.InformationPage.Controls.Add(this.tableLayoutPanel1);
             this.InformationPage.Location = new System.Drawing.Point(4, 22);
             this.InformationPage.Name = "InformationPage";
             this.InformationPage.Padding = new System.Windows.Forms.Padding(3);
-            this.InformationPage.Size = new System.Drawing.Size(870, 361);
+            this.InformationPage.Size = new System.Drawing.Size(948, 346);
             this.InformationPage.TabIndex = 0;
             this.InformationPage.Text = "Information";
             this.InformationPage.UseVisualStyleBackColor = true;
             // 
-            // flowLayoutPanel1
+            // tableLayoutPanel1
             // 
-            this.flowLayoutPanel1.Controls.Add(this.ConnectionDetailsGroup);
-            this.flowLayoutPanel1.Controls.Add(this.ChangeMacAddressGroup);
-            this.flowLayoutPanel1.Controls.Add(this.PerformanceCounterGroup);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(864, 355);
-            this.flowLayoutPanel1.TabIndex = 0;
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.ConnectionDetailsGroup, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.PerformanceCounterGroup, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.ChangeMacAddressGroup, 0, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 340);
+            this.tableLayoutPanel1.TabIndex = 3;
             // 
             // ConnectionDetailsGroup
             // 
+            this.ConnectionDetailsGroup.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.ConnectionDetailsGroup, 2);
             this.ConnectionDetailsGroup.Controls.Add(this.ActiveMacVendorTextbox);
             this.ConnectionDetailsGroup.Controls.Add(this.ActiveMacValueTextbox);
             this.ConnectionDetailsGroup.Controls.Add(this.ActiveMacLabel);
@@ -188,9 +197,10 @@ namespace MacChanger.Gui.Forms
             this.ConnectionDetailsGroup.Controls.Add(this.DeviceLabel);
             this.ConnectionDetailsGroup.Controls.Add(this.ConnectionValueTextbox);
             this.ConnectionDetailsGroup.Controls.Add(this.ConnectionLabel);
+            this.ConnectionDetailsGroup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
             this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
-            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(858, 135);
+            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 130);
             this.ConnectionDetailsGroup.TabIndex = 0;
             this.ConnectionDetailsGroup.TabStop = false;
             this.ConnectionDetailsGroup.Text = "Connection Details";
@@ -395,6 +405,15 @@ namespace MacChanger.Gui.Forms
             this.ConnectionLabel.TabIndex = 0;
             this.ConnectionLabel.Text = "Connection";
             // 
+            // PerformanceCounterGroup
+            // 
+            this.PerformanceCounterGroup.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 139);
+            this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
+            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 198);
+            this.PerformanceCounterGroup.TabIndex = 2;
+            this.PerformanceCounterGroup.TabStop = false;
+            // 
             // ChangeMacAddressGroup
             // 
             this.ChangeMacAddressGroup.Controls.Add(this.WikiLink);
@@ -406,9 +425,10 @@ namespace MacChanger.Gui.Forms
             this.ChangeMacAddressGroup.Controls.Add(this.VendorComboBox);
             this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.macTextBox1);
-            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 144);
+            this.ChangeMacAddressGroup.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 139);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
-            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(400, 193);
+            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 198);
             this.ChangeMacAddressGroup.TabIndex = 1;
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
@@ -491,20 +511,12 @@ namespace MacChanger.Gui.Forms
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
             // 
-            // PerformanceCounterGroup
-            // 
-            this.PerformanceCounterGroup.Location = new System.Drawing.Point(409, 144);
-            this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
-            this.PerformanceCounterGroup.Size = new System.Drawing.Size(452, 193);
-            this.PerformanceCounterGroup.TabIndex = 2;
-            this.PerformanceCounterGroup.TabStop = false;
-            // 
             // IPAddressPage
             // 
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
-            this.IPAddressPage.Size = new System.Drawing.Size(870, 361);
+            this.IPAddressPage.Size = new System.Drawing.Size(948, 376);
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
@@ -514,7 +526,7 @@ namespace MacChanger.Gui.Forms
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PresetsPage.Size = new System.Drawing.Size(870, 361);
+            this.PresetsPage.Size = new System.Drawing.Size(948, 376);
             this.PresetsPage.TabIndex = 2;
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
@@ -524,6 +536,7 @@ namespace MacChanger.Gui.Forms
             this.ConnectionsGrid.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
             this.ConnectionsGrid.AllowColumnReorder = true;
             this.ConnectionsGrid.CausesValidation = false;
+            this.ConnectionsGrid.CellEditUseWholeCell = false;
             this.ConnectionsGrid.DataSource = null;
             this.ConnectionsGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectionsGrid.FullRowSelect = true;
@@ -534,12 +547,19 @@ namespace MacChanger.Gui.Forms
             this.ConnectionsGrid.Name = "ConnectionsGrid";
             this.ConnectionsGrid.ShowGroups = false;
             this.ConnectionsGrid.ShowItemToolTips = true;
-            this.ConnectionsGrid.Size = new System.Drawing.Size(878, 125);
+            this.ConnectionsGrid.Size = new System.Drawing.Size(956, 119);
             this.ConnectionsGrid.SpaceBetweenGroups = 1;
             this.ConnectionsGrid.TabIndex = 1;
             this.ConnectionsGrid.UseCompatibleStateImageBehavior = false;
             this.ConnectionsGrid.View = System.Windows.Forms.View.Details;
             this.ConnectionsGrid.SelectedIndexChanged += new System.EventHandler(this.ConnectionsGrid_SelectedIndexChanged);
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(200, 100);
+            this.flowLayoutPanel1.TabIndex = 0;
             // 
             // Toolbar
             // 
@@ -553,7 +573,7 @@ namespace MacChanger.Gui.Forms
             this.Toolbar.Location = new System.Drawing.Point(0, 0);
             this.Toolbar.Name = "Toolbar";
             this.Toolbar.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.Toolbar.Size = new System.Drawing.Size(884, 24);
+            this.Toolbar.Size = new System.Drawing.Size(962, 24);
             this.Toolbar.TabIndex = 0;
             // 
             // FileMenu
@@ -821,9 +841,10 @@ namespace MacChanger.Gui.Forms
             // 
             // MainStatusBar
             // 
-            this.MainStatusBar.Location = new System.Drawing.Point(0, 526);
+            this.MainStatusBar.Location = new System.Drawing.Point(0, 505);
             this.MainStatusBar.Name = "MainStatusBar";
-            this.MainStatusBar.Size = new System.Drawing.Size(884, 22);
+            this.MainStatusBar.Size = new System.Drawing.Size(962, 22);
+            this.MainStatusBar.SizingGrip = false;
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
@@ -840,12 +861,17 @@ namespace MacChanger.Gui.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(884, 548);
+            this.ClientSize = new System.Drawing.Size(962, 527);
             this.Controls.Add(this.MainStatusBar);
             this.Controls.Add(this.MainTableLayoutPanel);
             this.Controls.Add(this.Toolbar);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.KeyPreview = true;
             this.MainMenuStrip = this.Toolbar;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MacChanger GUI";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
@@ -853,7 +879,8 @@ namespace MacChanger.Gui.Forms
             this.MainTableLayoutPanel.ResumeLayout(false);
             this.InfoTabs.ResumeLayout(false);
             this.InformationPage.ResumeLayout(false);
-            this.flowLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ConnectionDetailsGroup.ResumeLayout(false);
             this.ConnectionDetailsGroup.PerformLayout();
             this.ChangeMacAddressGroup.ResumeLayout(false);
@@ -940,6 +967,7 @@ namespace MacChanger.Gui.Forms
         private Button RandomMacButton;
         private Controls.MacTextBox macTextBox1;
         private LinkLabel WikiLink;
+        private TableLayoutPanel tableLayoutPanel1;
     }
 }
 
