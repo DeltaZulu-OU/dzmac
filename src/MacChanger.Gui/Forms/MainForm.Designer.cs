@@ -65,6 +65,7 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
+            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
@@ -105,7 +106,6 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -209,7 +209,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.ActiveMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.ActiveMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(551, 107);
+            this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(630, 107);
             this.ActiveMacVendorTextbox.Name = "ActiveMacVendorTextbox";
             this.ActiveMacVendorTextbox.ReadOnly = true;
             this.ActiveMacVendorTextbox.Size = new System.Drawing.Size(300, 13);
@@ -221,10 +221,10 @@ namespace MacChanger.Gui.Forms
             // 
             this.ActiveMacValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.ActiveMacValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ActiveMacValueTextbox.Location = new System.Drawing.Point(421, 107);
+            this.ActiveMacValueTextbox.Location = new System.Drawing.Point(474, 107);
             this.ActiveMacValueTextbox.Name = "ActiveMacValueTextbox";
             this.ActiveMacValueTextbox.ReadOnly = true;
-            this.ActiveMacValueTextbox.Size = new System.Drawing.Size(124, 13);
+            this.ActiveMacValueTextbox.Size = new System.Drawing.Size(150, 13);
             this.ActiveMacValueTextbox.TabIndex = 16;
             this.ActiveMacValueTextbox.TabStop = false;
             this.ActiveMacValueTextbox.Text = "...";
@@ -233,7 +233,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.ActiveMacLabel.AutoSize = true;
             this.ActiveMacLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ActiveMacLabel.Location = new System.Drawing.Point(418, 84);
+            this.ActiveMacLabel.Location = new System.Drawing.Point(471, 84);
             this.ActiveMacLabel.Name = "ActiveMacLabel";
             this.ActiveMacLabel.Size = new System.Drawing.Size(120, 13);
             this.ActiveMacLabel.TabIndex = 15;
@@ -243,7 +243,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.OriginalMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.OriginalMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(551, 41);
+            this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(630, 41);
             this.OriginalMacVendorTextbox.Name = "OriginalMacVendorTextbox";
             this.OriginalMacVendorTextbox.ReadOnly = true;
             this.OriginalMacVendorTextbox.Size = new System.Drawing.Size(300, 13);
@@ -255,10 +255,10 @@ namespace MacChanger.Gui.Forms
             // 
             this.OriginalMacValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.OriginalMacValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.OriginalMacValueTextbox.Location = new System.Drawing.Point(421, 41);
+            this.OriginalMacValueTextbox.Location = new System.Drawing.Point(474, 41);
             this.OriginalMacValueTextbox.Name = "OriginalMacValueTextbox";
             this.OriginalMacValueTextbox.ReadOnly = true;
-            this.OriginalMacValueTextbox.Size = new System.Drawing.Size(124, 13);
+            this.OriginalMacValueTextbox.Size = new System.Drawing.Size(150, 13);
             this.OriginalMacValueTextbox.TabIndex = 13;
             this.OriginalMacValueTextbox.TabStop = false;
             this.OriginalMacValueTextbox.Text = "...";
@@ -267,7 +267,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.OriginalMacLabel.AutoSize = true;
             this.OriginalMacLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.OriginalMacLabel.Location = new System.Drawing.Point(418, 16);
+            this.OriginalMacLabel.Location = new System.Drawing.Point(471, 16);
             this.OriginalMacLabel.Name = "OriginalMacLabel";
             this.OriginalMacLabel.Size = new System.Drawing.Size(127, 13);
             this.OriginalMacLabel.TabIndex = 12;
@@ -277,10 +277,10 @@ namespace MacChanger.Gui.Forms
             // 
             this.Ipv6ValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.Ipv6ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.Ipv6ValueTextbox.Location = new System.Drawing.Point(260, 110);
+            this.Ipv6ValueTextbox.Location = new System.Drawing.Point(303, 110);
             this.Ipv6ValueTextbox.Name = "Ipv6ValueTextbox";
             this.Ipv6ValueTextbox.ReadOnly = true;
-            this.Ipv6ValueTextbox.Size = new System.Drawing.Size(60, 13);
+            this.Ipv6ValueTextbox.Size = new System.Drawing.Size(100, 13);
             this.Ipv6ValueTextbox.TabIndex = 5;
             this.Ipv6ValueTextbox.TabStop = false;
             this.Ipv6ValueTextbox.Text = "...";
@@ -289,7 +289,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.Ipv6Label.AutoSize = true;
             this.Ipv6Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Ipv6Label.Location = new System.Drawing.Point(181, 110);
+            this.Ipv6Label.Location = new System.Drawing.Point(221, 110);
             this.Ipv6Label.Name = "Ipv6Label";
             this.Ipv6Label.Size = new System.Drawing.Size(63, 13);
             this.Ipv6Label.TabIndex = 10;
@@ -302,7 +302,7 @@ namespace MacChanger.Gui.Forms
             this.Ipv4ValueTextbox.Location = new System.Drawing.Point(103, 110);
             this.Ipv4ValueTextbox.Name = "Ipv4ValueTextbox";
             this.Ipv4ValueTextbox.ReadOnly = true;
-            this.Ipv4ValueTextbox.Size = new System.Drawing.Size(60, 13);
+            this.Ipv4ValueTextbox.Size = new System.Drawing.Size(100, 13);
             this.Ipv4ValueTextbox.TabIndex = 5;
             this.Ipv4ValueTextbox.TabStop = false;
             this.Ipv4ValueTextbox.Text = "...";
@@ -511,12 +511,21 @@ namespace MacChanger.Gui.Forms
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
             // 
+            // macTextBox1
+            // 
+            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox1.Name = "macTextBox1";
+            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox1.TabIndex = 0;
+            // 
             // IPAddressPage
             // 
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
-            this.IPAddressPage.Size = new System.Drawing.Size(948, 376);
+            this.IPAddressPage.Size = new System.Drawing.Size(948, 346);
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
@@ -526,7 +535,7 @@ namespace MacChanger.Gui.Forms
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PresetsPage.Size = new System.Drawing.Size(948, 376);
+            this.PresetsPage.Size = new System.Drawing.Size(948, 346);
             this.PresetsPage.TabIndex = 2;
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
@@ -847,15 +856,6 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.SizingGrip = false;
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
-            // 
-            // macTextBox1
-            // 
-            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox1.Name = "macTextBox1";
-            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox1.TabIndex = 0;
             // 
             // MainForm
             // 

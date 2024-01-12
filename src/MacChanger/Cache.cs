@@ -79,7 +79,7 @@ namespace MacChanger
         /// <param name="oui">IEEE assigned OUI</param>
         /// <returns>List of vendors matching the OUI</returns>
         /// <exception cref="ArgumentException">OUI should be 6 hexadecimal characters. If not, an exception is thrown.</exception>
-        public IEnumerable<Vendor> Get(string oui)
+        public IEnumerable<Vendor> Get(string oui, bool useWildcard = false)
         {
             if (!_pattern.IsMatch(oui))
             {
@@ -90,15 +90,23 @@ namespace MacChanger
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "SELECT vendor FROM vendors WHERE oui LIKE $oui";
+            command.CommandText = "SELECT oui,vendor FROM vendors WHERE oui LIKE $oui";
+
+            if (useWildcard)
+            {
+                var charArray = oui.ToCharArray();
+                charArray[1] = '%';
+                oui = new string(charArray);
+            }
             command.Parameters.AddWithValue("$oui", oui);
             var reader = command.ExecuteReader();
 
             var vs = new List<Vendor>();
             while (reader.Read())
             {
-                var vendorName = reader.GetString(0).Replace("\r", "");
-                vs.Add(new Vendor(oui, vendorName));
+                var vendorOui = reader.GetString(0).Replace("\r", "");
+                var vendorName = reader.GetString(1).Replace("\r", "");
+                vs.Add(new Vendor(vendorOui, vendorName));
             }
             return vs.AsReadOnly();
         }

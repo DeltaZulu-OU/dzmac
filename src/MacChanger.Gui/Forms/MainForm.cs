@@ -4,18 +4,19 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BrightIdeasSoftware;
 using MacChanger.Gui.DTO;
 
 namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
+        internal List<NetworkConnection> NetworkConnections { get; set; }
         private const string zeroMacValue = "00-00-00-00-00-00";
         private readonly VendorManager _vm;
         private bool _locallyAdministered;
         private bool _reenableOnChange;
         private NetworkConnectionDetail _selected;
-        internal List<NetworkConnection> NetworkConnections { get; set; }
         public MainForm()
         {
             _vm = new VendorManager();
@@ -59,9 +60,10 @@ namespace MacChanger.Gui.Forms
             // Ignore default value to prevend accidents
             if (targetMac.Equals(zeroMacValue)) return;
 
-            if (_selected.TryUpdateMac(targetMac))
+            if (_selected.TryUpdateMac(new MacAddress(targetMac)))
             {
                 _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RefreshConnectionsBackground();
             }
             else
             {
@@ -148,7 +150,7 @@ namespace MacChanger.Gui.Forms
             var randomVendor = _vm.GetRandom();
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
-            var vendors = _vm.FindByMac(randomMac).ToList();
+            var vendors = _vm.FindByMac(randomMac, _locallyAdministered).ToList();
             if (vendors.Count == 0)
             {
                 VendorComboBox.SelectedItem = null;

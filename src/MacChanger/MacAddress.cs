@@ -16,7 +16,7 @@ namespace MacChanger
         ///     Use 02 as the first octet to mark the MAC address as locally administered.
         ///     <see href="https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage"/>
         /// </summary>
-        private const string locallyAdministeredOctet = "02";
+        private const char locallyAdministeredOctet = '2';
 
         /// <summary>
         ///     6 bytes == 12 hex characters (without dashes/dots/anything else)
@@ -165,7 +165,12 @@ namespace MacChanger
         ///     Mark the MAC address as locally administered.
         ///     <see href="https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage"/>
         /// </summary>
-        public void SetAsLocallyAdministered() => _macAddress = locallyAdministeredOctet + _macAddress.Substring(2);
+        public void SetAsLocallyAdministered()
+        {
+            var charArray = _macAddress.ToCharArray();
+            charArray[1] = locallyAdministeredOctet;
+            _macAddress = new string(charArray);
+        }
 
         /// <inheritdoc/>
         public override string ToString() => ToString(MacDelimiter.None);

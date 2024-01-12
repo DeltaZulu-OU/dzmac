@@ -52,7 +52,7 @@ namespace MacChanger
         }
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public IEnumerable<Vendor> Get(string oui) => _cache.Get(oui);
+        public IEnumerable<Vendor> Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -71,9 +71,9 @@ namespace MacChanger
         /// <param name="oui">IEEE assigned OUI</param>
         /// <param name="vendors">Matched vendors from IEEE records</param>
         /// <returns>If OUI exists in the IEEE database</returns>
-        public bool TryGetValue(string oui, out IEnumerable<Vendor> vendors)
+        public bool TryGetValue(string oui, out IEnumerable<Vendor> vendors, bool useWildcard = false)
         {
-            vendors = Get(oui);
+            vendors = Get(oui, useWildcard);
             return vendors.Any();
         }
         protected virtual void Dispose(bool disposing)

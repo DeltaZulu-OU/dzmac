@@ -37,9 +37,9 @@ namespace MacChanger.Gui.DTO
 
         public bool TryDisable() => _adapter.TryDisable();
 
-        public bool TryUpdateMac(string mac) => _adapter.SetRegistryMac(new MacAddress(mac));
+        public bool TryUpdateMac(MacAddress mac) => _adapter.SetRegistryMac(mac);
 
-        public bool TryReset() => _adapter.Changed ? true : _adapter.TryResetMac();
+        public bool TryReset() => _adapter.Changed && _adapter.TryResetMac();
 
         private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)" : OriginalMac;
         private string GetDebuggerDisplay() => Name;

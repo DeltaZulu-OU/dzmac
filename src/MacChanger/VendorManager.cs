@@ -22,10 +22,10 @@ namespace MacChanger
         /// </summary>
         /// <param name="macAddress">MAC address of the adapter</param>
         /// <returns>List of possible vendors or an empty list.</returns>
-        public IEnumerable<Vendor> FindByMac(string macAddress)
+        public IEnumerable<Vendor> FindByMac(string macAddress, bool useWildcard = false)
         {
             var oui = macAddress.Substring(0, 6);
-            return Vendors.Get(oui);
+            return Vendors.Get(oui, useWildcard);
         }
 
         /// <summary>
@@ -35,12 +35,7 @@ namespace MacChanger
         /// </summary>
         /// <param name="macAddress">MAC address of the adapter</param>
         /// <returns>List of possible vendors or an empty list.</returns>
-        public IEnumerable<Vendor> FindByMac(MacAddress macAddress)
-        {
-            var str = macAddress.ToString();
-            var oui = str.Substring(0, 6);
-            return Vendors.Get(oui);
-        }
+        public IEnumerable<Vendor> FindByMac(MacAddress macAddress, bool useWildcard = false) => FindByMac(macAddress.ToString(), useWildcard);
 
         public Vendor GetRandom()
         {
