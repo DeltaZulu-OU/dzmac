@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -63,11 +65,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Adapter.cs" />
-    <Compile Include="AdapterFactory.cs" />
+    <Compile Include="MacAddress.cs" />
+    <Compile Include="MacAddress.MacDelimiter.cs" />
+    <Compile Include="MacFormatter.cs" />
+    <Compile Include="NetworkAdapter.cs" />
+    <Compile Include="NetworkAdapterFactory.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="Downloader.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MacChangerException.cs" />
     <Compile Include="Vendor.cs" />
     <Compile Include="VendorManager.cs" />
@@ -78,6 +82,12 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <PropertyGroup>
+    <ContentSQLiteInteropFiles>true</ContentSQLiteInteropFiles>
+    <CopySQLiteInteropFiles>false</CopySQLiteInteropFiles>
+    <CleanSQLiteInteropFiles>false</CleanSQLiteInteropFiles>
+    <CollectSQLiteInteropFiles>false</CollectSQLiteInteropFiles>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

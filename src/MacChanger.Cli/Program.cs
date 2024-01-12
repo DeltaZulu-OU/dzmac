@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MacChanger.App
+namespace MacChanger.Cli
 {
     internal static class Program
     {
@@ -11,14 +11,14 @@ namespace MacChanger.App
             var manager = new VendorManager();
             var list = manager.GetVendorList();
 
-            foreach (var adapter in AdapterFactory.GetAdapters())
+            foreach (var adapter in NetworkAdapterFactory.GetNetworkAdapters())
             {
                 Console.WriteLine(adapter.ToString());
 
-                Console.WriteLine($"MAC: {adapter.Mac}");
+                Console.WriteLine($"MAC: {adapter.OriginalMacAddress}");
 
                 var vendor = "Unknown";
-                if (list.TryGetValue(adapter.Mac.Substring(0, OuiLength), out var vendorNames))
+                if (list.TryGetValue(adapter.OriginalMacAddress.ToString().Substring(0, OuiLength), out var vendorNames))
                 {
                     vendor = string.Join(", ", vendorNames);
                 }
