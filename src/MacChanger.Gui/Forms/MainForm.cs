@@ -10,6 +10,7 @@ namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
+        private const string zeroMacValue = "00-00-00-00-00-00";
         private readonly VendorManager _vm;
         private bool _locallyAdministered;
         private bool _reenableOnChange;
@@ -54,6 +55,9 @@ namespace MacChanger.Gui.Forms
         private void ChangeMacButton_Click(object sender, EventArgs e)
         {
             var targetMac = macTextBox1.Text;
+
+            // Ignore default value to prevend accidents
+            if (targetMac.Equals(zeroMacValue)) return;
 
             if (_selected.TryUpdateMac(targetMac))
             {
