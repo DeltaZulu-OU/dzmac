@@ -174,6 +174,7 @@ namespace MacChanger.Gui.Forms
 
         private void RestoreMacButton_Click(object sender, EventArgs e)
         {
+            if (_selected.Changed == "No") { return; }
             if (_selected.TryReset())
             {
                 _ = MessageBox.Show("Successfully restored MAC address", "MAC Address Restore", MessageBoxButtons.OK, MessageBoxIcon.Information);
