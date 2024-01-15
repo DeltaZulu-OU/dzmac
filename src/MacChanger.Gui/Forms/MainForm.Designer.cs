@@ -65,7 +65,6 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
-            this.macTextBox1 = new MacChanger.Gui.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
@@ -106,6 +105,7 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
+            this.macTextBox = new MacChanger.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -424,7 +424,7 @@ namespace MacChanger.Gui.Forms
             this.ChangeMacAddressGroup.Controls.Add(this.AutoStartCheckBox);
             this.ChangeMacAddressGroup.Controls.Add(this.VendorComboBox);
             this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
-            this.ChangeMacAddressGroup.Controls.Add(this.macTextBox1);
+            this.ChangeMacAddressGroup.Controls.Add(this.macTextBox);
             this.ChangeMacAddressGroup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 139);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
@@ -510,15 +510,6 @@ namespace MacChanger.Gui.Forms
             this.RandomMacButton.Text = "Random MAC Address";
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
-            // 
-            // macTextBox1
-            // 
-            this.macTextBox1.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox1.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox1.Name = "macTextBox1";
-            this.macTextBox1.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox1.TabIndex = 0;
             // 
             // IPAddressPage
             // 
@@ -857,6 +848,15 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
+            // macTextBox1
+            // 
+            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox.Name = "macTextBox1";
+            this.macTextBox.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox.TabIndex = 0;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -965,7 +965,7 @@ namespace MacChanger.Gui.Forms
         private CheckBox AutoStartCheckBox;
         private ComboBox VendorComboBox;
         private Button RandomMacButton;
-        private Controls.MacTextBox macTextBox1;
+        private Controls.MacTextBox macTextBox;
         private LinkLabel WikiLink;
         private TableLayoutPanel tableLayoutPanel1;
     }
