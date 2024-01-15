@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using BrightIdeasSoftware;
 using MacChanger.Gui.DTO;
 
 namespace MacChanger.Gui.Forms
@@ -95,11 +94,32 @@ namespace MacChanger.Gui.Forms
                     OriginalMacVendorTextbox.Text = _selected.OriginalVendor;
                     ActiveMacValueTextbox.Text = _selected.ActiveMac;
                     ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
+
+
+                    Dhcp4EnabledItem.Checked = _selected.IsDhcpEnabled;
                 }
             }
         }
 
         private void DeleteItem_Click(object sender, EventArgs e) => NotImplemented();
+
+        private void Dhcp4EnabledItem_Click(object sender, EventArgs e)
+        {
+            if (_selected.IsDhcpEnabled)
+            {
+                if (_selected.TryDisableDhcp())
+                {
+                    Dhcp4EnabledItem.Checked = false;
+                }
+            }
+            else
+            {
+                if (_selected.TryEnableDhcp())
+                {
+                    Dhcp4EnabledItem.Checked = true;
+                }
+            }
+        }
 
         private void ExitItem_Click(object sender, EventArgs e) => Close();
 

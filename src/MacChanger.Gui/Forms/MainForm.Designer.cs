@@ -1,4 +1,5 @@
 ﻿using BrightIdeasSoftware;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -90,10 +91,6 @@ namespace MacChanger.Gui.Forms
             this.Dhcp4EnabledItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Dhcp4ReleaseIpItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Dhcp4RenewIpItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Dhcp6Item = new System.Windows.Forms.ToolStripMenuItem();
-            this.Dhcp6EnabledItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Dhcp6ReleaseIpItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Dhcp6RenewItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.DeleteItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OptionsMenu = new System.Windows.Forms.ToolStripMenuItem();
@@ -683,7 +680,6 @@ namespace MacChanger.Gui.Forms
             this.RefreshItem,
             this.toolStripSeparator4,
             this.Dhcp4Item,
-            this.Dhcp6Item,
             this.toolStripSeparator7,
             this.DeleteItem});
             this.ActionMenu.Name = "ActionMenu";
@@ -715,12 +711,10 @@ namespace MacChanger.Gui.Forms
             // 
             // Dhcp4EnabledItem
             // 
-            this.Dhcp4EnabledItem.Checked = true;
-            this.Dhcp4EnabledItem.CheckOnClick = true;
-            this.Dhcp4EnabledItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.Dhcp4EnabledItem.Name = "Dhcp4EnabledItem";
             this.Dhcp4EnabledItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp4EnabledItem.Text = "DHCPv4 Enabled";
+            this.Dhcp4EnabledItem.Click += new System.EventHandler(this.Dhcp4EnabledItem_Click);
             // 
             // Dhcp4ReleaseIpItem
             // 
@@ -735,39 +729,6 @@ namespace MacChanger.Gui.Forms
             this.Dhcp4RenewIpItem.Name = "Dhcp4RenewIpItem";
             this.Dhcp4RenewIpItem.Size = new System.Drawing.Size(163, 22);
             this.Dhcp4RenewIpItem.Text = "Renew IP";
-            // 
-            // Dhcp6Item
-            // 
-            this.Dhcp6Item.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Dhcp6EnabledItem,
-            this.Dhcp6ReleaseIpItem,
-            this.Dhcp6RenewItem});
-            this.Dhcp6Item.Name = "Dhcp6Item";
-            this.Dhcp6Item.Size = new System.Drawing.Size(274, 22);
-            this.Dhcp6Item.Text = "DHCPv6";
-            // 
-            // Dhcp6EnabledItem
-            // 
-            this.Dhcp6EnabledItem.Checked = true;
-            this.Dhcp6EnabledItem.CheckOnClick = true;
-            this.Dhcp6EnabledItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.Dhcp6EnabledItem.Name = "Dhcp6EnabledItem";
-            this.Dhcp6EnabledItem.Size = new System.Drawing.Size(163, 22);
-            this.Dhcp6EnabledItem.Text = "DHCPv6 Enabled";
-            // 
-            // Dhcp6ReleaseIpItem
-            // 
-            this.Dhcp6ReleaseIpItem.Enabled = false;
-            this.Dhcp6ReleaseIpItem.Name = "Dhcp6ReleaseIpItem";
-            this.Dhcp6ReleaseIpItem.Size = new System.Drawing.Size(163, 22);
-            this.Dhcp6ReleaseIpItem.Text = "Release IP";
-            // 
-            // Dhcp6RenewItem
-            // 
-            this.Dhcp6RenewItem.Enabled = false;
-            this.Dhcp6RenewItem.Name = "Dhcp6RenewItem";
-            this.Dhcp6RenewItem.Size = new System.Drawing.Size(163, 22);
-            this.Dhcp6RenewItem.Text = "Renew IP";
             // 
             // toolStripSeparator7
             // 
@@ -915,14 +876,10 @@ namespace MacChanger.Gui.Forms
         private ToolStripMenuItem ExitItem;
         private ToolStripMenuItem RefreshItem;
         private ToolStripMenuItem Dhcp4Item;
-        private ToolStripMenuItem Dhcp6Item;
         private ToolStripMenuItem DeleteItem;
         private ToolStripMenuItem Dhcp4EnabledItem;
         private ToolStripMenuItem Dhcp4ReleaseIpItem;
         private ToolStripMenuItem Dhcp4RenewIpItem;
-        private ToolStripMenuItem Dhcp6EnabledItem;
-        private ToolStripMenuItem Dhcp6ReleaseIpItem;
-        private ToolStripMenuItem Dhcp6RenewItem;
         private FlowLayoutPanel flowLayoutPanel1;
         private GroupBox ConnectionDetailsGroup;
         private Label ConnectionLabel;

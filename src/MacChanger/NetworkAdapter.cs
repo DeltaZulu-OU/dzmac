@@ -53,6 +53,11 @@ namespace MacChanger
         /// </summary>
         public string HardwareId { get; }
 
+        /// <summary>
+        ///     Gets if the network adapter has DHCP for IPv4 enabled
+        /// </summary>
+        public bool IsDhcpEnabled { get; }
+
         public bool IsIPv4Enabled { get; }
         public bool IsIPv6Enabled { get; }
         /// <summary>
@@ -80,13 +85,16 @@ namespace MacChanger
         public long Speed => _networkInterface.Speed;
 
         private const string UnknownVendorIdentifier = "Unkown Vendor";
+        private const string ApipaGatewayAddress = "169.254.1.0";
         private readonly VendorManager? _manager;
         private readonly NetworkInterface _networkInterface;
         private ManagementObject? _adapter;
+        private ManagementObject? _adapterConfig;
         private bool disposedValue;
-        public NetworkAdapter(ManagementObject adapterObject, NetworkInterface networkInterface, VendorManager? vendorManager = null)
+        public NetworkAdapter(ManagementObject adapterObject, ManagementObject adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
             _adapter = adapterObject;
+            _adapterConfig = adapterConfig;
             _networkInterface = networkInterface;
             _manager = vendorManager;
 
@@ -100,6 +108,7 @@ namespace MacChanger
             OriginalMacAddress = GetOriginalMacAddress();
             OriginalVendor = GetOriginalVendor();
             ActiveMacAddress = GetActiveMac();
+            IsDhcpEnabled = _networkInterface.GetIPProperties().GetIPv4Properties().IsDhcpEnabled;
         }
 
         /// <summary>
@@ -125,7 +134,7 @@ namespace MacChanger
             }
             finally
             {
-                if (shouldReenable && !TryEnable())
+                if (shouldReenable && !TryEnableAdapter())
                 {
                     throw new MacChangerException("Failed to re-enable network adapter.");
                 }
@@ -143,7 +152,7 @@ namespace MacChanger
         ///     True if the disable operation succees. False if the adapter is already disabled or
         ///     the operation is failed.
         /// </returns>
-        public bool TryDisable()
+        public bool TryDisableAdapter()
         {
             if (!Enabled)
             {
@@ -171,7 +180,7 @@ namespace MacChanger
         ///     True if the enable operation succees. False if the adapter is already enabled or the
         ///     operation is failed.
         /// </returns>
-        public bool TryEnable()
+        public bool TryEnableAdapter()
         {
             if (Enabled)
             {
@@ -192,6 +201,70 @@ namespace MacChanger
             return Convert.ToInt32(result) == 0;
         }
 
+        /// <summary>
+        ///     Disables the DHCP of network adapter by setting existing IP address as static.
+        ///     If the disable operatuin succeeds or DHCP is already disabled, it will return true.
+        ///     If the disable operation fails, it will return false.
+        /// </summary>
+        /// <returns>
+        ///     True if the disable operation succees or if DHCP is already disabled.
+        ///     False if the operation is failed.
+        /// </returns>
+        public bool TryDisableDhcp()
+        {
+            if (!IsDhcpEnabled)
+            {
+                return true;
+            }
+            if (_adapterConfig == null)
+            {
+                return false;
+            }
+            var props = _networkInterface.GetIPProperties();
+            var ipAddress = props.UnicastAddresses.FirstOrDefault(ip => ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).Address.ToString();
+            var gateway = props.GatewayAddresses.FirstOrDefault(gw => gw.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+            var gatewayAddress = ApipaGatewayAddress;
+            if (gateway != null)
+            {
+                gatewayAddress = gateway.Address.ToString();
+            }
+            var parameters = new object[] { ipAddress.ToCharArray(), gatewayAddress.ToCharArray() };
+            var result = _adapterConfig.InvokeMethod("EnableStatic", parameters);
+            if (result == null)
+            {
+                return false;
+            }
+
+            return Convert.ToInt32(result) == 0;
+        }
+
+        /// <summary>
+        ///     Enables the DHCP of network adapter. If DHCP is already disabled, it will return
+        ///     true. If the disable operation fails, it will return false.
+        /// </summary>
+        /// <returns>
+        ///     True if the disable operation succees or if DHCP is already disabled.
+        ///     False if the operation is failed.
+        /// </returns>
+        public bool TryEnableDhcp()
+        {
+            if (!IsDhcpEnabled)
+            {
+                return true;
+            }
+            if (_adapterConfig == null)
+            {
+                return false;
+            }
+
+            var result = _adapterConfig.InvokeMethod("EnableDHCP", null);
+            if (result == null)
+            {
+                return false;
+            }
+
+            return Convert.ToInt32(result) == 0;
+        }
         /// <summary>
         ///     Tries to restore the original MAC address
         /// </summary>
@@ -335,7 +408,7 @@ namespace MacChanger
             }
 
             // Attempt to disable the adapter
-            if (!TryDisable())
+            if (!TryDisableAdapter())
             {
                 throw new MacChangerException("Failed to disable network adapter.");
             }

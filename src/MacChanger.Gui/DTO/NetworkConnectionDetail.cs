@@ -16,6 +16,7 @@ namespace MacChanger.Gui.DTO
         public string Device => _adapter.DeviceDescription;
         public bool Enabled => _adapter.Enabled;
         public string HardwareId => _adapter.HardwareId;
+        public bool IsDhcpEnabled => _adapter.IsDhcpEnabled;
         public string IPv4Status => _adapter.IsIPv4Enabled ? "Enabled" : "Disabled";
         public string IPv6Status => _adapter.IsIPv6Enabled ? "Enabled" : "Disabled";
         public string LinkStatus => _adapter.LinkStatus;
@@ -33,9 +34,12 @@ namespace MacChanger.Gui.DTO
 
         public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);
 
-        public bool TryEnable() => _adapter.TryEnable();
+        public bool TryEnable() => _adapter.TryEnableAdapter();
 
-        public bool TryDisable() => _adapter.TryDisable();
+        public bool TryDisable() => _adapter.TryDisableAdapter();
+        public bool TryEnableDhcp() => _adapter.TryEnableDhcp();
+
+        public bool TryDisableDhcp() => _adapter.TryDisableDhcp();
 
         public bool TryUpdateMac(MacAddress mac) => _adapter.SetRegistryMac(mac);
 
