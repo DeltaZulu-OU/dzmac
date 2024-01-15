@@ -18,6 +18,18 @@ namespace MacChanger
     /// </remarks>
     public class NetworkAdapter : IDisposable
     {
+        private const string UnknownVendorIdentifier = "Unkown Vendor";
+
+        private readonly VendorManager? _manager;
+
+        private readonly NetworkInterface _networkInterface;
+
+        private readonly string _registryKey;
+
+        private ManagementObject? _adapter;
+
+        private bool disposedValue;
+
         /// <summary>
         ///     Gets the NetworkAddress registry value of this adapter.
         /// </summary>
@@ -78,21 +90,18 @@ namespace MacChanger
         ///     Gets the speed of the network interface.
         /// </summary>
         public long Speed => _networkInterface.Speed;
-
-        private const string UnknownVendorIdentifier = "Unkown Vendor";
-        private readonly VendorManager? _manager;
-        private readonly NetworkInterface _networkInterface;
-        private ManagementObject? _adapter;
-        private bool disposedValue;
         public NetworkAdapter(ManagementObject adapterObject, NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
             _adapter = adapterObject;
             _networkInterface = networkInterface;
             _manager = vendorManager;
 
+            _registryKey = GetRegistryKey();
+
             Enabled = GetEnabled();
             Name = _networkInterface.Name;
             HardwareId = GetHardwareId();
+
             var props = _networkInterface.GetIPProperties();
             var ads = props.UnicastAddresses;
             IsIPv4Enabled = ads.Any(a => a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
@@ -100,36 +109,6 @@ namespace MacChanger
             OriginalMacAddress = GetOriginalMacAddress();
             OriginalVendor = GetOriginalVendor();
             ActiveMacAddress = GetActiveMac();
-        }
-
-        /// <summary>
-        ///     Sets the NetworkAddress registry value of this adapter.
-        /// </summary>
-        /// <param name="value">
-        ///     The value. Should be EITHER a string of 12 hexadecimal digits, uppercase, without
-        ///     dashes, dots or anything else, OR an empty string (clears the registry value).
-        /// </param>
-        /// <returns> true if successful, false otherwise </returns>
-        /// <exception cref="MacChangerException"> </exception>
-        public bool SetRegistryMac(MacAddress value)
-        {
-            var shouldReenable = false;
-
-            try
-            {
-                return UpdateRegistryMac(GetRegistryKey(), value.ToString(), _networkInterface.Description, out shouldReenable);
-            }
-            catch (Exception ex)
-            {
-                throw new MacChangerException(ex.Message, ex);
-            }
-            finally
-            {
-                if (shouldReenable && !TryEnable())
-                {
-                    throw new MacChangerException("Failed to re-enable network adapter.");
-                }
-            }
         }
 
         ///  <inheritdoc/>
@@ -193,25 +172,33 @@ namespace MacChanger
         }
 
         /// <summary>
-        ///     Tries to restore the original MAC address
+        ///     Sets and resets the NetworkAddress registry value of this adapter.
         /// </summary>
-        /// <returns>True if successfully restored the MAC address</returns>
-        public bool TryResetMac()
+        /// <param name="mac">
+        ///     The nullable value either an instance of <see cref="MacAddress"/>.
+        ///     or null (to restore).
+        /// </param>
+        /// <returns> true if successful, false otherwise </returns>
+        /// <exception cref="MacChangerException"> </exception>
+        public bool TrySetRegistryMac(MacAddress? mac)
         {
-            using var regkey = Registry.LocalMachine.OpenSubKey(GetRegistryKey(), true);
-            if (regkey == null)
-            {
-                return false;
-            }
+            var shouldReenable = false;
 
             try
             {
-                regkey.DeleteValue("NetworkAddress");
-                return true;
+                var targetMac = mac != null ? mac.ToString() : string.Empty;
+                return UpdateRegistryMac(_registryKey, targetMac, _networkInterface.Description, out shouldReenable);
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                throw new MacChangerException(ex.Message, ex);
+            }
+            finally
+            {
+                if (shouldReenable && !TryEnable())
+                {
+                    throw new MacChangerException("Failed to re-enable network adapter.");
+                }
             }
         }
         private int ExtractDeviceNumber()
@@ -235,7 +222,7 @@ namespace MacChanger
 
         private MacAddress? GetActiveMac()
         {
-            using var regkey = Registry.LocalMachine.OpenSubKey(GetRegistryKey(), false);
+            using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
             if (regkey == null)
             {
                 return null;
@@ -285,10 +272,19 @@ namespace MacChanger
 
         private MacAddress GetOriginalMacAddress()
         {
-            using var regkey = Registry.LocalMachine.OpenSubKey(GetRegistryKey(), false);
+            // The Registry key value "OriginalNetworkAddress" is created by TMAC,
+            // Therefore, we need to check if it exists first, then query the value from 
+            // internal objects.
+            // Ref: https://blog.technitium.com/2014/06/fixing-wrong-original-mac-address-in.html
+            using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
             var address = regkey.GetValue("OriginalNetworkAddress");
-            var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
-            return new MacAddress(macString);
+            if (address != null)
+            {
+                var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
+                return new MacAddress(macString);
+            }
+
+            return new MacAddress(_networkInterface.GetPhysicalAddress());
         }
 
         private string? GetOriginalVendor()
@@ -347,11 +343,16 @@ namespace MacChanger
             // If we're here everything is OK; update or clear the registry value
             if (newMac.Length > 0)
             {
+                // rollback value
+                regkey.SetValue("OriginalNetworkAddress", OriginalMacAddress.ToString(), RegistryValueKind.String);
+
+                // active value
                 regkey.SetValue("NetworkAddress", newMac, RegistryValueKind.String);
             }
             else
             {
                 regkey.DeleteValue("NetworkAddress");
+                regkey.DeleteValue("OriginalNetworkAddress");
             }
 
             return true;
