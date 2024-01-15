@@ -220,7 +220,7 @@ namespace MacChanger
                 var rollbackGatewayResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetGateways", oldGateway, null).GetPropertyValue("ReturnValue")) == 0;
                 var rollbackDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", oldDnsConfig1, null).GetPropertyValue("ReturnValue")) == 0;
 
-                var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult & rollbackDnsResult;
+                var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult && rollbackDnsResult;
                 if (rollbackSuccess)
                 {
                     return false;
@@ -315,7 +315,7 @@ namespace MacChanger
             }
             finally
             {
-                if (shouldReenable && !TryEnable())
+                if (shouldReenable && !TryEnableAdapter())
                 {
                     throw new MacChangerException("Failed to re-enable network adapter.");
                 }
@@ -428,7 +428,7 @@ namespace MacChanger
         private MacAddress GetOriginalMacAddress()
         {
             // The Registry key value "OriginalNetworkAddress" is created by TMAC,
-            // Therefore, we need to check if it exists first, then query the value from 
+            // Therefore, we need to check if it exists first, then query the value from
             // internal objects.
             // Ref: https://blog.technitium.com/2014/06/fixing-wrong-original-mac-address-in.html
             using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
