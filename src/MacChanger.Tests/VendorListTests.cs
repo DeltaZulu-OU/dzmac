@@ -43,7 +43,7 @@ namespace MacChanger.Tests
         public void VendorListShouldAllowAccessByOui()
         {
             var index = random.Next(_list.Count);
-            var temp = _list[index];
+            var temp = _list[index] ?? default;
             var v = _list[temp.Oui];
             Assert.IsNotNull(v);
         }
@@ -51,7 +51,7 @@ namespace MacChanger.Tests
         [TestMethod]
         public void VendorListShouldReturnFalseWhenNonexistentOuiUsed()
         {
-            var result = _list.TryGetValue("AAAAAA", out var v);
+            var result = _list.TryGetValue("AAAAAA", out _);
             Assert.IsFalse(result);
         }
 

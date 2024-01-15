@@ -150,15 +150,8 @@ namespace MacChanger.Gui.Forms
             var randomVendor = _vm.GetRandom();
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
-            var vendors = _vm.FindByMac(randomMac, _locallyAdministered).ToList();
-            if (vendors.Count == 0)
-            {
-                VendorComboBox.SelectedItem = null;
-            }
-            else
-            {
-                VendorComboBox.SelectedItem = vendors[0];
-            }
+            var vendor = _vm.FindByMac(randomMac, _locallyAdministered);
+            VendorComboBox.SelectedItem = vendor;
 
             if (_locallyAdministered)
             {

@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using System;
-using System.Collections.Generic;
 
 namespace MacChanger
 {
@@ -22,7 +21,7 @@ namespace MacChanger
         /// </summary>
         /// <param name="macAddress">MAC address of the adapter</param>
         /// <returns>List of possible vendors or an empty list.</returns>
-        public IEnumerable<Vendor> FindByMac(string macAddress, bool useWildcard = false)
+        public Vendor? FindByMac(string macAddress, bool useWildcard = false)
         {
             var oui = macAddress.Substring(0, 6);
             return Vendors.Get(oui, useWildcard);
@@ -35,17 +34,23 @@ namespace MacChanger
         /// </summary>
         /// <param name="macAddress">MAC address of the adapter</param>
         /// <returns>List of possible vendors or an empty list.</returns>
-        public IEnumerable<Vendor> FindByMac(MacAddress macAddress, bool useWildcard = false) => FindByMac(macAddress.ToString(), useWildcard);
+        public Vendor? FindByMac(MacAddress macAddress, bool useWildcard = false) => FindByMac(macAddress.ToString(), useWildcard);
 
         public Vendor GetRandom()
         {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var max = _vendors.Count;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            if (_vendors == null)
+            {
+                throw new MacChangerException($"{nameof(_vendors)} cannot be null.");
+            }
 
-            var offset = _random.Next(max);
-            var selected = _vendors[offset];
-            return selected;
+            var max = _vendors.Count;
+            Vendor? selected = null;
+            while (selected == null)
+            {
+                var offset = _random.Next(max);
+                selected = _vendors[offset];
+            }
+            return selected.Value;
         }
 
         public VendorList GetVendorList() => Vendors;

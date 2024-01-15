@@ -249,13 +249,13 @@ namespace MacChanger
                 return null;
             }
 
-            var vendors = _manager.FindByMac(ActiveMacAddress, true);
-            if (vendors.Any())
+            var vendor = _manager.FindByMac(ActiveMacAddress, true);
+            if (vendor == null)
             {
-                return string.Join(", ", vendors);
+                return UnknownVendorIdentifier;
             }
 
-            return UnknownVendorIdentifier;
+            return vendor.ToString();
         }
 
         private bool GetEnabled()
@@ -299,13 +299,14 @@ namespace MacChanger
                 return null;
             }
 
-            var vendors = _manager.FindByMac(OriginalMacAddress);
-            if (vendors.Any())
+            var vendor = _manager.FindByMac(OriginalMacAddress);
+
+            if (vendor == null)
             {
-                return string.Join(", ", vendors);
+                return UnknownVendorIdentifier;
             }
 
-            return UnknownVendorIdentifier;
+            return vendor.ToString();
         }
 
         /// <summary>

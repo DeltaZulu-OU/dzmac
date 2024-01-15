@@ -16,7 +16,7 @@ namespace MacChanger
 
         public int Count { get; private set; }
 
-        public Vendor this[int index] => GetByIndex(index);
+        public Vendor? this[int index] => GetByIndex(index);
 
         public Cache(string databaseFile)
         {
@@ -26,7 +26,7 @@ namespace MacChanger
             UpdateCount();
         }
 
-        public IEnumerable<Vendor> this[string oui] => Get(oui);
+        public Vendor? this[string oui] => Get(oui);
 
         /// <summary>
         ///     Add an instance of Vendors to the database
@@ -79,7 +79,7 @@ namespace MacChanger
         /// <param name="oui">IEEE assigned OUI</param>
         /// <returns>List of vendors matching the OUI</returns>
         /// <exception cref="ArgumentException">OUI should be 6 hexadecimal characters. If not, an exception is thrown.</exception>
-        public IEnumerable<Vendor> Get(string oui, bool useWildcard = false)
+        public Vendor? Get(string oui, bool useWildcard = false)
         {
             if (!_pattern.IsMatch(oui))
             {
@@ -90,7 +90,7 @@ namespace MacChanger
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "SELECT oui,vendor FROM vendors WHERE oui LIKE $oui";
+            command.CommandText = "SELECT oui,vendor FROM vendors WHERE oui LIKE $oui LIMIT 1";
 
             if (useWildcard)
             {
@@ -101,14 +101,14 @@ namespace MacChanger
             command.Parameters.AddWithValue("$oui", oui);
             var reader = command.ExecuteReader();
 
-            var vs = new List<Vendor>();
-            while (reader.Read())
+            if (!reader.Read())
             {
-                var vendorOui = reader.GetString(0).Replace("\r", "");
-                var vendorName = reader.GetString(1).Replace("\r", "");
-                vs.Add(new Vendor(vendorOui, vendorName));
+                return null;
             }
-            return vs.AsReadOnly();
+
+            var vendorOui = reader.GetString(0).Replace("\r", "");
+            var vendorName = reader.GetString(1).Replace("\r", "");
+            return new Vendor(vendorOui, vendorName);
         }
 
         /// <summary>
@@ -188,7 +188,7 @@ namespace MacChanger
         /// </summary>
         /// <param name="index">Index to the item</param>
         /// <exception cref="IndexOutOfRangeException"></exception>
-        private Vendor GetByIndex(int index)
+        private Vendor? GetByIndex(int index)
         {
             Debug.WriteLine($"Querying database (index: {index})...");
 
@@ -203,7 +203,11 @@ namespace MacChanger
             command.CommandText = "SELECT * FROM vendors LIMIT 1 OFFSET $offset";
             command.Parameters.AddWithValue("$offset", index);
             var reader = command.ExecuteReader();
-            reader.Read();
+            if (!reader.Read())
+            {
+                return null;
+            }
+
             var oui = reader.GetString(0).Replace("\r", "");
             var vendorName = reader.GetString(1).Replace("\r", "");
             return new Vendor(oui, vendorName);
@@ -220,7 +224,7 @@ namespace MacChanger
             reader.Read();
             Count = reader.GetInt32(0);
         }
-
+        #region Dispose
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
@@ -242,5 +246,6 @@ namespace MacChanger
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion Dispose
     }
 }
