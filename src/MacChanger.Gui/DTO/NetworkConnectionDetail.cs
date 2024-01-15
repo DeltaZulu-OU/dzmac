@@ -41,9 +41,9 @@ namespace MacChanger.Gui.DTO
 
         public bool TryDisableDhcp() => _adapter.TryDhcpDisable();
 
-        public bool TryUpdateMac(MacAddress mac) => _adapter.SetRegistryMac(mac);
+        public bool TryUpdateMac(MacAddress mac) => _adapter.TrySetRegistryMac(mac);
 
-        public bool TryReset() => _adapter.Changed && _adapter.TryResetMac();
+        public bool TryReset() => _adapter.Changed && _adapter.TrySetRegistryMac(null);
 
         private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)" : OriginalMac;
         private string GetDebuggerDisplay() => Name;

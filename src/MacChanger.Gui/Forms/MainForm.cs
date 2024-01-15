@@ -10,39 +10,17 @@ namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
-        internal List<NetworkConnection> NetworkConnections { get; set; }
         private const string zeroMacValue = "00-00-00-00-00-00";
         private readonly VendorManager _vm;
         private bool _locallyAdministered;
         private bool _reenableOnChange;
         private NetworkConnectionDetail _selected;
+        internal List<NetworkConnection> NetworkConnections { get; set; }
         public MainForm()
         {
             _vm = new VendorManager();
             InitializeComponent();
         }
-
-        /// <summary>
-        ///     A placeholder method for events not implemented.
-        /// </summary>
-        private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        private void RefreshConnections()
-        {
-            ConnectionsGrid.BeginUpdate();
-            NetworkConnections = new List<NetworkConnection>();
-            foreach (var adapter in NetworkAdapterFactory.GetNetworkAdapters(_vm))
-            {
-                NetworkConnections.Add(new NetworkConnection(adapter));
-            }
-            ConnectionsGrid.DataSource = NetworkConnections;
-            ConnectionsGrid.EndUpdate();
-            ConnectionsGrid.AutoResizeColumns();
-        }
-
-        private Task RefreshConnectionsBackground() => Task.Factory.StartNew(() => Invoke(new Action(RefreshConnections)));
-
-        private void UpdateVendorList() => _vm.Refresh();
 
         #region EventHandlers
 
@@ -54,7 +32,7 @@ namespace MacChanger.Gui.Forms
 
         private void ChangeMacButton_Click(object sender, EventArgs e)
         {
-            var targetMac = macTextBox1.Text;
+            var targetMac = macTextBox.Text;
 
             // Ignore default value to prevend accidents
             if (targetMac.Equals(zeroMacValue)) return;
@@ -155,7 +133,6 @@ namespace MacChanger.Gui.Forms
             VendorComboBox.DataSource = _vm.GetVendorList().ToList();
             VendorComboBox.SelectedItem = null;
         }
-
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
 
         private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
@@ -169,21 +146,14 @@ namespace MacChanger.Gui.Forms
             var randomVendor = _vm.GetRandom();
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
-            var vendors = _vm.FindByMac(randomMac, _locallyAdministered).ToList();
-            if (vendors.Count == 0)
-            {
-                VendorComboBox.SelectedItem = null;
-            }
-            else
-            {
-                VendorComboBox.SelectedItem = vendors[0];
-            }
+            var vendor = _vm.FindByMac(randomMac, _locallyAdministered);
+            VendorComboBox.SelectedItem = vendor;
 
             if (_locallyAdministered)
             {
                 randomMac.SetAsLocallyAdministered();
             }
-            macTextBox1.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);
+            macTextBox.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);
         }
 
         private async void RefreshItem_Click(object sender, EventArgs e)
@@ -240,5 +210,29 @@ namespace MacChanger.Gui.Forms
 
         private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => _locallyAdministered = ZeroTwoCheckBox.Checked;
         #endregion EventHandlers
+
+        #region Private Methods
+        /// <summary>
+        ///     A placeholder method for events not implemented.
+        /// </summary>
+        private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        private void RefreshConnections()
+        {
+            ConnectionsGrid.BeginUpdate();
+            NetworkConnections = new List<NetworkConnection>();
+            foreach (var adapter in NetworkAdapterFactory.GetNetworkAdapters(_vm))
+            {
+                NetworkConnections.Add(new NetworkConnection(adapter));
+            }
+            ConnectionsGrid.DataSource = NetworkConnections;
+            ConnectionsGrid.EndUpdate();
+            ConnectionsGrid.AutoResizeColumns();
+        }
+
+        private Task RefreshConnectionsBackground() => Task.Factory.StartNew(() => Invoke(new Action(RefreshConnections)));
+
+        private void UpdateVendorList() => _vm.Refresh();
+        #endregion Private Methods
     }
 }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MacChanger
 {
@@ -18,17 +17,13 @@ namespace MacChanger
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         public int Count => _cache.Count;
+
+        Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index] ?? default;
+
+        public Vendor? this[int index] => _cache[index];
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index];
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public Vendor this[int index] => _cache[index];
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-        public IEnumerable<Vendor> this[string oui] => Get(oui);
+        public Vendor? this[string oui] => Get(oui);
 
         internal VendorList()
         {
@@ -52,15 +47,11 @@ namespace MacChanger
         }
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public IEnumerable<Vendor> Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
+        public Vendor? Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         public IEnumerator<Vendor> GetEnumerator() => _cache.GetAll().GetEnumerator();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        IEnumerator IEnumerable.GetEnumerator() => _cache.GetAll().GetEnumerator();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         /// <summary>
@@ -71,10 +62,10 @@ namespace MacChanger
         /// <param name="oui">IEEE assigned OUI</param>
         /// <param name="vendors">Matched vendors from IEEE records</param>
         /// <returns>If OUI exists in the IEEE database</returns>
-        public bool TryGetValue(string oui, out IEnumerable<Vendor> vendors, bool useWildcard = false)
+        public bool TryGetValue(string oui, out Vendor? vendors, bool useWildcard = false)
         {
             vendors = Get(oui, useWildcard);
-            return vendors.Any();
+            return vendors != null;
         }
         protected virtual void Dispose(bool disposing)
         {
@@ -96,5 +87,7 @@ namespace MacChanger
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
     }
 }
