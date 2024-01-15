@@ -65,6 +65,11 @@ namespace MacChanger
         /// </summary>
         public string HardwareId { get; }
 
+        /// <summary>
+        ///     Gets if the network adapter has DHCP for IPv4 enabled
+        /// </summary>
+        public bool IsDhcpEnabled => _networkInterface.GetIPProperties().GetIPv4Properties().IsDhcpEnabled;
+
         public bool IsIPv4Enabled { get; }
         public bool IsIPv6Enabled { get; }
         /// <summary>
@@ -90,9 +95,11 @@ namespace MacChanger
         ///     Gets the speed of the network interface.
         /// </summary>
         public long Speed => _networkInterface.Speed;
-        public NetworkAdapter(ManagementObject adapterObject, NetworkInterface networkInterface, VendorManager? vendorManager = null)
+        private readonly ManagementObject? _adapterConfig;
+        public NetworkAdapter(ManagementObject adapterObject, ManagementObject adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
             _adapter = adapterObject;
+            _adapterConfig = adapterConfig;
             _networkInterface = networkInterface;
             _manager = vendorManager;
 
@@ -115,6 +122,120 @@ namespace MacChanger
         public override string ToString() => $"{_networkInterface.Description} ({_networkInterface.Name})";
 
         /// <summary>
+        ///     Disables the DHCP of network adapter by setting existing IP address as static.
+        ///     If the disable operatuin succeeds or DHCP is already disabled, it will return true.
+        ///     If the disable operation fails, it will return false.
+        /// </summary>
+        /// <returns>
+        ///     True if the disable operation succees or if DHCP is already disabled.
+        ///     False if the operation is failed.
+        /// </returns>
+        public bool TryDhcpDisable()
+        {
+            if (_adapterConfig == null)
+            {
+                return false;
+            }
+
+            var gateway = ExtractGateway();
+            var ipAddress = ExtractIPConfig();
+            var dnsConfig = ExtractDnsConfig();
+
+            var enableStaticResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableStatic", ipAddress, null).GetPropertyValue("ReturnValue")) == 0;
+            var setGatewayResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetGateways", gateway, null).GetPropertyValue("ReturnValue")) == 0;
+            var setDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", dnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+
+            var success = enableStaticResult && setGatewayResult && setDnsResult;
+
+            // Rollback
+            if (!success)
+            {
+                // Set new values
+                var newDnsConfig = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
+                newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
+
+                // Run command
+                var enableDhcpResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
+                var emptyDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+
+                var rollbackSuccess = enableDhcpResult && emptyDnsResult;
+                if (rollbackSuccess)
+                {
+                    return false;
+                }
+                else
+                {
+                    // something we cannot handle here.
+                    throw new MacChangerException("Failed to disable DHCP");
+                }
+            }
+
+            //// Attempt to disable the adapter
+            //if (!TryDisableAdapter())
+            //{
+            //    throw new MacChangerException("Failed to disable network adapter.");
+            //}
+
+            //if (!TryEnableAdapter())
+            //{
+            //    throw new MacChangerException("Failed to re-enable network adapter.");
+            //}
+            return true;
+        }
+
+        /// <summary>
+        ///     Enables the DHCP of network adapter. If DHCP is already disabled, it will return
+        ///     true. If the disable operation fails, it will return false.
+        /// </summary>
+        /// <returns>
+        ///     True if the disable operation succees or if DHCP is already disabled.
+        ///     False if the operation is failed.
+        /// </returns>
+        public bool TryDhcpEnable()
+        {
+            if (_adapterConfig == null)
+            {
+                return false;
+            }
+
+            // Get old values for rollback
+            var oldGateway = ExtractGateway();
+            var oldIpAddress = ExtractIPConfig();
+            var oldDnsConfig1 = ExtractDnsConfig();
+
+            // Set new values
+            var newDnsConfig = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
+            newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
+
+            // Run command
+            var enableDhcpResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
+            var emptyDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+
+            var success = enableDhcpResult && emptyDnsResult;
+
+            // Rollback
+            if (!success)
+            {
+                var rollbackStaticResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableStatic", oldIpAddress, null).GetPropertyValue("ReturnValue")) == 0;
+                var rollbackGatewayResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetGateways", oldGateway, null).GetPropertyValue("ReturnValue")) == 0;
+                var rollbackDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", oldDnsConfig1, null).GetPropertyValue("ReturnValue")) == 0;
+
+                var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult & rollbackDnsResult;
+                if (rollbackSuccess)
+                {
+                    return false;
+                }
+                else
+                {
+                    // something we cannot handle here.
+                    throw new MacChangerException("Failed to enable DHCP");
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         ///     Disables the network adapter If the adapter is already disabled, it will return
         ///     true. If the disable operation fails, it will return false.
         /// </summary>
@@ -122,12 +243,12 @@ namespace MacChanger
         ///     True if the disable operation succees. False if the adapter is already disabled or
         ///     the operation is failed.
         /// </returns>
-        public bool TryDisable()
+        public bool TryDisableAdapter()
         {
-            if (!Enabled)
-            {
-                return true;
-            }
+            //if (!GetEnabled())
+            //{
+            //    return true;
+            //}
             if (_adapter == null)
             {
                 return false;
@@ -150,12 +271,12 @@ namespace MacChanger
         ///     True if the enable operation succees. False if the adapter is already enabled or the
         ///     operation is failed.
         /// </returns>
-        public bool TryEnable()
+        public bool TryEnableAdapter()
         {
-            if (Enabled)
-            {
-                return true;
-            }
+            //if (GetEnabled())
+            //{
+            //    return true;
+            //}
 
             if (_adapter == null)
             {
@@ -170,7 +291,6 @@ namespace MacChanger
 
             return Convert.ToInt32(result) == 0;
         }
-
         /// <summary>
         ///     Sets and resets the NetworkAddress registry value of this adapter.
         /// </summary>
@@ -201,6 +321,7 @@ namespace MacChanger
                 }
             }
         }
+
         private int ExtractDeviceNumber()
         {
             if (_adapter == null)
@@ -220,6 +341,40 @@ namespace MacChanger
             }
         }
 
+        private ManagementBaseObject ExtractDnsConfig()
+        {
+            // Get current values
+            var dnsServerSearchOrder = (string[])_adapterConfig.GetPropertyValue("DNSServerSearchOrder");
+
+            // Create parameter object
+            var dnsParams = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
+            dnsParams["DNSServerSearchOrder"] = dnsServerSearchOrder;
+            return dnsParams;
+        }
+
+        private ManagementBaseObject ExtractGateway()
+        {
+            // Get current values
+            var gatewayAddress = (string[])_adapterConfig.GetPropertyValue("DefaultIPGateway");
+
+            // Create parameter object
+            var gatewayParams = _adapterConfig.GetMethodParameters("SetGateways");
+            gatewayParams["DefaultIPGateway"] = gatewayAddress;
+            return gatewayParams;
+        }
+
+        private ManagementBaseObject ExtractIPConfig()
+        {
+            // Get current values
+            var ipAddress = ((string[])_adapterConfig.GetPropertyValue("IPAddress"))[0];
+            var subnetMask = ((string[])_adapterConfig.GetPropertyValue("IPSubnet"))[0];
+
+            // Create parameter object
+            var ipParams = _adapterConfig.GetMethodParameters("EnableStatic");
+            ipParams["IPAddress"] = new string[] { ipAddress };
+            ipParams["SubnetMask"] = new string[] { subnetMask };
+            return ipParams;
+        }
         private MacAddress? GetActiveMac()
         {
             using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
@@ -332,7 +487,7 @@ namespace MacChanger
             }
 
             // Attempt to disable the adapter
-            if (!TryDisable())
+            if (!TryDisableAdapter())
             {
                 throw new MacChangerException("Failed to disable network adapter.");
             }
