@@ -37,9 +37,9 @@ namespace MacChanger.Gui.DTO
         public bool TryEnable() => _adapter.TryEnableAdapter();
 
         public bool TryDisable() => _adapter.TryDisableAdapter();
-        public bool TryEnableDhcp() => _adapter.TryEnableDhcp();
+        public bool TryEnableDhcp() => _adapter.TryDhcpEnable();
 
-        public bool TryDisableDhcp() => _adapter.TryDisableDhcp();
+        public bool TryDisableDhcp() => _adapter.TryDhcpDisable();
 
         public bool TryUpdateMac(MacAddress mac) => _adapter.SetRegistryMac(mac);
 

@@ -94,8 +94,6 @@ namespace MacChanger.Gui.Forms
                     OriginalMacVendorTextbox.Text = _selected.OriginalVendor;
                     ActiveMacValueTextbox.Text = _selected.ActiveMac;
                     ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
-
-
                     Dhcp4EnabledItem.Checked = _selected.IsDhcpEnabled;
                 }
             }
@@ -105,7 +103,7 @@ namespace MacChanger.Gui.Forms
 
         private void Dhcp4EnabledItem_Click(object sender, EventArgs e)
         {
-            if (_selected.IsDhcpEnabled)
+            if (Dhcp4EnabledItem.Checked)
             {
                 if (_selected.TryDisableDhcp())
                 {
@@ -119,6 +117,7 @@ namespace MacChanger.Gui.Forms
                     Dhcp4EnabledItem.Checked = true;
                 }
             }
+            RefreshConnectionsBackground();
         }
 
         private void ExitItem_Click(object sender, EventArgs e) => Close();
