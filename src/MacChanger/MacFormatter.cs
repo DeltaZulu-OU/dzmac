@@ -13,8 +13,23 @@ namespace MacChanger
             ? this
             : null;
 
-        public string? Format(string format, object arg, IFormatProvider formatProvider) =>
-            // Check whether this is an appropriate callback
-            Equals(formatProvider) ? _regex.Replace(arg.ToString(), macReplace) : null;
+        public string? Format(string format, object arg, IFormatProvider formatProvider)
+        {
+            if (Equals(formatProvider))
+            {
+                try
+                {
+                    return _regex.Replace(arg.ToString(), macReplace);
+                }
+                catch (RegexMatchTimeoutException)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

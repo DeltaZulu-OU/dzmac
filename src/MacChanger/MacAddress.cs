@@ -38,7 +38,6 @@ namespace MacChanger
         /// <param name="macAddress">Mac address with no punctuation marks.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="RegexMatchTimeoutException"></exception>
         public MacAddress(string macAddress)
         {
             if (macAddress == null)
@@ -76,7 +75,6 @@ namespace MacChanger
         ///     Get a random (locally administered) MAC address.
         /// </summary>
         /// <returns>A MAC address having 01 as the least significant bits of the first byte, but otherwise random.</returns>
-        /// <exception cref="RegexMatchTimeoutException"></exception>
         public static MacAddress GetNewMac()
         {
             var r = new Random();
@@ -97,9 +95,6 @@ namespace MacChanger
         /// </summary>
         /// <param name="oui">OUI of the vendor</param>
         /// <returns>A MAC address with the specified OUI.</returns>
-        /// <exception cref="RegexMatchTimeoutException"></exception>
-        /// <exception cref="FormatException"></exception>
-        /// <exception cref="OverflowException"></exception>
         public static MacAddress GetNewMac(string oui)
         {
             var ouiOctet = ConvertHexStringToByteArray(oui);
@@ -117,16 +112,25 @@ namespace MacChanger
         /// </summary>
         /// <param name="mac">MAC address as string.</param>
         /// <returns>true if the string is a valid MAC address, false otherwise.</returns>
-        /// <exception cref="RegexMatchTimeoutException"></exception>
-        public static bool IsValidMac(string mac) => _macAddressPattern.IsMatch(mac);
+        public static bool IsValidMac(string mac)
+        {
+            try
+            {
+                return _macAddressPattern.IsMatch(mac);
+            }
+            catch (RegexMatchTimeoutException ex)
+            {
+                Debug.WriteLine($"Regex pattern timed out. Likely the text is too long for a MAC address. {ex}");
+                return false;
+            }
+        }
 
         /// <summary>
         ///     Verifies that a given MAC address is valid.
         /// </summary>
         /// <param name="macAsBytes">The address.</param>
         /// <returns>true if valid, false otherwise.</returns>
-        /// <exception cref="RegexMatchTimeoutException"></exception>
-        public static bool IsValidMac(byte[] macAsBytes) => IsValidMac(MacAddress.MacToString(macAsBytes));
+        public static bool IsValidMac(byte[] macAsBytes) => IsValidMac(MacToString(macAsBytes));
 
         /// <summary>
         ///     Converts a byte array of length 6 to a MAC address (i.e. string of hexadecimal digits).
@@ -178,14 +182,12 @@ namespace MacChanger
         /// <summary>
         ///     Format the MAC as dash or colon delimited octets
         /// </summary>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="FormatException"></exception>
         public string ToString(MacDelimiter delimiter) => delimiter switch
         {
             MacDelimiter.None => _macAddress,
-            MacDelimiter.Dash => string.Format(formatter, "{0:D}", _macAddress),
-            MacDelimiter.Colon => string.Format(formatter, "{0:C}", _macAddress),
-            _ => throw new ArgumentException(nameof(delimiter)),
+            MacDelimiter.Dash => SafeStringFormat(formatter, "{0:D}", _macAddress),
+            MacDelimiter.Colon => SafeStringFormat(formatter, "{0:C}", _macAddress),
+            _ => _macAddress
         };
         /// <summary>
         ///     Gets a string comprised of hexadecimal values, and converts it into a byte array
@@ -193,13 +195,11 @@ namespace MacChanger
         /// <param name="hexString">String consists of hexadecimal characters</param>
         /// <returns>MAC address as byte array</returns>
         /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="FormatException"></exception>
-        /// <exception cref="OverflowException"></exception>
         private static byte[] ConvertHexStringToByteArray(string hexString)
         {
             if (hexString.Length % 2 != 0)
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The binary key cannot have an odd number of digits: {0}", hexString));
+                throw new ArgumentException(SafeStringFormat(CultureInfo.InvariantCulture, "The binary key cannot have an odd number of digits: {0}", hexString));
             }
 
             var data = new byte[hexString.Length / 2];
@@ -218,7 +218,6 @@ namespace MacChanger
         /// <param name="firstArray">The first byte array used for OUI</param>
         /// <param name="secondArray">Second byte array randomly generated</param>
         /// <returns>A generated MAC address as byte array</returns>
-        /// <exception cref="OverflowException"></exception>
         private static byte[] MergeByteArrays(byte[] firstArray, byte[] secondArray)
         {
             var combinedArray = new byte[firstArray.Length + secondArray.Length];
@@ -226,6 +225,19 @@ namespace MacChanger
             Buffer.BlockCopy(secondArray, 0, combinedArray, firstArray.Length, secondArray.Length);
             return combinedArray;
         }
+
+        private static string SafeStringFormat(IFormatProvider formatProvider, string format, string obj)
+        {
+            try
+            {
+                return string.Format(formatProvider, format, obj);
+            }
+            catch (FormatException)
+            {
+                return obj;
+            }
+        }
+
         bool Equals(MacAddress other)
         {
             if (other is null)

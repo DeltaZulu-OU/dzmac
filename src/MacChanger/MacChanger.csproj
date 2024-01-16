@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MacAddress.cs" />
     <Compile Include="MacAddress.MacDelimiter.cs" />
     <Compile Include="MacFormatter.cs" />

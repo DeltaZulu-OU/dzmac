@@ -18,18 +18,6 @@ namespace MacChanger
     /// </remarks>
     public class NetworkAdapter : IDisposable
     {
-        private const string UnknownVendorIdentifier = "Unkown Vendor";
-
-        private readonly VendorManager? _manager;
-
-        private readonly NetworkInterface _networkInterface;
-
-        private readonly string _registryKey;
-
-        private ManagementObject? _adapter;
-
-        private bool disposedValue;
-
         /// <summary>
         ///     Gets the NetworkAddress registry value of this adapter.
         /// </summary>
@@ -68,7 +56,20 @@ namespace MacChanger
         /// <summary>
         ///     Gets if the network adapter has DHCP for IPv4 enabled
         /// </summary>
-        public bool IsDhcpEnabled => _networkInterface.GetIPProperties().GetIPv4Properties().IsDhcpEnabled;
+        public bool IsDhcpEnabled
+        {
+            get
+            {
+                try
+                {
+                    return _networkInterface.GetIPProperties().GetIPv4Properties().IsDhcpEnabled;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
 
         public bool IsIPv4Enabled { get; }
         public bool IsIPv6Enabled { get; }
@@ -91,11 +92,26 @@ namespace MacChanger
         ///     Gets the vendor of the network adapter.
         /// </summary>
         public string? OriginalVendor { get; }
+
         /// <summary>
         ///     Gets the speed of the network interface.
         /// </summary>
         public long Speed => _networkInterface.Speed;
+
+        private const string UnknownVendorIdentifier = "Unkown Vendor";
+
         private readonly ManagementObject? _adapterConfig;
+        private readonly VendorManager? _manager;
+
+        private readonly NetworkInterface _networkInterface;
+
+        private readonly string _registryKey;
+
+        private ManagementObject? _adapter;
+
+        private bool disposedValue;
+        private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
+
         public NetworkAdapter(ManagementObject adapterObject, ManagementObject adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
             _adapter = adapterObject;
@@ -130,6 +146,7 @@ namespace MacChanger
         ///     True if the disable operation succees or if DHCP is already disabled.
         ///     False if the operation is failed.
         /// </returns>
+        /// <exception cref="MacChangerException"></exception>
         public bool TryDhcpDisable()
         {
             if (_adapterConfig == null)
@@ -141,9 +158,9 @@ namespace MacChanger
             var ipAddress = ExtractIPConfig();
             var dnsConfig = ExtractDnsConfig();
 
-            var enableStaticResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableStatic", ipAddress, null).GetPropertyValue("ReturnValue")) == 0;
-            var setGatewayResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetGateways", gateway, null).GetPropertyValue("ReturnValue")) == 0;
-            var setDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", dnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+            var enableStaticResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableStatic", ipAddress, null).GetPropertyValue("ReturnValue")) == 0;
+            var setGatewayResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetGateways", gateway, null).GetPropertyValue("ReturnValue")) == 0;
+            var setDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", dnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
 
             var success = enableStaticResult && setGatewayResult && setDnsResult;
 
@@ -155,8 +172,8 @@ namespace MacChanger
                 newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
 
                 // Run command
-                var enableDhcpResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
-                var emptyDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+                var enableDhcpResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
+                var emptyDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
 
                 var rollbackSuccess = enableDhcpResult && emptyDnsResult;
                 if (rollbackSuccess)
@@ -170,16 +187,6 @@ namespace MacChanger
                 }
             }
 
-            //// Attempt to disable the adapter
-            //if (!TryDisableAdapter())
-            //{
-            //    throw new MacChangerException("Failed to disable network adapter.");
-            //}
-
-            //if (!TryEnableAdapter())
-            //{
-            //    throw new MacChangerException("Failed to re-enable network adapter.");
-            //}
             return true;
         }
 
@@ -191,6 +198,7 @@ namespace MacChanger
         ///     True if the disable operation succees or if DHCP is already disabled.
         ///     False if the operation is failed.
         /// </returns>
+        /// <exception cref="MacChangerException"></exception>
         public bool TryDhcpEnable()
         {
             if (_adapterConfig == null)
@@ -208,17 +216,17 @@ namespace MacChanger
             newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
 
             // Run command
-            var enableDhcpResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
-            var emptyDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+            var enableDhcpResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
+            var emptyDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
 
             var success = enableDhcpResult && emptyDnsResult;
 
             // Rollback
             if (!success)
             {
-                var rollbackStaticResult = Convert.ToInt32(_adapterConfig.InvokeMethod("EnableStatic", oldIpAddress, null).GetPropertyValue("ReturnValue")) == 0;
-                var rollbackGatewayResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetGateways", oldGateway, null).GetPropertyValue("ReturnValue")) == 0;
-                var rollbackDnsResult = Convert.ToInt32(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", oldDnsConfig1, null).GetPropertyValue("ReturnValue")) == 0;
+                var rollbackStaticResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableStatic", oldIpAddress, null).GetPropertyValue("ReturnValue")) == 0;
+                var rollbackGatewayResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetGateways", oldGateway, null).GetPropertyValue("ReturnValue")) == 0;
+                var rollbackDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", oldDnsConfig1, null).GetPropertyValue("ReturnValue")) == 0;
 
                 var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult && rollbackDnsResult;
                 if (rollbackSuccess)
@@ -236,19 +244,15 @@ namespace MacChanger
         }
 
         /// <summary>
-        ///     Disables the network adapter If the adapter is already disabled, it will return
-        ///     true. If the disable operation fails, it will return false.
+        ///     Disables the network adapter.
+        ///     If the disable operation fails, it will return false.
         /// </summary>
         /// <returns>
-        ///     True if the disable operation succees. False if the adapter is already disabled or
-        ///     the operation is failed.
+        ///     True if the disable operation succees.
+        ///     False if the operation is failed.
         /// </returns>
         public bool TryDisableAdapter()
         {
-            //if (!GetEnabled())
-            //{
-            //    return true;
-            //}
             if (_adapter == null)
             {
                 return false;
@@ -260,24 +264,18 @@ namespace MacChanger
                 return false;
             }
 
-            return Convert.ToInt32(result) == 0;
+            return SafeConvertToInt(result) == 0;
         }
 
         /// <summary>
-        ///     Enables the network adapter If the adapter is already enabled, it will return true.
+        ///     Enables the network adapter.
         ///     If the enable operation fails, it will return false.
         /// </summary>
         /// <returns>
-        ///     True if the enable operation succees. False if the adapter is already enabled or the
-        ///     operation is failed.
+        ///     True if the enable operation succees. False if the operation is failed.
         /// </returns>
         public bool TryEnableAdapter()
         {
-            //if (GetEnabled())
-            //{
-            //    return true;
-            //}
-
             if (_adapter == null)
             {
                 return false;
@@ -289,8 +287,9 @@ namespace MacChanger
                 return false;
             }
 
-            return Convert.ToInt32(result) == 0;
+            return SafeConvertToInt(result) == 0;
         }
+
         /// <summary>
         ///     Sets and resets the NetworkAddress registry value of this adapter.
         /// </summary>
@@ -330,21 +329,30 @@ namespace MacChanger
             }
 
             // Extract adapter number; this should correspond to the keys under HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}
-            var match = Regex.Match(_adapter.Path.RelativePath, "\\\"(\\d+)\\\"$");
-            if (int.TryParse(match.Groups[1].Value, out var deviceNumber))
+            Match? match;
+            try
             {
-                return deviceNumber;
+                match = _adapterNumberPattern.Match(_adapter.Path.RelativePath);
             }
-            else
+            catch (RegexMatchTimeoutException)
             {
                 return -1;
             }
+
+            if (match == null || !int.TryParse(match.Groups[1].Value, out var deviceNumber))
+            {
+                return -1;
+            }
+
+            return deviceNumber;
         }
 
         private ManagementBaseObject ExtractDnsConfig()
         {
             // Get current values
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var dnsServerSearchOrder = (string[])_adapterConfig.GetPropertyValue("DNSServerSearchOrder");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             // Create parameter object
             var dnsParams = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
@@ -355,7 +363,9 @@ namespace MacChanger
         private ManagementBaseObject ExtractGateway()
         {
             // Get current values
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gatewayAddress = (string[])_adapterConfig.GetPropertyValue("DefaultIPGateway");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             // Create parameter object
             var gatewayParams = _adapterConfig.GetMethodParameters("SetGateways");
@@ -366,8 +376,10 @@ namespace MacChanger
         private ManagementBaseObject ExtractIPConfig()
         {
             // Get current values
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var ipAddress = ((string[])_adapterConfig.GetPropertyValue("IPAddress"))[0];
             var subnetMask = ((string[])_adapterConfig.GetPropertyValue("IPSubnet"))[0];
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             // Create parameter object
             var ipParams = _adapterConfig.GetMethodParameters("EnableStatic");
@@ -375,16 +387,25 @@ namespace MacChanger
             ipParams["SubnetMask"] = new string[] { subnetMask };
             return ipParams;
         }
+
         private MacAddress? GetActiveMac()
         {
-            using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
-            if (regkey == null)
+            object address;
+            try
             {
-                return null;
-            }
+                using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
+                if (regkey == null)
+                {
+                    return null;
+                }
 
-            var address = regkey.GetValue("NetworkAddress");
-            if (address == null)
+                address = regkey.GetValue("NetworkAddress");
+                if (address == null)
+                {
+                    return null;
+                }
+            }
+            catch
             {
                 return null;
             }
@@ -431,12 +452,19 @@ namespace MacChanger
             // Therefore, we need to check if it exists first, then query the value from
             // internal objects.
             // Ref: https://blog.technitium.com/2014/06/fixing-wrong-original-mac-address-in.html
-            using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
-            var address = regkey.GetValue("OriginalNetworkAddress");
-            if (address != null)
+            try
             {
-                var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
-                return new MacAddress(macString);
+                using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
+                var address = regkey.GetValue("OriginalNetworkAddress");
+                if (address != null)
+                {
+                    var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
+                    return new MacAddress(macString);
+                }
+            }
+            catch
+            {
+                return new MacAddress(_networkInterface.GetPhysicalAddress());
             }
 
             return new MacAddress(_networkInterface.GetPhysicalAddress());
@@ -468,6 +496,29 @@ namespace MacChanger
         ///     Gets the registry key associated to this adapter.
         /// </summary>
         private string GetRegistryKey() => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{ExtractDeviceNumber():D4}";
+
+        private int SafeConvertToInt(object obj)
+        {
+            try
+            {
+                return Convert.ToInt32(obj);
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+        /// <summary>
+        ///     Registry helper function
+        /// </summary>
+        /// <param name="registryKey">Registry key path to access</param>
+        /// <param name="newMac">New mac address without delimiters or empty string to reset.</param>
+        /// <param name="description">Network adapter description to find the adapter.</param>
+        /// <param name="shouldReenable">A bool value to trigger Disable/Enable commands</param>
+        /// <exception cref="MacChangerException"></exception>
+        /// <exception cref="System.Security.SecurityException"></exception>
+        /// <exception cref="System.IO.IOException"></exception>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         private bool UpdateRegistryMac(string registryKey, string newMac, string description, out bool shouldReenable)
         {
             // If the value is not the empty string, we want to set NetworkAddress to it, so it had
@@ -529,6 +580,7 @@ namespace MacChanger
                 if (disposing)
                 {
                     _adapter?.Dispose();
+                    _adapterConfig?.Dispose();
                 }
 
                 _adapter = null;

@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Object lifecycle", "TI5113:Implement IDisposable if a class uses unmanaged resources, owns disposable objects or subscribes to other objects", Justification = "Since the class is a Form, the disposal is handled in FormClosing event.", Scope = "type", Target = "~T:MacChanger.Gui.Forms.MainForm")]
+[assembly: SuppressMessage("Exceptions", "TI8110:Do not silently ignore exceptions", Justification = "<Pending>", Scope = "member", Target = "~M:MacChanger.Gui.Forms.MainForm.VisitUrl(System.String)")]

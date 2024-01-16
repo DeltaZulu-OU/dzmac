@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,12 +11,12 @@ namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
+        internal List<NetworkConnection> NetworkConnections { get; set; }
         private const string zeroMacValue = "00-00-00-00-00-00";
         private readonly VendorManager _vm;
         private bool _locallyAdministered;
         private bool _reenableOnChange;
         private NetworkConnectionDetail _selected;
-        internal List<NetworkConnection> NetworkConnections { get; set; }
         public MainForm()
         {
             _vm = new VendorManager();
@@ -104,7 +105,7 @@ namespace MacChanger.Gui.Forms
 
         private void ExportReportItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void HelpTopicsItem_Click(object sender, EventArgs e) => System.Diagnostics.Process.Start("https://github.com/zbalkan/MacChanger");
+        private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/zbalkan/MacChanger");
 
         private void ImportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
@@ -205,7 +206,7 @@ namespace MacChanger.Gui.Forms
             WikiLink.LinkVisited = true;
 
             // Navigate to a URL.
-            System.Diagnostics.Process.Start("https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage");
+            VisitUrl("https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage");
         }
 
         private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => _locallyAdministered = ZeroTwoCheckBox.Checked;
@@ -217,14 +218,22 @@ namespace MacChanger.Gui.Forms
         /// </summary>
         private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+        private static void VisitUrl(string url)
+        {
+            try
+            {
+                _ = Process.Start(url);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
         private void RefreshConnections()
         {
             ConnectionsGrid.BeginUpdate();
-            NetworkConnections = new List<NetworkConnection>();
-            foreach (var adapter in NetworkAdapterFactory.GetNetworkAdapters(_vm))
-            {
-                NetworkConnections.Add(new NetworkConnection(adapter));
-            }
+            NetworkConnections = NetworkAdapterFactory.GetNetworkAdapters(_vm).Select(adapter => new NetworkConnection(adapter)).ToList();
             ConnectionsGrid.DataSource = NetworkConnections;
             ConnectionsGrid.EndUpdate();
             ConnectionsGrid.AutoResizeColumns();
