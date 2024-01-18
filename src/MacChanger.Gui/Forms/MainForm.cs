@@ -115,7 +115,7 @@ namespace MacChanger.Gui.Forms
             _vm?.Dispose();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        private async void MainForm_LoadAsync(object sender, EventArgs e)
         {
             ConnectionValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
             DeviceValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
@@ -128,10 +128,12 @@ namespace MacChanger.Gui.Forms
             ActiveMacValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
             ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
 
-            RefreshConnectionsBackground();
+            await RefreshConnectionsBackground();
+            ConnectionsGrid.SelectedItem = null;
 
+            var vendors = await Task.Run(() => _vm.GetVendorList().ToList());
             // Fill in vendor combobox
-            VendorComboBox.DataSource = _vm.GetVendorList().ToList();
+            VendorComboBox.DataSource = vendors;
             VendorComboBox.SelectedItem = null;
         }
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();

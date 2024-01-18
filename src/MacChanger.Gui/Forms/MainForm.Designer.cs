@@ -64,6 +64,7 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
+            this.macTextBox = new MacChanger.Gui.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
@@ -100,7 +101,6 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this.macTextBox = new MacChanger.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -506,6 +506,15 @@ namespace MacChanger.Gui.Forms
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
             // 
+            // macTextBox
+            // 
+            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox.Name = "macTextBox";
+            this.macTextBox.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox.TabIndex = 0;
+            // 
             // IPAddressPage
             // 
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
@@ -807,15 +816,6 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
-            // macTextBox1
-            // 
-            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox.Name = "macTextBox1";
-            this.macTextBox.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox.TabIndex = 0;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -833,7 +833,7 @@ namespace MacChanger.Gui.Forms
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MacChanger GUI";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Load += new System.EventHandler(this.MainForm_Load);
+            this.Load += new System.EventHandler(this.MainForm_LoadAsync);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.MainTableLayoutPanel.ResumeLayout(false);
             this.InfoTabs.ResumeLayout(false);
