@@ -784,7 +784,7 @@ namespace MacChanger.Gui.Forms
             this.UpdateOuiItem.Name = "UpdateOuiItem";
             this.UpdateOuiItem.Size = new System.Drawing.Size(262, 22);
             this.UpdateOuiItem.Text = "Update Vendors List (OUI) from IEEE";
-            this.UpdateOuiItem.Click += new System.EventHandler(this.UpdateOuiItem_Click);
+            this.UpdateOuiItem.Click += new System.EventHandler(this.UpdateOuiItem_ClickAsync);
             // 
             // toolStripSeparator5
             // 

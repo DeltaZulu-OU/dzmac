@@ -11,19 +11,10 @@ namespace MacChanger
     /// </summary>
     public class VendorList : IDisposable, IReadOnlyList<Vendor>
     {
+        public int Count => _cache.Count;
         private const string _databaseFile = "oui.db";
         private static Cache? _cache;
         private bool disposedValue;
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public int Count => _cache.Count;
-
-        Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index] ?? default;
-
-        public Vendor? this[int index] => _cache[index];
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-        public Vendor? this[string oui] => Get(oui);
 
         internal VendorList()
         {
@@ -33,26 +24,32 @@ namespace MacChanger
                 _cache.AddRange(Downloader.GetAll());
             }
         }
+        ///  <inheritdoc/>
+        public Vendor? this[string oui] => Get(oui);
+        ///  <inheritdoc/>
+        public Vendor? this[int index] => _cache[index];
+        Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index] ?? default;
+        public Vendor? Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
 
+        ///  <inheritdoc/>
+        public IEnumerator<Vendor> GetEnumerator() => _cache.GetAll().GetEnumerator();
+
+        /// <summary>
+        ///     Downloads data from IEEE and writes to DB
+        /// </summary>
+        /// <exception cref="MacChangerException"></exception>
         public void Refresh()
         {
             // There must not be a possibility of empty cache but t is better to check
             if (_cache is null) throw new MacChangerException("Cache object does not exist");
 
+            var downloaded = Downloader.GetAll();
             if (!_cache.IsEmpty)
             {
                 _cache.Clear();
             }
-            _cache.AddRange(Downloader.GetAll());
+            _cache.AddRange(downloaded);
         }
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public Vendor? Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        public IEnumerator<Vendor> GetEnumerator() => _cache.GetAll().GetEnumerator();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         /// <summary>
         ///     Checks if a vendor with the provided OUI exists.
@@ -67,6 +64,14 @@ namespace MacChanger
             vendors = Get(oui, useWildcard);
             return vendors != null;
         }
+        #region Dispose
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -80,14 +85,9 @@ namespace MacChanger
                 disposedValue = true;
             }
         }
+        #endregion Dispose
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
+        ///  <inheritdoc/>
+        IEnumerator IEnumerable.GetEnumerator() => _cache.GetAll().GetEnumerator();
     }
 }

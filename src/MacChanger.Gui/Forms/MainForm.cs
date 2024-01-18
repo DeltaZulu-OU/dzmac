@@ -147,8 +147,7 @@ namespace MacChanger.Gui.Forms
             var randomVendor = _vm.GetRandom();
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
-            var vendor = _vm.FindByMac(randomMac, _locallyAdministered);
-            VendorComboBox.SelectedItem = vendor;
+            VendorComboBox.SelectedItem = _vm.FindByMac(randomMac, _locallyAdministered);
 
             if (_locallyAdministered)
             {
@@ -186,9 +185,9 @@ namespace MacChanger.Gui.Forms
         private void SavePresetAsItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void SavePresetItem_Click(object sender, EventArgs e) => NotImplemented();
-        private async void UpdateOuiItem_Click(object sender, EventArgs e)
+        private async void UpdateOuiItem_ClickAsync(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Vendor list update will take some time and the UI will be frozen in the meantime.\n\nAre you sure?", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.YesNo);
+            var result = MessageBox.Show("This will initiate OUI download in the background.\n\nAre you sure?", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.YesNo);
 
             if (result != DialogResult.Yes)
             {
@@ -196,10 +195,11 @@ namespace MacChanger.Gui.Forms
             }
 
             MainStatusBar.Text = "Downloading OUI data...";
-            await Task.Factory.StartNew(() => BeginInvoke(new Action(UpdateVendorList)));
-            MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
+            await Task.Factory.StartNew(_vm.Refresh);
+            _ = MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
             MainStatusBar.Text = "Ready";
         }
+
         private void WikiLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             // Specify that the link was visited.
@@ -240,8 +240,6 @@ namespace MacChanger.Gui.Forms
         }
 
         private Task RefreshConnectionsBackground() => Task.Factory.StartNew(() => Invoke(new Action(RefreshConnections)));
-
-        private void UpdateVendorList() => _vm.Refresh();
         #endregion Private Methods
     }
 }
