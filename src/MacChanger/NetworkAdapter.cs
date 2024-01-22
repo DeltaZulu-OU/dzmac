@@ -18,6 +18,22 @@ namespace MacChanger
     /// </remarks>
     public class NetworkAdapter : IDisposable
     {
+        private const string UnknownVendorIdentifier = "Unkown Vendor";
+
+        private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
+
+        private readonly ManagementObject? _adapterConfig;
+
+        private readonly VendorManager? _manager;
+
+        private readonly NetworkInterface _networkInterface;
+
+        private readonly string _registryKey;
+
+        private ManagementObject? _adapter;
+
+        private bool disposedValue;
+
         /// <summary>
         ///     Gets the NetworkAddress registry value of this adapter.
         /// </summary>
@@ -97,21 +113,6 @@ namespace MacChanger
         ///     Gets the speed of the network interface.
         /// </summary>
         public long Speed => _networkInterface.Speed;
-
-        private const string UnknownVendorIdentifier = "Unkown Vendor";
-
-        private readonly ManagementObject? _adapterConfig;
-        private readonly VendorManager? _manager;
-
-        private readonly NetworkInterface _networkInterface;
-
-        private readonly string _registryKey;
-
-        private ManagementObject? _adapter;
-
-        private bool disposedValue;
-        private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
-
         public NetworkAdapter(ManagementObject adapterObject, ManagementObject adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
             _adapter = adapterObject;
@@ -138,13 +139,11 @@ namespace MacChanger
         public override string ToString() => $"{_networkInterface.Description} ({_networkInterface.Name})";
 
         /// <summary>
-        ///     Disables the DHCP of network adapter by setting existing IP address as static.
-        ///     If the disable operatuin succeeds or DHCP is already disabled, it will return true.
-        ///     If the disable operation fails, it will return false.
+        ///     Tries to disable the DHCP of network adapter by setting existing IP address as static.
         /// </summary>
         /// <returns>
-        ///     True if the disable operation succees or if DHCP is already disabled.
-        ///     False if the operation is failed.
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
         /// </returns>
         /// <exception cref="MacChangerException"></exception>
         public bool TryDhcpDisable()
@@ -191,12 +190,12 @@ namespace MacChanger
         }
 
         /// <summary>
-        ///     Enables the DHCP of network adapter. If DHCP is already disabled, it will return
-        ///     true. If the disable operation fails, it will return false.
+        ///     Tries to enable the DHCP of network adapter.
         /// </summary>
         /// <returns>
-        ///     True if the disable operation succees or if DHCP is already disabled.
-        ///     False if the operation is failed.
+        /// <returns>
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
         /// </returns>
         /// <exception cref="MacChangerException"></exception>
         public bool TryDhcpEnable()
@@ -244,12 +243,69 @@ namespace MacChanger
         }
 
         /// <summary>
-        ///     Disables the network adapter.
-        ///     If the disable operation fails, it will return false.
+        ///     Tries to release the IP address on specific DHCP-enabled network adapters.
+        /// </summary>
+        /// <param name="message">Message obtained from return code of the operation.</param>
+        /// <returns>
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
+        /// </returns>
+        public bool TryDhcpRelease(out string message)
+        {
+            message = string.Empty;
+            if (_adapter == null)
+            {
+                return false;
+            }
+
+            var resultObject = _adapter.InvokeMethod("ReleaseDHCPLease", null);
+            if (resultObject == null)
+            {
+                return false;
+            }
+
+            var resultCode = SafeConvertToInt(resultObject);
+
+            message = HResult.TranslateErrorCode(resultCode);
+
+            return resultCode == 0 || resultCode == 1;
+        }
+
+        /// <summary>
+        ///     Tries to renew the IP address on specific DHCP-enabled network adapters.
+        /// </summary>
+        /// <param name="message">Message obtained from return code of the operation.</param>
+        /// <returns>
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
+        /// </returns>
+        public bool TryDhcpRenew(out string message)
+        {
+            message = string.Empty;
+            if (_adapter == null)
+            {
+                return false;
+            }
+
+            var resultObject = _adapter.InvokeMethod("RenewDHCPLease", null);
+            if (resultObject == null)
+            {
+                return false;
+            }
+
+            var resultCode = SafeConvertToInt(resultObject);
+
+            message = HResult.TranslateErrorCode(resultCode);
+
+            return resultCode == 0 || resultCode == 1;
+        }
+
+        /// <summary>
+        ///     Tries to disable the network adapter.
         /// </summary>
         /// <returns>
-        ///     True if the disable operation succees.
-        ///     False if the operation is failed.
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
         /// </returns>
         public bool TryDisableAdapter()
         {
@@ -268,11 +324,11 @@ namespace MacChanger
         }
 
         /// <summary>
-        ///     Enables the network adapter.
-        ///     If the enable operation fails, it will return false.
+        ///     Tries to enable the network adapter.
         /// </summary>
         /// <returns>
-        ///     True if the enable operation succees. False if the operation is failed.
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
         /// </returns>
         public bool TryEnableAdapter()
         {
@@ -297,7 +353,10 @@ namespace MacChanger
         ///     The nullable value either an instance of <see cref="MacAddress"/>.
         ///     or null (to restore).
         /// </param>
-        /// <returns> true if successful, false otherwise </returns>
+        /// <returns>
+        ///     <c>true</c> if the operation succeeds.
+        ///     <c>false</c> if the operation fails.
+        /// </returns>
         /// <exception cref="MacChangerException"> </exception>
         public bool TrySetRegistryMac(MacAddress? mac)
         {

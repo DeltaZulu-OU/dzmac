@@ -57,7 +57,8 @@ namespace MacChanger.Gui.Forms
         {
             if (ConnectionsGrid?.SelectedItem != null)
             {
-                // The event is triggered twice: First c reset where index is 0xffffff (-1)
+                // The event is triggered twice:
+                // First one is a reset event where index is 0xffffff (-1),
                 // and the second is the actual value.
                 if (ConnectionsGrid.SelectedItem.Index != -1)
                 {
@@ -73,7 +74,9 @@ namespace MacChanger.Gui.Forms
                     OriginalMacVendorTextbox.Text = _selected.OriginalVendor;
                     ActiveMacValueTextbox.Text = _selected.ActiveMac;
                     ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
-                    Dhcp4EnabledItem.Checked = _selected.IsDhcpEnabled;
+                    DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
+                    DhcpRenewIpItem.Enabled = _selected.IsDhcpEnabled;
+                    DhcpReleaseIpItem.Enabled = _selected.IsDhcpEnabled;
                 }
             }
         }
@@ -82,21 +85,45 @@ namespace MacChanger.Gui.Forms
 
         private void Dhcp4EnabledItem_Click(object sender, EventArgs e)
         {
-            if (Dhcp4EnabledItem.Checked)
+            if (DhcpEnabledItem.Checked)
             {
-                if (_selected.TryDisableDhcp())
+                if (_selected.TryDhcpDisable())
                 {
-                    Dhcp4EnabledItem.Checked = false;
+                    DhcpEnabledItem.Checked = false;
                 }
             }
             else
             {
-                if (_selected.TryEnableDhcp())
+                if (_selected.TryDhcpEnable())
                 {
-                    Dhcp4EnabledItem.Checked = true;
+                    DhcpEnabledItem.Checked = true;
                 }
             }
             RefreshConnectionsBackground();
+        }
+
+        private void DhcpReleaseIpItem_Click(object sender, EventArgs e)
+        {
+            if (_selected.TryDhcpRelease(out var message))
+            {
+                MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show(message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void DhcpRenewIpItem_Click(object sender, EventArgs e)
+        {
+            if (_selected.TryDhcpRenew(out var message))
+            {
+                MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show(message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void ExitItem_Click(object sender, EventArgs e) => Close();
