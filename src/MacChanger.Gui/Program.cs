@@ -12,9 +12,14 @@ namespace MacChanger.Gui
         [STAThread]
         static void Main()
         {
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
         }
+
+        // When logging is implemented, write the eror to log for diagnostics and exit.
+        static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs args) => _ = MessageBox.Show($"Unhandled exception caught : {((Exception)args.ExceptionObject).Message}", "Unhandled exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 }
