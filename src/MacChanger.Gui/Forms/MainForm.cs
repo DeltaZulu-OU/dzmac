@@ -144,6 +144,19 @@ namespace MacChanger.Gui.Forms
 
         private async void MainForm_LoadAsync(object sender, EventArgs e)
         {
+            MakeTextboxBackgroundTransparent();
+
+            await RefreshConnectionsBackground();
+            ConnectionsGrid.SelectedItem = null;
+
+            
+            // Fill in vendor combobox
+            VendorComboBox.DataSource = await Task.Run(() => _vm.GetVendorList().ToList());
+            VendorComboBox.SelectedItem = null;
+        }
+
+        private void MakeTextboxBackgroundTransparent()
+        {
             ConnectionValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
             DeviceValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
             HardwareIdValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
@@ -154,15 +167,8 @@ namespace MacChanger.Gui.Forms
             OriginalMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
             ActiveMacValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
             ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-
-            await RefreshConnectionsBackground();
-            ConnectionsGrid.SelectedItem = null;
-
-            var vendors = await Task.Run(() => _vm.GetVendorList().ToList());
-            // Fill in vendor combobox
-            VendorComboBox.DataSource = vendors;
-            VendorComboBox.SelectedItem = null;
         }
+
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
 
         private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
@@ -242,6 +248,14 @@ namespace MacChanger.Gui.Forms
         #endregion EventHandlers
 
         #region Private Methods
+
+        private void SetUserFonts(float scaleFactorX, float scaleFactorY)
+        {
+            var OldFont = Font;
+            Font = new Font(OldFont.FontFamily, 11f * scaleFactorX, OldFont.Style, GraphicsUnit.Pixel);
+            OldFont.Dispose();
+        }
+
         /// <summary>
         ///     A placeholder method for events not implemented.
         /// </summary>
