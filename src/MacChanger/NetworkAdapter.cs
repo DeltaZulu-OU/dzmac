@@ -253,12 +253,12 @@ namespace MacChanger
         public bool TryDhcpRelease(out string message)
         {
             message = string.Empty;
-            if (_adapter == null)
+            if (_adapterConfig == null)
             {
                 return false;
             }
 
-            var resultObject = _adapter.InvokeMethod("ReleaseDHCPLease", null);
+            var resultObject = _adapterConfig.InvokeMethod("ReleaseDHCPLease", null);
             if (resultObject == null)
             {
                 return false;
@@ -282,12 +282,12 @@ namespace MacChanger
         public bool TryDhcpRenew(out string message)
         {
             message = string.Empty;
-            if (_adapter == null)
+            if (_adapterConfig == null)
             {
                 return false;
             }
 
-            var resultObject = _adapter.InvokeMethod("RenewDHCPLease", null);
+            var resultObject = _adapterConfig.InvokeMethod("RenewDHCPLease", null);
             if (resultObject == null)
             {
                 return false;
