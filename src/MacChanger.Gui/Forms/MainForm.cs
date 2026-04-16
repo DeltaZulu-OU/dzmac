@@ -24,6 +24,8 @@ namespace MacChanger.Gui.Forms
 
         private CancellationTokenSource _refreshCancellation;
         private bool _isRefreshing;
+        private bool _isVendorListLoading;
+        private bool _isVendorListReady;
 
         private bool _locallyAdministered;
         private bool _reenableOnChange;
@@ -76,6 +78,7 @@ namespace MacChanger.Gui.Forms
             _loadingPanel.BringToFront();
 
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
+            VendorComboBox.Enabled = false;
             UpdateSelectionState();
         }
 
@@ -230,9 +233,7 @@ namespace MacChanger.Gui.Forms
 
             await RefreshConnectionsBackground(clearListWhileLoading: true);
             ConnectionsGrid.SelectedItem = null;
-
-            VendorComboBox.DataSource = await Task.Run(() => _vm.GetVendorList().ToList());
-            VendorComboBox.SelectedItem = null;
+            _ = LoadVendorsInBackground();
         }
 
         private void MakeTextboxBackgroundTransparent()
@@ -271,7 +272,23 @@ namespace MacChanger.Gui.Forms
                 return;
             }
 
-            var randomVendor = _vm.GetRandom();
+            if (!_isVendorListReady)
+            {
+                _ = MessageBox.Show("Vendor list is still loading. Please try again in a moment.", "Vendor List Loading", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            Vendor randomVendor;
+            try
+            {
+                randomVendor = _vm.GetRandom();
+            }
+            catch (MacChangerException ex)
+            {
+                _ = MessageBox.Show(ex.Message, "Vendor List Unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
             VendorComboBox.SelectedItem = _vm.FindByMac(randomMac, _locallyAdministered);
@@ -449,11 +466,73 @@ namespace MacChanger.Gui.Forms
 
             ChangeMacButton.Enabled = enableActions;
             RestoreMacButton.Enabled = enableActions;
-            RandomMacButton.Enabled = enableActions;
+            RandomMacButton.Enabled = enableActions && _isVendorListReady;
             DhcpEnabledItem.Enabled = enableActions;
             DhcpRenewIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DeleteItem.Enabled = enableActions;
+        }
+
+        private async Task LoadVendorsInBackground()
+        {
+            if (_isVendorListLoading || _isVendorListReady)
+            {
+                return;
+            }
+
+            _isVendorListLoading = true;
+            if (!IsDisposed)
+            {
+                MainStatusBar.Text = "Loading vendor list...";
+            }
+
+            try
+            {
+                var vendors = await Task.Run(() => _vm.GetVendorList().ToList());
+                if (IsDisposed)
+                {
+                    return;
+                }
+
+                BeginInvoke(new Action(() =>
+                {
+                    if (IsDisposed)
+                    {
+                        return;
+                    }
+
+                    VendorComboBox.DataSource = vendors;
+                    VendorComboBox.SelectedItem = null;
+                    VendorComboBox.Enabled = true;
+                    _isVendorListReady = true;
+                    UpdateSelectionState();
+
+                    if (MainStatusBar.Text == "Loading vendor list...")
+                    {
+                        MainStatusBar.Text = "Ready";
+                    }
+                }));
+            }
+            catch (Exception ex)
+            {
+                if (!IsDisposed)
+                {
+                    BeginInvoke(new Action(() =>
+                    {
+                        if (IsDisposed)
+                        {
+                            return;
+                        }
+
+                        MainStatusBar.Text = "Vendor list failed to load.";
+                        _ = MessageBox.Show(ex.Message, "Vendor List Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }));
+                }
+            }
+            finally
+            {
+                _isVendorListLoading = false;
+            }
         }
 
         private void SetLoadingState(bool isLoading, bool clearListWhileLoading)

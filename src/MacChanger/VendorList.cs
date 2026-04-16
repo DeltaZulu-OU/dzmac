@@ -1,8 +1,10 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 
 namespace MacChanger
 {
@@ -12,18 +14,19 @@ namespace MacChanger
     /// </summary>
     public class VendorList : IDisposable, IReadOnlyList<Vendor>
     {
+        private const string DatabaseFileName = "oui.db";
+
         public int Count => _cache.Count;
-        private const string _databaseFile = "oui.db";
+
         private static Cache? _cache;
         private bool disposedValue;
 
         internal VendorList()
         {
-            _cache = new Cache(_databaseFile);
-            if (_cache.IsEmpty)
-            {
-                _cache.AddRange(Downloader.GetAll());
-            }
+            var databasePath = ResolveDatabasePath();
+            _cache = new Cache(databasePath);
+
+            Diagnostics.Info("vendor_cache_initialized", ("databasePath", databasePath), ("isEmpty", _cache.IsEmpty));
         }
 
         ///  <inheritdoc/>
@@ -54,6 +57,8 @@ namespace MacChanger
                 _cache.Clear();
             }
             _cache.AddRange(downloaded);
+
+            Diagnostics.Info("vendor_cache_refreshed", ("recordCount", _cache.Count));
         }
 
         /// <summary>
@@ -68,6 +73,51 @@ namespace MacChanger
         {
             vendors = Get(oui, useWildcard);
             return vendors != null;
+        }
+
+        private static string ResolveDatabasePath()
+        {
+            var envPath = Environment.GetEnvironmentVariable("MACCHANGER_OUI_CACHE_PATH");
+            var configuredPath = ConfigurationManager.AppSettings["MacChanger.OuiCachePath"];
+            var path = FirstNonEmpty(envPath, configuredPath);
+
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MacChanger");
+                path = Path.Combine(basePath, DatabaseFileName);
+            }
+
+            var fullPath = Path.GetFullPath(path);
+            var directory = Path.GetDirectoryName(fullPath);
+
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                throw new MacChangerException("Resolved OUI cache path has no parent directory.");
+            }
+
+            try
+            {
+                Directory.CreateDirectory(directory);
+            }
+            catch (Exception ex)
+            {
+                throw new MacChangerException($"Failed to prepare OUI cache directory: {directory}", ex);
+            }
+
+            return fullPath;
+        }
+
+        private static string? FirstNonEmpty(params string?[] values)
+        {
+            foreach (var value in values)
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value;
+                }
+            }
+
+            return null;
         }
 
         #region Dispose

@@ -176,6 +176,7 @@ namespace MacChanger
             EnsureWmiObjects();
             if (_adapterConfig == null)
             {
+                Diagnostics.Warning("dhcp_disable_skipped", "Adapter configuration object is unavailable.", ("adapter", Name));
                 return false;
             }
 
@@ -183,7 +184,7 @@ namespace MacChanger
                 || !TryExtractIPConfig(out var ipAddress)
                 || !TryExtractDnsConfig(out var dnsConfig))
             {
-                Debug.WriteLine($"[{nameof(NetworkAdapter)}] DHCP disable aborted for adapter '{Name}' because required WMI config values were incomplete.");
+                Diagnostics.Warning("dhcp_disable_skipped", "Required WMI values are incomplete.", ("adapter", Name));
                 return false;
             }
 
@@ -207,15 +208,18 @@ namespace MacChanger
                 var rollbackSuccess = enableDhcpResult && emptyDnsResult;
                 if (rollbackSuccess)
                 {
+                    Diagnostics.Warning("dhcp_disable_failed_rollback_success", "DHCP disable failed and automatic rollback succeeded.", ("adapter", Name));
                     return false;
                 }
                 else
                 {
                     // something we cannot handle here.
+                    Diagnostics.Error("dhcp_disable_failed_rollback_failed", null, "DHCP disable failed and rollback did not complete.", ("adapter", Name));
                     throw new MacChangerException("Failed to disable DHCP");
                 }
             }
 
+            Diagnostics.Info("dhcp_disable_succeeded", ("adapter", Name));
             return true;
         }
 
@@ -233,6 +237,7 @@ namespace MacChanger
             EnsureWmiObjects();
             if (_adapterConfig == null)
             {
+                Diagnostics.Warning("dhcp_enable_skipped", "Adapter configuration object is unavailable.", ("adapter", Name));
                 return false;
             }
 
@@ -241,7 +246,7 @@ namespace MacChanger
                 || !TryExtractIPConfig(out var oldIpAddress)
                 || !TryExtractDnsConfig(out var oldDnsConfig1))
             {
-                Debug.WriteLine($"[{nameof(NetworkAdapter)}] DHCP enable aborted for adapter '{Name}' because required WMI config values were incomplete.");
+                Diagnostics.Warning("dhcp_enable_skipped", "Required WMI values are incomplete.", ("adapter", Name));
                 return false;
             }
 
@@ -265,15 +270,18 @@ namespace MacChanger
                 var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult && rollbackDnsResult;
                 if (rollbackSuccess)
                 {
+                    Diagnostics.Warning("dhcp_enable_failed_rollback_success", "DHCP enable failed and automatic rollback succeeded.", ("adapter", Name));
                     return false;
                 }
                 else
                 {
                     // something we cannot handle here.
+                    Diagnostics.Error("dhcp_enable_failed_rollback_failed", null, "DHCP enable failed and rollback did not complete.", ("adapter", Name));
                     throw new MacChangerException("Failed to enable DHCP");
                 }
             }
 
+            Diagnostics.Info("dhcp_enable_succeeded", ("adapter", Name));
             return true;
         }
 
@@ -349,16 +357,28 @@ namespace MacChanger
             EnsureWmiObjects();
             if (_adapter == null)
             {
+                Diagnostics.Warning("adapter_disable_skipped", "Adapter WMI object is unavailable.", ("adapter", Name));
                 return false;
             }
 
             var result = _adapter.InvokeMethod("Disable", null);
             if (result == null)
             {
+                Diagnostics.Warning("adapter_disable_failed", "Disable command returned null.", ("adapter", Name));
                 return false;
             }
 
-            return SafeConvertToInt(result) == 0;
+            var success = SafeConvertToInt(result) == 0;
+            if (success)
+            {
+                Diagnostics.Info("adapter_disable_succeeded", ("adapter", Name));
+            }
+            else
+            {
+                Diagnostics.Warning("adapter_disable_failed", "Disable command returned non-zero.", ("adapter", Name));
+            }
+
+            return success;
         }
 
         /// <summary>
@@ -373,16 +393,28 @@ namespace MacChanger
             EnsureWmiObjects();
             if (_adapter == null)
             {
+                Diagnostics.Warning("adapter_enable_skipped", "Adapter WMI object is unavailable.", ("adapter", Name));
                 return false;
             }
 
             var result = _adapter.InvokeMethod("Enable", null);
             if (result == null)
             {
+                Diagnostics.Warning("adapter_enable_failed", "Enable command returned null.", ("adapter", Name));
                 return false;
             }
 
-            return SafeConvertToInt(result) == 0;
+            var success = SafeConvertToInt(result) == 0;
+            if (success)
+            {
+                Diagnostics.Info("adapter_enable_succeeded", ("adapter", Name));
+            }
+            else
+            {
+                Diagnostics.Warning("adapter_enable_failed", "Enable command returned non-zero.", ("adapter", Name));
+            }
+
+            return success;
         }
 
         /// <summary>
@@ -404,10 +436,12 @@ namespace MacChanger
             try
             {
                 var targetMac = mac != null ? mac.ToString() : string.Empty;
+                Diagnostics.Info("registry_mac_update_started", ("adapter", Name), ("targetMac", string.IsNullOrEmpty(targetMac) ? "<restore>" : targetMac));
                 return UpdateRegistryMac(GetRegistryKey(), targetMac, _networkInterface.Description, out shouldReenable);
             }
             catch (Exception ex)
             {
+                Diagnostics.Error("registry_mac_update_failed", ex, null, ("adapter", Name));
                 throw new MacChangerException(ex.Message, ex);
             }
             finally

@@ -46,6 +46,10 @@ namespace MacChanger
             }
 
             var max = _vendors.Count;
+            if (max == 0)
+            {
+                throw new MacChangerException("Vendor list is empty. Update the OUI list from the About menu.");
+            }
             Vendor? selected = null;
             while (selected == null)
             {
