@@ -9,6 +9,8 @@ namespace MacChanger.Gui.DTO
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     internal class NetworkConnectionDetail : IDisposable
     {
+        public bool ShowSpeedInKBytesPerSec { get; set; }
+
         public string ActiveMac => GetActiveMac();
         public string ActiveVendor => _adapter.ActiveVendor;
         public string Changed => IsChanged ? "Yes" : "No";
@@ -57,6 +59,17 @@ namespace MacChanger.Gui.DTO
 
         private string ReadableSpeed(long speed)
         {
+            if (ShowSpeedInKBytesPerSec)
+            {
+                if (speed <= 0)
+                {
+                    return "0 KB/s";
+                }
+
+                var speedInKBytesPerSecond = speed / 8192f;
+                return $"{speedInKBytesPerSecond:F2} KB/s";
+            }
+
             if (speed >= 1000000000)
             {
                 float v = speed / 1000000000;

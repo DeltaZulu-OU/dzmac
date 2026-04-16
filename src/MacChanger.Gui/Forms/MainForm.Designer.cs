@@ -92,6 +92,8 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.DeleteItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OptionsMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.NetworkConnectionsItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ShowSpeedInKBytesPerSecItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpTopicsItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CliParamsHelpItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -744,10 +746,27 @@ namespace MacChanger.Gui.Forms
             // 
             // OptionsMenu
             // 
+            this.OptionsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.NetworkConnectionsItem,
+            this.ShowSpeedInKBytesPerSecItem});
             this.OptionsMenu.Name = "OptionsMenu";
             this.OptionsMenu.Size = new System.Drawing.Size(61, 20);
             this.OptionsMenu.Text = "&Options";
-            this.OptionsMenu.Click += new System.EventHandler(this.OptionsMenu_Click);
+            //
+            // NetworkConnectionsItem
+            //
+            this.NetworkConnectionsItem.Name = "NetworkConnectionsItem";
+            this.NetworkConnectionsItem.Size = new System.Drawing.Size(223, 22);
+            this.NetworkConnectionsItem.Text = "Network Connections";
+            this.NetworkConnectionsItem.Click += new System.EventHandler(this.NetworkConnectionsItem_Click);
+            //
+            // ShowSpeedInKBytesPerSecItem
+            //
+            this.ShowSpeedInKBytesPerSecItem.CheckOnClick = true;
+            this.ShowSpeedInKBytesPerSecItem.Name = "ShowSpeedInKBytesPerSecItem";
+            this.ShowSpeedInKBytesPerSecItem.Size = new System.Drawing.Size(223, 22);
+            this.ShowSpeedInKBytesPerSecItem.Text = "Show Speed In KBytes/sec";
+            this.ShowSpeedInKBytesPerSecItem.Click += new System.EventHandler(this.ShowSpeedInKBytesPerSecItem_Click);
             // 
             // HelpMenu
             // 
@@ -871,6 +890,8 @@ namespace MacChanger.Gui.Forms
         private ToolStripMenuItem ExportPresetItem;
         private ToolStripMenuItem ActionMenu;
         private ToolStripMenuItem OptionsMenu;
+        private ToolStripMenuItem NetworkConnectionsItem;
+        private ToolStripMenuItem ShowSpeedInKBytesPerSecItem;
         private ToolStripMenuItem HelpMenu;
         private ToolStripMenuItem AssociateItem;
         private ToolStripMenuItem ExitItem;
@@ -927,4 +948,3 @@ namespace MacChanger.Gui.Forms
         private TableLayoutPanel tableLayoutPanel1;
     }
 }
-

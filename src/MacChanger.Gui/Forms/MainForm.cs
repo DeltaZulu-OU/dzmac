@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MacChanger.Gui.DTO;
+using MacChanger.Gui.Properties;
 
 namespace MacChanger.Gui.Forms
 {
@@ -224,6 +225,7 @@ namespace MacChanger.Gui.Forms
         private async void MainForm_LoadAsync(object sender, EventArgs e)
         {
             MakeTextboxBackgroundTransparent();
+            ShowSpeedInKBytesPerSecItem.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
 
             await RefreshConnectionsBackground(clearListWhileLoading: true);
             ConnectionsGrid.SelectedItem = null;
@@ -250,7 +252,14 @@ namespace MacChanger.Gui.Forms
 
         private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void OptionsMenu_Click(object sender, EventArgs e) => NotImplemented();
+        private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
+
+        private async void ShowSpeedInKBytesPerSecItem_Click(object sender, EventArgs e)
+        {
+            Settings.Default.ShowSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem.Checked;
+            Settings.Default.Save();
+            await RefreshConnectionsBackground();
+        }
 
         private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
 
@@ -356,6 +365,22 @@ namespace MacChanger.Gui.Forms
             }
         }
 
+        private static void OpenNetworkConnections()
+        {
+            try
+            {
+                _ = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "ncpa.cpl",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _ = MessageBox.Show($"Unable to open Network Connections.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "Network Connections", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void BindSelection()
         {
             var hasSelection = _selected != null;
@@ -457,7 +482,7 @@ namespace MacChanger.Gui.Forms
                     var adapters = NetworkAdapterFactory.GetNetworkAdapters(_vm).ToList();
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    return adapters.Select(adapter => new NetworkConnection(adapter)).ToList();
+                    return adapters.Select(adapter => new NetworkConnection(adapter, ShowSpeedInKBytesPerSecItem.Checked)).ToList();
                 }, cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested || IsDisposed)
