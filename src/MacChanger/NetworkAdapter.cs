@@ -19,18 +19,21 @@ namespace MacChanger
     public class NetworkAdapter : IDisposable
     {
         private const string UnknownVendorIdentifier = "Unkown Vendor";
+        private const string RegistryClassKey = @"SYSTEM\ControlSet001\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
 
-        private readonly ManagementObject? _adapterConfig;
-
         private readonly VendorManager? _manager;
-
         private readonly NetworkInterface _networkInterface;
-
-        private readonly string _registryKey;
+        private readonly object _syncRoot = new object();
 
         private ManagementObject? _adapter;
+        private ManagementObject? _adapterConfig;
+        private bool _wmiResolved;
+        private string? _hardwareId;
+        private bool? _enabled;
+        private string? _registryKey;
+        private bool _registryResolved;
 
         private bool disposedValue;
 
@@ -62,12 +65,26 @@ namespace MacChanger
         /// <summary>
         ///     Gets if the adapter is enabled or not.
         /// </summary>
-        public bool Enabled { get; }
+        public bool Enabled
+        {
+            get
+            {
+                EnsureWmiObjects();
+                return _enabled ?? false;
+            }
+        }
 
         /// <summary>
         ///     Gets the Win32 Plug and Play device ID of the logical device.
         /// </summary>
-        public string HardwareId { get; }
+        public string HardwareId
+        {
+            get
+            {
+                EnsureWmiObjects();
+                return _hardwareId ?? string.Empty;
+            }
+        }
 
         /// <summary>
         ///     Gets if the network adapter has DHCP for IPv4 enabled
@@ -113,18 +130,12 @@ namespace MacChanger
         ///     Gets the speed of the network interface.
         /// </summary>
         public long Speed => _networkInterface.Speed;
-        public NetworkAdapter(ManagementObject adapterObject, ManagementObject adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
+
+        public NetworkAdapter(NetworkInterface networkInterface, VendorManager? vendorManager = null)
         {
-            _adapter = adapterObject;
-            _adapterConfig = adapterConfig;
             _networkInterface = networkInterface;
             _manager = vendorManager;
-
-            _registryKey = GetRegistryKey();
-
-            Enabled = GetEnabled();
             Name = _networkInterface.Name;
-            HardwareId = GetHardwareId();
 
             var props = _networkInterface.GetIPProperties();
             var ads = props.UnicastAddresses;
@@ -133,6 +144,16 @@ namespace MacChanger
             OriginalMacAddress = GetOriginalMacAddress();
             OriginalVendor = GetOriginalVendor();
             ActiveMacAddress = GetActiveMac();
+        }
+
+        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
+            : this(networkInterface, vendorManager)
+        {
+            _adapter = adapterObject;
+            _adapterConfig = adapterConfig;
+            _enabled = GetEnabled();
+            _hardwareId = GetHardwareId();
+            _wmiResolved = true;
         }
 
         ///  <inheritdoc/>
@@ -148,6 +169,7 @@ namespace MacChanger
         /// <exception cref="MacChangerException"></exception>
         public bool TryDhcpDisable()
         {
+            EnsureWmiObjects();
             if (_adapterConfig == null)
             {
                 return false;
@@ -200,6 +222,7 @@ namespace MacChanger
         /// <exception cref="MacChangerException"></exception>
         public bool TryDhcpEnable()
         {
+            EnsureWmiObjects();
             if (_adapterConfig == null)
             {
                 return false;
@@ -253,6 +276,7 @@ namespace MacChanger
         public bool TryDhcpRelease(out string message)
         {
             message = string.Empty;
+            EnsureWmiObjects();
             if (_adapterConfig == null)
             {
                 return false;
@@ -282,6 +306,7 @@ namespace MacChanger
         public bool TryDhcpRenew(out string message)
         {
             message = string.Empty;
+            EnsureWmiObjects();
             if (_adapterConfig == null)
             {
                 return false;
@@ -309,6 +334,7 @@ namespace MacChanger
         /// </returns>
         public bool TryDisableAdapter()
         {
+            EnsureWmiObjects();
             if (_adapter == null)
             {
                 return false;
@@ -332,6 +358,7 @@ namespace MacChanger
         /// </returns>
         public bool TryEnableAdapter()
         {
+            EnsureWmiObjects();
             if (_adapter == null)
             {
                 return false;
@@ -365,7 +392,7 @@ namespace MacChanger
             try
             {
                 var targetMac = mac != null ? mac.ToString() : string.Empty;
-                return UpdateRegistryMac(_registryKey, targetMac, _networkInterface.Description, out shouldReenable);
+                return UpdateRegistryMac(GetRegistryKey(), targetMac, _networkInterface.Description, out shouldReenable);
             }
             catch (Exception ex)
             {
@@ -452,7 +479,13 @@ namespace MacChanger
             object address;
             try
             {
-                using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
+                var registryKey = GetRegistryKey();
+                if (string.IsNullOrWhiteSpace(registryKey))
+                {
+                    return null;
+                }
+
+                using var regkey = Registry.LocalMachine.OpenSubKey(registryKey, false);
                 if (regkey == null)
                 {
                     return null;
@@ -513,7 +546,13 @@ namespace MacChanger
             // Ref: https://blog.technitium.com/2014/06/fixing-wrong-original-mac-address-in.html
             try
             {
-                using var regkey = Registry.LocalMachine.OpenSubKey(_registryKey, false);
+                var registryKey = GetRegistryKey();
+                if (string.IsNullOrWhiteSpace(registryKey))
+                {
+                    return new MacAddress(_networkInterface.GetPhysicalAddress());
+                }
+
+                using var regkey = Registry.LocalMachine.OpenSubKey(registryKey, false);
                 var address = regkey.GetValue("OriginalNetworkAddress");
                 if (address != null)
                 {
@@ -554,7 +593,93 @@ namespace MacChanger
         /// <summary>
         ///     Gets the registry key associated to this adapter.
         /// </summary>
-        private string GetRegistryKey() => $@"SYSTEM\ControlSet001\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{ExtractDeviceNumber():D4}";
+        private string GetRegistryKey()
+        {
+            lock (_syncRoot)
+            {
+                if (_registryResolved)
+                {
+                    return _registryKey ?? string.Empty;
+                }
+
+                _registryResolved = true;
+                _registryKey = TryResolveRegistryKey();
+
+                if (string.IsNullOrWhiteSpace(_registryKey) && !_wmiResolved)
+                {
+                    EnsureWmiObjects();
+                    var deviceNumber = ExtractDeviceNumber();
+                    if (deviceNumber >= 0)
+                    {
+                        _registryKey = $@"{RegistryClassKey}\{deviceNumber:D4}";
+                    }
+                }
+
+                return _registryKey ?? string.Empty;
+            }
+        }
+
+        private string? TryResolveRegistryKey()
+        {
+            try
+            {
+                using var baseKey = Registry.LocalMachine.OpenSubKey(RegistryClassKey, false);
+                if (baseKey == null)
+                {
+                    return null;
+                }
+
+                foreach (var name in baseKey.GetSubKeyNames())
+                {
+                    using var adapterKey = baseKey.OpenSubKey(name, false);
+                    var configId = adapterKey?.GetValue("NetCfgInstanceId") as string;
+                    if (string.Equals(configId, ConfigId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return $"{RegistryClassKey}\\{name}";
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
+        }
+
+        private void EnsureWmiObjects()
+        {
+            lock (_syncRoot)
+            {
+                if (_wmiResolved)
+                {
+                    return;
+                }
+
+                _wmiResolved = true;
+                try
+                {
+                    var escapedId = ConfigId.Replace("'", "''");
+                    _adapter = new ManagementObjectSearcher($"SELECT NetEnabled,PNPDeviceID,GUID,DeviceID FROM Win32_NetworkAdapter WHERE GUID = '{escapedId}'")
+                        .Get()
+                        .Cast<ManagementObject>()
+                        .FirstOrDefault();
+
+                    _adapterConfig = new ManagementObjectSearcher($"SELECT SettingID,DNSServerSearchOrder,DefaultIPGateway,IPAddress,IPSubnet FROM Win32_NetworkAdapterConfiguration WHERE SettingID = '{escapedId}'")
+                        .Get()
+                        .Cast<ManagementObject>()
+                        .FirstOrDefault();
+                }
+                catch
+                {
+                    _adapter = null;
+                    _adapterConfig = null;
+                }
+
+                _enabled = GetEnabled();
+                _hardwareId = GetHardwareId();
+            }
+        }
 
         private int SafeConvertToInt(object obj)
         {
@@ -567,6 +692,7 @@ namespace MacChanger
                 return -1;
             }
         }
+
         /// <summary>
         ///     Registry helper function
         /// </summary>
@@ -623,6 +749,7 @@ namespace MacChanger
 
             return true;
         }
+
         #region Dispose
 
         public void Dispose()
@@ -643,6 +770,7 @@ namespace MacChanger
                 }
 
                 _adapter = null;
+                _adapterConfig = null;
 
                 disposedValue = true;
             }
