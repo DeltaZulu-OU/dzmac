@@ -67,6 +67,17 @@ namespace MacChanger.Tests
         }
 
         [TestMethod]
+        public void VendorListShouldFailWhenOuiContainsValidFragmentOnly()
+        {
+            void InvalidButContainsFragment()
+            {
+                _ = _list.TryGetValue("ZZA1B2C3ZZ", out var _);
+            }
+
+            Assert.ThrowsException<ArgumentException>(InvalidButContainsFragment);
+        }
+
+        [TestMethod]
         public void VendorListShouldAllowEnumeration()
         {
             bool Enumerate()

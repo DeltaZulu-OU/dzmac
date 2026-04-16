@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
@@ -19,7 +20,7 @@ namespace MacChanger
     /// </remarks>
     public class NetworkAdapter : IDisposable
     {
-        private const string UnknownVendorIdentifier = "Unkown Vendor";
+        private const string UnknownVendorIdentifier = "Unknown Vendor";
         private const string RegistryClassKey = @"SYSTEM\ControlSet001\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
@@ -100,6 +101,7 @@ namespace MacChanger
                 }
                 catch
                 {
+                    Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read DHCPv4 status for adapter '{Name}'.");
                     return false;
                 }
             }
@@ -177,9 +179,13 @@ namespace MacChanger
                 return false;
             }
 
-            var gateway = ExtractGateway();
-            var ipAddress = ExtractIPConfig();
-            var dnsConfig = ExtractDnsConfig();
+            if (!TryExtractGateway(out var gateway)
+                || !TryExtractIPConfig(out var ipAddress)
+                || !TryExtractDnsConfig(out var dnsConfig))
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] DHCP disable aborted for adapter '{Name}' because required WMI config values were incomplete.");
+                return false;
+            }
 
             var enableStaticResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableStatic", ipAddress, null).GetPropertyValue("ReturnValue")) == 0;
             var setGatewayResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetGateways", gateway, null).GetPropertyValue("ReturnValue")) == 0;
@@ -231,9 +237,13 @@ namespace MacChanger
             }
 
             // Get old values for rollback
-            var oldGateway = ExtractGateway();
-            var oldIpAddress = ExtractIPConfig();
-            var oldDnsConfig1 = ExtractDnsConfig();
+            if (!TryExtractGateway(out var oldGateway)
+                || !TryExtractIPConfig(out var oldIpAddress)
+                || !TryExtractDnsConfig(out var oldDnsConfig1))
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] DHCP enable aborted for adapter '{Name}' because required WMI config values were incomplete.");
+                return false;
+            }
 
             // Set new values
             var newDnsConfig = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
@@ -435,45 +445,60 @@ namespace MacChanger
             return deviceNumber;
         }
 
-        private ManagementBaseObject ExtractDnsConfig()
+        private bool TryExtractDnsConfig(out ManagementBaseObject? dnsParams)
         {
-            // Get current values
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var dnsServerSearchOrder = (string[])_adapterConfig.GetPropertyValue("DNSServerSearchOrder");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            dnsParams = null;
+            if (_adapterConfig == null)
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] DNS extraction failed for adapter '{Name}': adapter config object is null.");
+                return false;
+            }
 
-            // Create parameter object
-            var dnsParams = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
+            var dnsServerSearchOrder = _adapterConfig.GetPropertyValue("DNSServerSearchOrder") as string[] ?? Array.Empty<string>();
+            dnsParams = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
             dnsParams["DNSServerSearchOrder"] = dnsServerSearchOrder;
-            return dnsParams;
+            return true;
         }
 
-        private ManagementBaseObject ExtractGateway()
+        private bool TryExtractGateway(out ManagementBaseObject? gatewayParams)
         {
-            // Get current values
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var gatewayAddress = (string[])_adapterConfig.GetPropertyValue("DefaultIPGateway");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            gatewayParams = null;
+            if (_adapterConfig == null)
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Gateway extraction failed for adapter '{Name}': adapter config object is null.");
+                return false;
+            }
 
-            // Create parameter object
-            var gatewayParams = _adapterConfig.GetMethodParameters("SetGateways");
+            var gatewayAddress = _adapterConfig.GetPropertyValue("DefaultIPGateway") as string[] ?? Array.Empty<string>();
+            gatewayParams = _adapterConfig.GetMethodParameters("SetGateways");
             gatewayParams["DefaultIPGateway"] = gatewayAddress;
-            return gatewayParams;
+            return true;
         }
 
-        private ManagementBaseObject ExtractIPConfig()
+        private bool TryExtractIPConfig(out ManagementBaseObject? ipParams)
         {
-            // Get current values
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var ipAddress = ((string[])_adapterConfig.GetPropertyValue("IPAddress"))[0];
-            var subnetMask = ((string[])_adapterConfig.GetPropertyValue("IPSubnet"))[0];
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            ipParams = null;
+            if (_adapterConfig == null)
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] IP extraction failed for adapter '{Name}': adapter config object is null.");
+                return false;
+            }
 
-            // Create parameter object
-            var ipParams = _adapterConfig.GetMethodParameters("EnableStatic");
+            var ipAddresses = _adapterConfig.GetPropertyValue("IPAddress") as string[];
+            var subnetMasks = _adapterConfig.GetPropertyValue("IPSubnet") as string[];
+            if (ipAddresses == null || subnetMasks == null || ipAddresses.Length == 0 || subnetMasks.Length == 0)
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] IP extraction failed for adapter '{Name}': missing IPAddress/IPSubnet values.");
+                return false;
+            }
+
+            var ipAddress = ipAddresses[0];
+            var subnetMask = subnetMasks[0];
+
+            ipParams = _adapterConfig.GetMethodParameters("EnableStatic");
             ipParams["IPAddress"] = new string[] { ipAddress };
             ipParams["SubnetMask"] = new string[] { subnetMask };
-            return ipParams;
+            return true;
         }
 
         private MacAddress? GetActiveMac()
@@ -501,6 +526,7 @@ namespace MacChanger
             }
             catch
             {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read active MAC from registry for adapter '{Name}'.");
                 return null;
             }
             var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
@@ -564,6 +590,7 @@ namespace MacChanger
             }
             catch
             {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read original MAC from registry for adapter '{Name}'. Falling back to physical address.");
                 return new MacAddress(_networkInterface.GetPhysicalAddress());
             }
 
@@ -643,6 +670,7 @@ namespace MacChanger
             }
             catch
             {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to resolve registry key from class map for adapter '{Name}'.");
                 return null;
             }
 
@@ -674,6 +702,7 @@ namespace MacChanger
                 }
                 catch
                 {
+                    Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to resolve WMI objects for adapter '{Name}'.");
                     _adapter = null;
                     _adapterConfig = null;
                 }
@@ -691,6 +720,7 @@ namespace MacChanger
             }
             catch
             {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to convert WMI return code to int.");
                 return -1;
             }
         }
@@ -745,8 +775,8 @@ namespace MacChanger
             }
             else
             {
-                regkey.DeleteValue("NetworkAddress");
-                regkey.DeleteValue("OriginalNetworkAddress");
+                regkey.DeleteValue("NetworkAddress", false);
+                regkey.DeleteValue("OriginalNetworkAddress", false);
             }
 
             return true;

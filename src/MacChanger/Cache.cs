@@ -13,7 +13,7 @@ namespace MacChanger
         private readonly string _databaseFile;
         private SQLiteConnection? _connection;
         private bool _disposedValue;
-        private readonly Regex _pattern = new Regex("[0-9A-F]{6}");
+        private readonly Regex _pattern = new Regex("^[0-9A-F]{6}$");
 
         public int Count { get; private set; }
 

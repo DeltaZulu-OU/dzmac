@@ -33,6 +33,7 @@ namespace MacChanger.Gui.Forms
         {
             _vm = new VendorManager();
             InitializeComponent();
+            ConfigureV1Surface();
 
             _loadingProgressBar = new ProgressBar
             {
@@ -347,6 +348,32 @@ namespace MacChanger.Gui.Forms
         #endregion EventHandlers
 
         #region Private Methods
+
+        private void ConfigureV1Surface()
+        {
+            // Keep v1 UI surface aligned with implemented feature set.
+            ExportReportItem.Visible = false;
+            toolStripSeparator1.Visible = false;
+            OpenPresetItem.Visible = false;
+            SavePresetItem.Visible = false;
+            SavePresetAsItem.Visible = false;
+            toolStripSeparator2.Visible = false;
+            ImportPresetItem.Visible = false;
+            ExportPresetItem.Visible = false;
+            AssociateItem.Visible = false;
+            toolStripSeparator7.Visible = false;
+            DeleteItem.Visible = false;
+            CliParamsHelpItem.Visible = false;
+            toolStripSeparator6.Visible = false;
+            CheckUpdateItem.Visible = false;
+
+            if (InfoTabs.TabPages.Contains(PresetsPage))
+            {
+                InfoTabs.TabPages.Remove(PresetsPage);
+            }
+
+            PersistentAddressCheckBox.Visible = false;
+        }
 
         /// <summary>
         ///     A placeholder method for events not implemented.
