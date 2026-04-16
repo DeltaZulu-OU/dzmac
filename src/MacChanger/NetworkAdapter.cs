@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 #nullable enable
+
 namespace MacChanger
 {
     /// <summary>
@@ -106,6 +107,7 @@ namespace MacChanger
 
         public bool IsIPv4Enabled { get; }
         public bool IsIPv6Enabled { get; }
+
         /// <summary>
         ///     Gets the current operational state of the network connection.
         /// </summary>

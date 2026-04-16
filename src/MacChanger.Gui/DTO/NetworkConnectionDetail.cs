@@ -27,6 +27,7 @@ namespace MacChanger.Gui.DTO
         internal bool IsChanged => _adapter.Changed;
         private readonly NetworkAdapter _adapter;
         private bool disposedValue;
+
         public NetworkConnectionDetail(NetworkAdapter adapter)
         {
             _adapter = adapter;
@@ -37,6 +38,7 @@ namespace MacChanger.Gui.DTO
         public bool TryEnable() => _adapter.TryEnableAdapter();
 
         public bool TryDisable() => _adapter.TryDisableAdapter();
+
         public bool TryDhcpEnable() => _adapter.TryDhcpEnable();
 
         public bool TryDhcpDisable() => _adapter.TryDhcpDisable();
@@ -50,6 +52,7 @@ namespace MacChanger.Gui.DTO
         public bool TryReset() => _adapter.Changed && _adapter.TrySetRegistryMac(null);
 
         private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)" : OriginalMac;
+
         private string GetDebuggerDisplay() => Name;
 
         private string ReadableSpeed(long speed)
@@ -78,7 +81,9 @@ namespace MacChanger.Gui.DTO
                 return $"{speed} bps";
             }
         }
+
         #region Dispose
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -98,6 +103,7 @@ namespace MacChanger.Gui.DTO
                 disposedValue = true;
             }
         }
+
         #endregion Dispose
     }
 }

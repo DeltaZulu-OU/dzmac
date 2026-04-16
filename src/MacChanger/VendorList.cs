@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,11 +25,15 @@ namespace MacChanger
                 _cache.AddRange(Downloader.GetAll());
             }
         }
+
         ///  <inheritdoc/>
         public Vendor? this[string oui] => Get(oui);
+
         ///  <inheritdoc/>
         public Vendor? this[int index] => _cache[index];
+
         Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index] ?? default;
+
         public Vendor? Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
 
         ///  <inheritdoc/>
@@ -64,7 +69,9 @@ namespace MacChanger
             vendors = Get(oui, useWildcard);
             return vendors != null;
         }
+
         #region Dispose
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -85,6 +92,7 @@ namespace MacChanger
                 disposedValue = true;
             }
         }
+
         #endregion Dispose
 
         ///  <inheritdoc/>

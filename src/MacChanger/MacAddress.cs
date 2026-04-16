@@ -189,6 +189,7 @@ namespace MacChanger
             MacDelimiter.Colon => SafeStringFormat(formatter, "{0:C}", _macAddress),
             _ => _macAddress
         };
+
         /// <summary>
         ///     Gets a string comprised of hexadecimal values, and converts it into a byte array
         /// </summary>
@@ -238,7 +239,7 @@ namespace MacChanger
             }
         }
 
-        bool Equals(MacAddress other)
+        private bool Equals(MacAddress other)
         {
             if (other is null)
                 return false;

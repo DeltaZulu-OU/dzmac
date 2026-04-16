@@ -9,7 +9,7 @@ namespace MacChanger
     public sealed class MacChangerException : Exception
     {
         /// <inheritdoc />
-        public MacChangerException():base()
+        public MacChangerException() : base()
         {
         }
 

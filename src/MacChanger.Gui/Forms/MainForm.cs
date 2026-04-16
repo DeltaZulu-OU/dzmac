@@ -339,7 +339,6 @@ namespace MacChanger.Gui.Forms
 
         #region Private Methods
 
-
         /// <summary>
         ///     A placeholder method for events not implemented.
         /// </summary>

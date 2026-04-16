@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using System;
 
 namespace MacChanger
@@ -14,6 +15,7 @@ namespace MacChanger
         private readonly Random _random = new Random();
         private bool disposedValue;
         internal VendorList Vendors => _vendors ??= new VendorList();
+
         /// <summary>
         ///     Checks if a vendor with the provided OUI exists.
         ///     There may be more than one vendors as OUIs are not unique.
@@ -54,9 +56,11 @@ namespace MacChanger
         }
 
         public VendorList GetVendorList() => Vendors;
+
         public void Refresh() => Vendors.Refresh();
 
         #region Dispose
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -77,6 +81,7 @@ namespace MacChanger
                 disposedValue = true;
             }
         }
-        #endregion
+
+        #endregion Dispose
     }
 }

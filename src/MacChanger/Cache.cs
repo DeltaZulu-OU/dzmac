@@ -1,4 +1,5 @@
 ﻿#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -224,7 +225,9 @@ namespace MacChanger
             reader.Read();
             Count = reader.GetInt32(0);
         }
+
         #region Dispose
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
@@ -246,6 +249,7 @@ namespace MacChanger
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
         #endregion Dispose
     }
 }

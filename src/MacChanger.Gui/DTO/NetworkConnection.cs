@@ -54,10 +54,12 @@ namespace MacChanger.Gui.DTO
 
         [OLVColumn("Speed", DisplayIndex = 5)]
         public string Speed => Detail.Speed;
+
         internal NetworkConnectionDetail Detail { get; set; }
         private bool enabled;
 
         private bool disposedValue;
+
         public NetworkConnection(NetworkConnectionDetail advanced)
         {
             Detail = advanced;
@@ -71,6 +73,7 @@ namespace MacChanger.Gui.DTO
         private string GetDebuggerDisplay() => ConnectionName;
 
         #region Dispose
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -90,6 +93,7 @@ namespace MacChanger.Gui.DTO
                 disposedValue = true;
             }
         }
+
         #endregion Dispose
     }
 }

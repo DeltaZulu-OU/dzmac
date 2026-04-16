@@ -10,7 +10,7 @@ namespace MacChanger.Gui.Controls
     /// </summary>
     public partial class MacTextBox : UserControl
     {
-        readonly KeyPressEventArgs KeyPressBuffer = new KeyPressEventArgs((char)0);
+        private readonly KeyPressEventArgs KeyPressBuffer = new KeyPressEventArgs((char)0);
 
         public MacTextBox()
         {

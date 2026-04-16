@@ -10,7 +10,7 @@ namespace MacChanger.Gui
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
 
@@ -20,6 +20,6 @@ namespace MacChanger.Gui
         }
 
         // When logging is implemented, write the eror to log for diagnostics and exit.
-        static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs args) => _ = MessageBox.Show($"Unhandled exception caught : {((Exception)args.ExceptionObject).Message}", "Unhandled exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs args) => _ = MessageBox.Show($"Unhandled exception caught : {((Exception)args.ExceptionObject).Message}", "Unhandled exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 }

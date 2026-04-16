@@ -91,7 +91,8 @@ namespace MacChanger.Gui.Forms
                 return ((AssemblyCompanyAttribute)attributes[0]).Company;
             }
         }
-        #endregion
+
+        #endregion Assembly Attribute Accessors
 
         private void OkButton_Click(object sender, EventArgs e) => Close();
 
