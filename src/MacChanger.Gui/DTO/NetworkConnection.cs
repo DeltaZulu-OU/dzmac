@@ -51,7 +51,7 @@ namespace Dzmac.Gui.DTO
         public string LinkStatus => Detail.LinkStatus;
 
         [OLVColumn("MAC Address", DisplayIndex = 3)]
-        public string MacAddress => Detail.ActiveMac;
+        public string MacAddress => Changed == "Yes" ? $"{Detail.ActiveMac} (Changed)" : Detail.OriginalMac;
 
         [OLVColumn("Speed", DisplayIndex = 5)]
         public string Speed => Detail.Speed;

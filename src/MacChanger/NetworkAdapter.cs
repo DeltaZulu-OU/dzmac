@@ -732,7 +732,7 @@ namespace MacChanger
                 return UnknownVendorIdentifier;
             }
 
-            return vendor.ToString();
+            return vendor.Value.VendorName;
         }
 
         private bool GetEnabled()

@@ -84,7 +84,7 @@ namespace Dzmac.Gui.DTO
 
         public bool TryReset() => _adapter.Changed && _adapter.TrySetRegistryMac(null);
 
-        private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) + " (Changed)" : OriginalMac;
+        private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) : OriginalMac;
 
         private string GetDebuggerDisplay() => Name;
 
