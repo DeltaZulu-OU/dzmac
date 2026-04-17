@@ -33,12 +33,19 @@ namespace MacChanger.Gui.Forms
         private bool _locallyAdministered;
         private bool _reenableOnChange;
         private NetworkConnectionDetail _selected;
+        private ListView _ipv4AddressListView;
+        private ListView _ipv4GatewayListView;
+        private ListView _ipv4DnsListView;
+        private ListView _ipv6AddressListView;
+        private ListView _ipv6GatewayListView;
+        private ListView _ipv6DnsListView;
 
         public MainForm()
         {
             _vm = new VendorManager();
             InitializeComponent();
             ConfigureV1Surface();
+            InitializeIpAddressPage();
 
             _loadingProgressBar = new ProgressBar
             {
@@ -424,6 +431,95 @@ namespace MacChanger.Gui.Forms
             PersistentAddressCheckBox.Visible = false;
         }
 
+        private void InitializeIpAddressPage()
+        {
+            IPAddressPage.Controls.Clear();
+
+            var rootLayout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1
+            };
+            rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+            rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
+
+            var ipv4Column = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 3
+            };
+            ipv4Column.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+            ipv4Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
+            ipv4Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
+
+            var ipv6Column = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 3
+            };
+            ipv6Column.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+            ipv6Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
+            ipv6Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
+
+            _ipv4AddressListView = CreateDetailsListView("IP Address", "Subnet Mask");
+            _ipv4GatewayListView = CreateDetailsListView("Gateway");
+            _ipv4DnsListView = CreateDetailsListView("DNS Server");
+
+            _ipv6AddressListView = CreateDetailsListView("Unicast IPv6 Address", "Prefix");
+            _ipv6GatewayListView = CreateDetailsListView("Gateway/Next Hop");
+            _ipv6DnsListView = CreateDetailsListView("DNS Server");
+
+            ipv4Column.Controls.Add(CreateIpSectionGroup("Internet Protocol v4 (DHCPv4)", _ipv4AddressListView), 0, 0);
+            ipv4Column.Controls.Add(CreateIpSectionGroup("Gateway", _ipv4GatewayListView), 0, 1);
+            ipv4Column.Controls.Add(CreateIpSectionGroup("DNS Server", _ipv4DnsListView), 0, 2);
+
+            // DHCPv6 operations are intentionally out of scope; IPv6 is read-only status.
+            ipv6Column.Controls.Add(CreateIpSectionGroup("Internet Protocol v6 (Stateless)", _ipv6AddressListView), 0, 0);
+            ipv6Column.Controls.Add(CreateIpSectionGroup("Gateway/Next Hop", _ipv6GatewayListView), 0, 1);
+            ipv6Column.Controls.Add(CreateIpSectionGroup("DNS Server", _ipv6DnsListView), 0, 2);
+
+            rootLayout.Controls.Add(ipv4Column, 0, 0);
+            rootLayout.Controls.Add(ipv6Column, 1, 0);
+
+            IPAddressPage.Controls.Add(rootLayout);
+        }
+
+        private static GroupBox CreateIpSectionGroup(string title, Control content)
+        {
+            var group = new GroupBox
+            {
+                Dock = DockStyle.Fill,
+                Text = title,
+                Padding = new Padding(6)
+            };
+
+            group.Controls.Add(content);
+            return group;
+        }
+
+        private static ListView CreateDetailsListView(params string[] columns)
+        {
+            var listView = new ListView
+            {
+                Dock = DockStyle.Fill,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = true,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable
+            };
+
+            var columnWidth = columns.Length == 1 ? 600 : 280;
+            foreach (var column in columns)
+            {
+                listView.Columns.Add(column, columnWidth);
+            }
+
+            return listView;
+        }
+
         /// <summary>
         ///     A placeholder method for events not implemented.
         /// </summary>
@@ -457,6 +553,79 @@ namespace MacChanger.Gui.Forms
             }
         }
 
+        private void BindIpAddressDetails()
+        {
+            if (_ipv4AddressListView == null)
+            {
+                return;
+            }
+
+            PopulateIpv4AddressRows(_selected?.Ipv4Addresses ?? Array.Empty<AdapterIpv4Address>());
+            PopulateSingleValueRows(_ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), "No IPv4 gateway");
+            PopulateSingleValueRows(_ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), "No IPv4 DNS server");
+
+            PopulateIpv6AddressRows(_selected?.Ipv6Addresses ?? Array.Empty<AdapterIpv6Address>());
+            PopulateSingleValueRows(_ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), "No IPv6 gateway");
+            PopulateSingleValueRows(_ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), "No IPv6 DNS server");
+        }
+
+        private void PopulateIpv4AddressRows(IEnumerable<AdapterIpv4Address> addresses)
+        {
+            _ipv4AddressListView.BeginUpdate();
+            _ipv4AddressListView.Items.Clear();
+
+            foreach (var entry in addresses)
+            {
+                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.SubnetMask }));
+            }
+
+            if (_ipv4AddressListView.Items.Count == 0)
+            {
+                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { "No IPv4 address", string.Empty }));
+            }
+
+            _ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            _ipv4AddressListView.EndUpdate();
+        }
+
+        private void PopulateIpv6AddressRows(IEnumerable<AdapterIpv6Address> addresses)
+        {
+            _ipv6AddressListView.BeginUpdate();
+            _ipv6AddressListView.Items.Clear();
+
+            foreach (var entry in addresses)
+            {
+                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.PrefixLength.ToString() }));
+            }
+
+            if (_ipv6AddressListView.Items.Count == 0)
+            {
+                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { "No IPv6 address", string.Empty }));
+            }
+
+            _ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            _ipv6AddressListView.EndUpdate();
+        }
+
+        private static void PopulateSingleValueRows(ListView listView, IEnumerable<string> values, string fallback)
+        {
+            listView.BeginUpdate();
+            listView.Items.Clear();
+
+            foreach (var value in values)
+            {
+                listView.Items.Add(new ListViewItem(value));
+            }
+
+            if (listView.Items.Count == 0)
+            {
+                listView.Items.Add(new ListViewItem(fallback));
+            }
+
+            listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listView.EndUpdate();
+        }
+
         private void BindSelection()
         {
             var hasSelection = _selected != null;
@@ -473,6 +642,7 @@ namespace MacChanger.Gui.Forms
                 ActiveMacValueTextbox.Text = "...";
                 ActiveMacVendorTextbox.Text = "...";
                 DhcpEnabledItem.Checked = false;
+                BindIpAddressDetails();
                 UpdateSelectionState();
                 return;
             }
@@ -488,6 +658,7 @@ namespace MacChanger.Gui.Forms
             ActiveMacValueTextbox.Text = _selected.ActiveMac;
             ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
             DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
+            BindIpAddressDetails();
             UpdateSelectionState();
         }
 

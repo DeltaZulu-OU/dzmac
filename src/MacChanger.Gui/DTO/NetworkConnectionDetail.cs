@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace MacChanger.Gui.DTO
@@ -25,6 +26,12 @@ namespace MacChanger.Gui.DTO
         public string Name { get; }
         public string OriginalMac { get; }
         public string OriginalVendor { get; }
+        public IReadOnlyList<AdapterIpv4Address> Ipv4Addresses { get; }
+        public IReadOnlyList<AdapterIpv6Address> Ipv6Addresses { get; }
+        public IReadOnlyList<string> Ipv4Gateways { get; }
+        public IReadOnlyList<string> Ipv6Gateways { get; }
+        public IReadOnlyList<string> Ipv4DnsServers { get; }
+        public IReadOnlyList<string> Ipv6DnsServers { get; }
         public string Speed => ReadableSpeed(RawSpeed);
         internal bool IsChanged { get; }
         private long RawSpeed { get; }
@@ -50,6 +57,12 @@ namespace MacChanger.Gui.DTO
             IsChanged = _adapter.Changed;
             ActiveMac = GetActiveMac();
             RawSpeed = _adapter.Speed;
+            Ipv4Addresses = _adapter.GetIpv4Addresses();
+            Ipv6Addresses = _adapter.GetIpv6Addresses();
+            Ipv4Gateways = _adapter.GetIpv4Gateways();
+            Ipv6Gateways = _adapter.GetIpv6Gateways();
+            Ipv4DnsServers = _adapter.GetIpv4DnsServers();
+            Ipv6DnsServers = _adapter.GetIpv6DnsServers();
         }
 
         public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);

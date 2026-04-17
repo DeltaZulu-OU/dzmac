@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -10,6 +13,30 @@ using Microsoft.Win32;
 
 namespace MacChanger
 {
+    public sealed class AdapterIpv4Address
+    {
+        public string Address { get; }
+        public string SubnetMask { get; }
+
+        public AdapterIpv4Address(string address, string subnetMask)
+        {
+            Address = address;
+            SubnetMask = subnetMask;
+        }
+    }
+
+    public sealed class AdapterIpv6Address
+    {
+        public string Address { get; }
+        public int PrefixLength { get; }
+
+        public AdapterIpv6Address(string address, int prefixLength)
+        {
+            Address = address;
+            PrefixLength = prefixLength;
+        }
+    }
+
     /// <summary>
     ///     Represents a Windows network interface. Wrapper around the .NET API for network
     ///     interfaces, as well as for the unmanaged device.
@@ -348,6 +375,69 @@ namespace MacChanger
 
             return resultCode == 0 || resultCode == 1;
         }
+
+        public IReadOnlyList<AdapterIpv4Address> GetIpv4Addresses()
+        {
+            var addresses = new List<AdapterIpv4Address>();
+            try
+            {
+                var props = _networkInterface.GetIPProperties();
+                foreach (var address in props.UnicastAddresses)
+                {
+                    if (address.Address.AddressFamily != AddressFamily.InterNetwork)
+                    {
+                        continue;
+                    }
+
+                    var subnetMask = address.IPv4Mask?.ToString() ?? string.Empty;
+                    addresses.Add(new AdapterIpv4Address(address.Address.ToString(), subnetMask));
+                }
+            }
+            catch
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read IPv4 addresses for adapter '{Name}'.");
+            }
+
+            return addresses;
+        }
+
+        public IReadOnlyList<AdapterIpv6Address> GetIpv6Addresses()
+        {
+            var addresses = new List<AdapterIpv6Address>();
+            try
+            {
+                var props = _networkInterface.GetIPProperties();
+                foreach (var address in props.UnicastAddresses)
+                {
+                    if (address.Address.AddressFamily != AddressFamily.InterNetworkV6)
+                    {
+                        continue;
+                    }
+
+                    var normalizedAddress = NormalizeIpAddress(address.Address);
+                    if (addresses.Any(a => string.Equals(a.Address, normalizedAddress, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
+                    addresses.Add(new AdapterIpv6Address(normalizedAddress, address.PrefixLength));
+                }
+            }
+            catch
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read IPv6 addresses for adapter '{Name}'.");
+            }
+
+            return addresses;
+        }
+
+        public IReadOnlyList<string> GetIpv4Gateways() => GetGateways(AddressFamily.InterNetwork);
+
+        public IReadOnlyList<string> GetIpv6Gateways() => GetGateways(AddressFamily.InterNetworkV6);
+
+        public IReadOnlyList<string> GetIpv4DnsServers() => GetDnsServers(AddressFamily.InterNetwork);
+
+        public IReadOnlyList<string> GetIpv6DnsServers() => GetDnsServers(AddressFamily.InterNetworkV6);
 
         /// <summary>
         ///     Tries to disable the network adapter.
@@ -818,6 +908,76 @@ namespace MacChanger
                 Diagnostics.Warning("adapter_config_method_management_exception", ex.Message, ("adapter", Name), ("method", methodName));
                 return false;
             }
+        }
+
+        private IReadOnlyList<string> GetGateways(AddressFamily family)
+        {
+            var gateways = new List<string>();
+            try
+            {
+                var props = _networkInterface.GetIPProperties();
+                foreach (var gatewayAddress in props.GatewayAddresses)
+                {
+                    if (gatewayAddress.Address.AddressFamily == family)
+                    {
+                        var normalizedAddress = NormalizeIpAddress(gatewayAddress.Address);
+                        if (!gateways.Any(g => string.Equals(g, normalizedAddress, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            gateways.Add(normalizedAddress);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read gateway addresses for adapter '{Name}'.");
+            }
+
+            return gateways;
+        }
+
+        private IReadOnlyList<string> GetDnsServers(AddressFamily family)
+        {
+            var dnsServers = new List<string>();
+            try
+            {
+                var props = _networkInterface.GetIPProperties();
+                foreach (var dnsAddress in props.DnsAddresses)
+                {
+                    if (dnsAddress.AddressFamily == family)
+                    {
+                        var normalizedAddress = NormalizeIpAddress(dnsAddress);
+                        if (!dnsServers.Any(d => string.Equals(d, normalizedAddress, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            dnsServers.Add(normalizedAddress);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read DNS server addresses for adapter '{Name}'.");
+            }
+
+            return dnsServers;
+        }
+
+        private static string NormalizeIpAddress(IPAddress address)
+        {
+            var formatted = address.ToString();
+
+            // Link-local IPv6 addresses may include a scope ID suffix (e.g. "%12").
+            // TMAC-style display should show the raw address without interface scope marker.
+            if (address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                var scopeSeparator = formatted.IndexOf('%');
+                if (scopeSeparator >= 0)
+                {
+                    return formatted.Substring(0, scopeSeparator);
+                }
+            }
+
+            return formatted;
         }
 
         /// <summary>
