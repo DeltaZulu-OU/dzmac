@@ -18,7 +18,6 @@ namespace MacChanger.Gui.Forms
         private readonly Panel _loadingPanel;
         private readonly ProgressBar _loadingProgressBar;
         private readonly VendorManager _vm;
-        private bool _hasInitialRenderCompleted;
         private ListView _ipv4AddressListView;
         private ListView _ipv4DnsListView;
         private ListView _ipv4GatewayListView;
@@ -84,7 +83,6 @@ namespace MacChanger.Gui.Forms
 
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             VendorComboBox.Enabled = false;
-            Shown += MainForm_Shown;
             UpdateSelectionState();
         }
 
@@ -245,12 +243,6 @@ namespace MacChanger.Gui.Forms
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
-
-        private void MainForm_Shown(object sender, EventArgs e)
-        {
-            _hasInitialRenderCompleted = true;
-            TryBindVendorsAfterFirstRender();
-        }
 
         private void MakeTextboxBackgroundTransparent()
         {
@@ -665,7 +657,7 @@ namespace MacChanger.Gui.Forms
                     _vendors = vendors;
                     VendorComboBox.Enabled = true;
                     _isVendorListReady = true;
-                    TryBindVendorsAfterFirstRender();
+                    TryBindVendorsWhenReady();
                     UpdateSelectionState();
 
                     if (MainStatusBar.Text == "Loading vendor list...")
@@ -850,9 +842,9 @@ namespace MacChanger.Gui.Forms
             UpdateSelectionState();
         }
 
-        private void TryBindVendorsAfterFirstRender()
+        private void TryBindVendorsWhenReady()
         {
-            if (_isVendorComboBound || !_hasInitialRenderCompleted || !_isVendorListReady || _vendors == null)
+            if (_isVendorComboBound || !_isVendorListReady || _vendors == null)
             {
                 return;
             }
