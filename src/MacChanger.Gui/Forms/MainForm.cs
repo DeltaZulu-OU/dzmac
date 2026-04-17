@@ -297,7 +297,7 @@ namespace MacChanger.Gui.Forms
             }
             else
             {
-                VendorComboBox.Text = matchedVendor?.ToString() ?? string.Empty;
+                VendorComboBox.Text = matchedVendor?.VendorName ?? string.Empty;
             }
 
             if (_locallyAdministered)

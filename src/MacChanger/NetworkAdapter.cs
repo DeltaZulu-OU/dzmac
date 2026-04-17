@@ -821,7 +821,7 @@ namespace MacChanger
                 return UnknownVendorIdentifier;
             }
 
-            return vendor.ToString();
+            return vendor?.VendorName;
         }
 
         /// <summary>
