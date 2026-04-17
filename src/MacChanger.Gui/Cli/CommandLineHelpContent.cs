@@ -71,7 +71,7 @@ OPTIONS:
             Enables network connection to apply changes.
 
         -ro
-            Restores the original MAC address record used by MacChanger.
+            Restores the original MAC address record.
 
     Help Option:
         -help
