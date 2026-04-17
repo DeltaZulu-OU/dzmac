@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
@@ -11,34 +11,18 @@ namespace MacChanger.Gui.Forms
         public AboutBox()
         {
             InitializeComponent();
-            Text = $"About {AssemblyTitle}";
-            labelProductName.Text = AssemblyProduct;
-            labelVersion.Text = $"Version {AssemblyVersion}";
-            labelCopyright.Text = AssemblyCopyright;
-            labelCompanyName.Text = AssemblyCompany;
-            textBoxDescription.Text = AssemblyDescription;
+
+            var productName = AssemblyProduct;
+            Text = $"About {productName}";
+            ProductNameLabel.Text = productName;
+            VersionLabel.Text = $"Version {AssemblyVersion}";
+            CopyrightLabel.Text = AssemblyCopyright;
+            DescriptionLabel.Text = AssemblyDescription;
         }
 
         #region Assembly Attribute Accessors
 
-        public string AssemblyTitle
-        {
-            get
-            {
-                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
-                if (attributes.Length > 0)
-                {
-                    var titleAttribute = (AssemblyTitleAttribute)attributes[0];
-                    if (titleAttribute.Title != "")
-                    {
-                        return titleAttribute.Title;
-                    }
-                }
-                return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase);
-            }
-        }
-
-        public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "Unknown";
 
         public string AssemblyDescription
         {
@@ -47,9 +31,13 @@ namespace MacChanger.Gui.Forms
                 var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
                 if (attributes.Length == 0)
                 {
-                    return "";
+                    return "Change and manage network adapter MAC addresses.";
                 }
-                return ((AssemblyDescriptionAttribute)attributes[0]).Description;
+
+                var description = ((AssemblyDescriptionAttribute)attributes[0]).Description;
+                return string.IsNullOrWhiteSpace(description)
+                    ? "Change and manage network adapter MAC addresses."
+                    : description;
             }
         }
 
@@ -60,9 +48,11 @@ namespace MacChanger.Gui.Forms
                 var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
                 if (attributes.Length == 0)
                 {
-                    return "";
+                    return "MacChanger";
                 }
-                return ((AssemblyProductAttribute)attributes[0]).Product;
+
+                var product = ((AssemblyProductAttribute)attributes[0]).Product;
+                return string.IsNullOrWhiteSpace(product) ? "MacChanger" : product;
             }
         }
 
@@ -75,26 +65,20 @@ namespace MacChanger.Gui.Forms
                 {
                     return "";
                 }
-                return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
-            }
-        }
 
-        public string AssemblyCompany
-        {
-            get
-            {
-                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
-                if (attributes.Length == 0)
-                {
-                    return "";
-                }
-                return ((AssemblyCompanyAttribute)attributes[0]).Company;
+                return ((AssemblyCopyrightAttribute)attributes[0]).Copyright;
             }
         }
 
         #endregion Assembly Attribute Accessors
 
-        private void OkButton_Click(object sender, EventArgs e) => Close();
+        private void CloseButton_Click(object sender, EventArgs e) => Close();
+
+        private void ProjectLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ProjectLinkLabel.LinkVisited = true;
+            Process.Start("https://github.com/zbalkan/MacChanger");
+        }
 
         private string GetDebuggerDisplay() => "About";
     }
