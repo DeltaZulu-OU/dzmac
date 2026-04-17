@@ -591,13 +591,37 @@ namespace MacChanger
         private bool GetEnabled()
         {
             var enabled = _adapter?["NetEnabled"];
-            return enabled != null && (bool)enabled;
+            if (enabled is bool netEnabled)
+            {
+                return netEnabled;
+            }
+
+            // CIM_NetworkAdapter fallback: 2 = Enabled
+            var enabledState = _adapter?["EnabledState"];
+            if (enabledState != null && ushort.TryParse(enabledState.ToString(), out var state))
+            {
+                return state == 2;
+            }
+
+            return false;
         }
 
         private string GetHardwareId()
         {
             var hardwareId = _adapter?["PNPDeviceID"];
-            return hardwareId == null ? string.Empty : (string)hardwareId;
+            if (hardwareId is string pnpDeviceId)
+            {
+                return pnpDeviceId;
+            }
+
+            // CIM_NetworkAdapter fallback
+            var deviceId = _adapter?["DeviceID"];
+            if (deviceId is string cimDeviceId)
+            {
+                return cimDeviceId;
+            }
+
+            return string.Empty;
         }
 
         private MacAddress GetOriginalMacAddress()
@@ -725,9 +749,9 @@ namespace MacChanger
                 {
                     var escapedId = ConfigId.Replace("'", "''");
                     _adapter = new ManagementObjectSearcher($"SELECT NetEnabled,PNPDeviceID,GUID,DeviceID FROM Win32_NetworkAdapter WHERE GUID = '{escapedId}'")
-                        .Get()
-                        .Cast<ManagementObject>()
-                        .FirstOrDefault();
+                            .Get()
+                            .Cast<ManagementObject>()
+                            .FirstOrDefault();
 
                     _adapterConfig = new ManagementObjectSearcher($"SELECT SettingID,DNSServerSearchOrder,DefaultIPGateway,IPAddress,IPSubnet FROM Win32_NetworkAdapterConfiguration WHERE SettingID = '{escapedId}'")
                         .Get()
