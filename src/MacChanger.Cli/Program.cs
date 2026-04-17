@@ -8,6 +8,8 @@ namespace MacChanger.Cli
 
         public static void Main()
         {
+            Diagnostics.Info("application_start", ("host", "cli"));
+
             var manager = new VendorManager();
             var list = manager.GetVendorList();
 
@@ -24,6 +26,8 @@ namespace MacChanger.Cli
                 }
                 Console.WriteLine($"Vendor: {vendor}");
             }
+
+            Diagnostics.Info("application_stop", ("host", "cli"));
         }
     }
 }

@@ -76,6 +76,7 @@
     <Compile Include="Cache.cs" />
     <Compile Include="Downloader.cs" />
     <Compile Include="Diagnostics.cs" />
+    <Compile Include="DiagnosticsEventCatalog.cs" />
     <Compile Include="MacChangerException.cs" />
     <Compile Include="Vendor.cs" />
     <Compile Include="VendorManager.cs" />

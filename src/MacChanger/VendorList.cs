@@ -51,14 +51,25 @@ namespace MacChanger
             // There must not be a possibility of empty cache but t is better to check
             if (_cache is null) throw new MacChangerException("Cache object does not exist");
 
-            var downloaded = Downloader.GetAll();
-            if (!_cache.IsEmpty)
-            {
-                _cache.Clear();
-            }
-            _cache.AddRange(downloaded);
+            Diagnostics.Info("vendor_refresh_started", ("cacheWasEmpty", _cache.IsEmpty));
 
-            Diagnostics.Info("vendor_cache_refreshed", ("recordCount", _cache.Count));
+            try
+            {
+                var downloaded = Downloader.GetAll();
+                if (!_cache.IsEmpty)
+                {
+                    _cache.Clear();
+                }
+                _cache.AddRange(downloaded);
+
+                Diagnostics.Info("vendor_cache_refreshed", ("recordCount", _cache.Count));
+                Diagnostics.Info("vendor_refresh_succeeded", ("recordCount", _cache.Count));
+            }
+            catch (Exception ex)
+            {
+                Diagnostics.Error("vendor_refresh_failed", ex, "Failed to refresh vendor list from IEEE.");
+                throw;
+            }
         }
 
         /// <summary>

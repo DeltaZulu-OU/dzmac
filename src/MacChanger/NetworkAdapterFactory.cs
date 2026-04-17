@@ -19,7 +19,9 @@ namespace MacChanger
         /// <returns>Instances of <see cref="NetworkAdapter"/>.</returns>
         public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorManager? vendorManager = null)
         {
+            Diagnostics.Info("adapter_discovery_started", ("vendorManagerProvided", vendorManager != null));
             var networkInterfaces = GetAll();
+            Diagnostics.Debug("adapter_discovery_raw_count", ("totalDiscovered", networkInterfaces.Length));
 
             var filtered = networkInterfaces.Where(a => MacAddress.IsValidMac(a.GetPhysicalAddress().GetAddressBytes()))
                                             .OrderByDescending(a => a.Name)
@@ -27,9 +29,11 @@ namespace MacChanger
 
             if (!filtered.Any())
             {
+                Diagnostics.Warning("adapter_discovery_completed", "No adapters with valid MAC addresses were found.", ("totalDiscovered", networkInterfaces.Length), ("usableAdapters", 0));
                 return Array.Empty<NetworkAdapter>();
             }
 
+            Diagnostics.Info("adapter_discovery_completed", ("totalDiscovered", networkInterfaces.Length), ("usableAdapters", filtered.Count));
             return filtered.Select(networkInterface => new NetworkAdapter(networkInterface, vendorManager));
         }
 
@@ -45,9 +49,9 @@ namespace MacChanger
                     networkInterfaces = interfaces;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignore
+                Diagnostics.Error("adapter_discovery_failed", ex, "Failed to enumerate network adapters.");
             }
             return networkInterfaces;
         }
