@@ -11,28 +11,43 @@ namespace MacChanger.Gui.DTO
     {
         public bool ShowSpeedInKBytesPerSec { get; set; }
 
-        public string ActiveMac => GetActiveMac();
-        public string ActiveVendor => _adapter.ActiveVendor;
+        public string ActiveMac { get; }
+        public string ActiveVendor { get; }
         public string Changed => IsChanged ? "Yes" : "No";
-        public string ConfigId => _adapter.ConfigId;
-        public string Device => _adapter.DeviceDescription;
-        public bool Enabled => _adapter.Enabled;
-        public string HardwareId => _adapter.HardwareId;
-        public bool IsDhcpEnabled => _adapter.IsDhcpEnabled;
-        public string IPv4Status => _adapter.IsIPv4Enabled ? "Enabled" : "Disabled";
-        public string IPv6Status => _adapter.IsIPv6Enabled ? "Enabled" : "Disabled";
-        public string LinkStatus => _adapter.LinkStatus;
-        public string Name => _adapter.Name;
-        public string OriginalMac => _adapter.OriginalMacAddress.ToString(MacAddress.MacDelimiter.Dash);
-        public string OriginalVendor => _adapter.OriginalVendor;
-        public string Speed => ReadableSpeed(_adapter.Speed);
-        internal bool IsChanged => _adapter.Changed;
+        public string ConfigId { get; }
+        public string Device { get; }
+        public bool Enabled { get; }
+        public string HardwareId { get; }
+        public bool IsDhcpEnabled { get; }
+        public string IPv4Status { get; }
+        public string IPv6Status { get; }
+        public string LinkStatus { get; }
+        public string Name { get; }
+        public string OriginalMac { get; }
+        public string OriginalVendor { get; }
+        public string Speed { get; }
+        internal bool IsChanged { get; }
         private readonly NetworkAdapter _adapter;
         private bool disposedValue;
 
         public NetworkConnectionDetail(NetworkAdapter adapter)
         {
             _adapter = adapter;
+            Name = _adapter.Name;
+            Device = _adapter.DeviceDescription;
+            ConfigId = _adapter.ConfigId;
+            Enabled = _adapter.Enabled;
+            HardwareId = _adapter.HardwareId;
+            IsDhcpEnabled = _adapter.IsDhcpEnabled;
+            IPv4Status = _adapter.IsIPv4Enabled ? "Enabled" : "Disabled";
+            IPv6Status = _adapter.IsIPv6Enabled ? "Enabled" : "Disabled";
+            LinkStatus = _adapter.LinkStatus;
+            OriginalMac = _adapter.OriginalMacAddress.ToString(MacAddress.MacDelimiter.Dash);
+            OriginalVendor = _adapter.OriginalVendor;
+            ActiveVendor = _adapter.ActiveVendor;
+            IsChanged = _adapter.Changed;
+            ActiveMac = GetActiveMac();
+            Speed = ReadableSpeed(_adapter.Speed);
         }
 
         public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);

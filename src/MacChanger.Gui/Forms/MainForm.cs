@@ -26,6 +26,9 @@ namespace MacChanger.Gui.Forms
         private bool _isRefreshing;
         private bool _isVendorListLoading;
         private bool _isVendorListReady;
+        private bool _isVendorComboBound;
+        private bool _hasInitialRenderCompleted;
+        private List<Vendor> _vendors;
 
         private bool _locallyAdministered;
         private bool _reenableOnChange;
@@ -79,6 +82,7 @@ namespace MacChanger.Gui.Forms
 
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             VendorComboBox.Enabled = false;
+            Shown += MainForm_Shown;
             UpdateSelectionState();
         }
 
@@ -231,9 +235,15 @@ namespace MacChanger.Gui.Forms
             MakeTextboxBackgroundTransparent();
             ShowSpeedInKBytesPerSecItem.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
 
-            await RefreshConnectionsBackground(clearListWhileLoading: true);
-            ConnectionsGrid.SelectedItem = null;
+            var refreshTask = RefreshConnectionsBackground(clearListWhileLoading: true);
             _ = LoadVendorsInBackground();
+            await refreshTask;
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            _hasInitialRenderCompleted = true;
+            TryBindVendorsAfterFirstRender();
         }
 
         private void MakeTextboxBackgroundTransparent()
@@ -291,7 +301,15 @@ namespace MacChanger.Gui.Forms
 
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
-            VendorComboBox.SelectedItem = _vm.FindByMac(randomMac, _locallyAdministered);
+            var matchedVendor = _vm.FindByMac(randomMac, _locallyAdministered);
+            if (_isVendorComboBound)
+            {
+                VendorComboBox.SelectedItem = matchedVendor;
+            }
+            else
+            {
+                VendorComboBox.Text = matchedVendor?.ToString() ?? string.Empty;
+            }
 
             if (_locallyAdministered)
             {
@@ -501,10 +519,10 @@ namespace MacChanger.Gui.Forms
                         return;
                     }
 
-                    VendorComboBox.DataSource = vendors;
-                    VendorComboBox.SelectedItem = null;
+                    _vendors = vendors;
                     VendorComboBox.Enabled = true;
                     _isVendorListReady = true;
+                    TryBindVendorsAfterFirstRender();
                     UpdateSelectionState();
 
                     if (MainStatusBar.Text == "Loading vendor list...")
@@ -535,6 +553,32 @@ namespace MacChanger.Gui.Forms
             }
         }
 
+        private void TryBindVendorsAfterFirstRender()
+        {
+            if (_isVendorComboBound || !_hasInitialRenderCompleted || !_isVendorListReady || _vendors == null)
+            {
+                return;
+            }
+
+            var currentText = VendorComboBox.Text;
+            VendorComboBox.BeginUpdate();
+            try
+            {
+                VendorComboBox.DataSource = _vendors;
+                VendorComboBox.SelectedItem = null;
+                if (!string.IsNullOrWhiteSpace(currentText))
+                {
+                    VendorComboBox.Text = currentText;
+                }
+            }
+            finally
+            {
+                VendorComboBox.EndUpdate();
+            }
+
+            _isVendorComboBound = true;
+        }
+
         private void SetLoadingState(bool isLoading, bool clearListWhileLoading)
         {
             _isRefreshing = isLoading;
@@ -545,8 +589,7 @@ namespace MacChanger.Gui.Forms
             {
                 MainStatusBar.Text = "Loading network adapters...";
                 _loadingLabel.Text = "Loading network adapters...";
-                _loadingPanel.Visible = true;
-                _loadingPanel.BringToFront();
+                _loadingPanel.Visible = false;
 
                 if (clearListWhileLoading)
                 {
@@ -612,6 +655,7 @@ namespace MacChanger.Gui.Forms
                     ConnectionsGrid.EndUpdate();
                     ConnectionsGrid.AutoResizeColumns();
 
+                    ConnectionsGrid.SelectedItem = null;
                     _selected = null;
                     BindSelection();
                     MainStatusBar.Text = $"Loaded {NetworkConnections.Count} adapters.";
