@@ -10,6 +10,16 @@ dzmac is a Windows desktop application for viewing network adapters and managing
 
 The goal is to provide a focused, predictable, and maintainable application centered on core adapter management workflows.
 
+## Status
+
+This project is in **alpha**.
+
+The focus is on stabilizing core functionality before expanding scope for dzmac.
+
+## Help
+
+See [wiki](https://github.com/zbalkan/dzmac/wiki/Help) for help.
+
 ## Features (current scope)
 
 - Enumerate network adapters
@@ -26,7 +36,7 @@ The goal is to provide a focused, predictable, and maintainable application cent
 - Display adapter speed (with optional KB/s view)
 - Open Windows Network Connections
 
-## Product decisions (ADR summary)
+## Deviations from TMAC
 
 The following decisions define the current user-facing scope:
 
@@ -66,8 +76,4 @@ Thanks to the following projects and resources:
 - https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class  
   For MAC address textbox implementation reference
 
-## Status
 
-This project is in **alpha**.
-
-The focus is on stabilizing core functionality before expanding scope for dzmac.
