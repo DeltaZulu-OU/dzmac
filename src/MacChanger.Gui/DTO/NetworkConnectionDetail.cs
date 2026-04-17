@@ -25,14 +25,16 @@ namespace MacChanger.Gui.DTO
         public string Name { get; }
         public string OriginalMac { get; }
         public string OriginalVendor { get; }
-        public string Speed { get; }
+        public string Speed => ReadableSpeed(RawSpeed);
         internal bool IsChanged { get; }
+        private long RawSpeed { get; }
         private readonly NetworkAdapter _adapter;
         private bool disposedValue;
 
-        public NetworkConnectionDetail(NetworkAdapter adapter)
+        public NetworkConnectionDetail(NetworkAdapter adapter, bool showSpeedInKBytesPerSec = false)
         {
             _adapter = adapter;
+            ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
             Name = _adapter.Name;
             Device = _adapter.DeviceDescription;
             ConfigId = _adapter.ConfigId;
@@ -47,7 +49,7 @@ namespace MacChanger.Gui.DTO
             ActiveVendor = _adapter.ActiveVendor;
             IsChanged = _adapter.Changed;
             ActiveMac = GetActiveMac();
-            Speed = ReadableSpeed(_adapter.Speed);
+            RawSpeed = _adapter.Speed;
         }
 
         public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);

@@ -757,7 +757,7 @@ namespace MacChanger.Gui.Forms
             this.ShowSpeedInKBytesPerSecItem.Name = "ShowSpeedInKBytesPerSecItem";
             this.ShowSpeedInKBytesPerSecItem.Size = new System.Drawing.Size(211, 22);
             this.ShowSpeedInKBytesPerSecItem.Text = "Show Speed In KBytes/sec";
-            this.ShowSpeedInKBytesPerSecItem.Click += new System.EventHandler(this.ShowSpeedInKBytesPerSecItem_Click);
+            this.ShowSpeedInKBytesPerSecItem.CheckedChanged += new System.EventHandler(this.ShowSpeedInKBytesPerSecItem_CheckedChanged);
             // 
             // HelpMenu
             // 

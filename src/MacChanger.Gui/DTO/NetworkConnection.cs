@@ -66,10 +66,7 @@ namespace MacChanger.Gui.DTO
             enabled = Detail.Enabled;
         }
 
-        public NetworkConnection(NetworkAdapter adapter, bool showSpeedInKBytesPerSec) : this(new NetworkConnectionDetail(adapter)
-        {
-            ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec
-        })
+        public NetworkConnection(NetworkAdapter adapter, bool showSpeedInKBytesPerSec) : this(new NetworkConnectionDetail(adapter, showSpeedInKBytesPerSec))
         {
         }
 

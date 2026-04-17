@@ -266,11 +266,25 @@ namespace MacChanger.Gui.Forms
 
         private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
 
-        private async void ShowSpeedInKBytesPerSecItem_Click(object sender, EventArgs e)
+        private void ShowSpeedInKBytesPerSecItem_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Default.ShowSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem.Checked;
+            var showSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem.Checked;
+            Settings.Default.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
             Settings.Default.Save();
-            await RefreshConnectionsBackground();
+
+            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var networkConnection in NetworkConnections)
+            {
+                networkConnection.Detail.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
+            }
+
+            ConnectionsGrid.BeginUpdate();
+            ConnectionsGrid.RefreshObjects(NetworkConnections);
+            ConnectionsGrid.EndUpdate();
         }
 
         private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
