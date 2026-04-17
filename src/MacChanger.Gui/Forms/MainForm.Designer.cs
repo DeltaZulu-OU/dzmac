@@ -64,7 +64,6 @@ namespace MacChanger.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
-            this.macTextBox = new MacChanger.Gui.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
@@ -103,6 +102,7 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
+            this.macTextBox = new MacChanger.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -206,10 +206,10 @@ namespace MacChanger.Gui.Forms
             // 
             this.ActiveMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.ActiveMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(630, 107);
+            this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(580, 107);
             this.ActiveMacVendorTextbox.Name = "ActiveMacVendorTextbox";
             this.ActiveMacVendorTextbox.ReadOnly = true;
-            this.ActiveMacVendorTextbox.Size = new System.Drawing.Size(300, 13);
+            this.ActiveMacVendorTextbox.Size = new System.Drawing.Size(350, 13);
             this.ActiveMacVendorTextbox.TabIndex = 17;
             this.ActiveMacVendorTextbox.TabStop = false;
             this.ActiveMacVendorTextbox.Text = "...";
@@ -221,7 +221,7 @@ namespace MacChanger.Gui.Forms
             this.ActiveMacValueTextbox.Location = new System.Drawing.Point(474, 107);
             this.ActiveMacValueTextbox.Name = "ActiveMacValueTextbox";
             this.ActiveMacValueTextbox.ReadOnly = true;
-            this.ActiveMacValueTextbox.Size = new System.Drawing.Size(150, 13);
+            this.ActiveMacValueTextbox.Size = new System.Drawing.Size(100, 13);
             this.ActiveMacValueTextbox.TabIndex = 16;
             this.ActiveMacValueTextbox.TabStop = false;
             this.ActiveMacValueTextbox.Text = "...";
@@ -240,10 +240,10 @@ namespace MacChanger.Gui.Forms
             // 
             this.OriginalMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.OriginalMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(630, 41);
+            this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(580, 41);
             this.OriginalMacVendorTextbox.Name = "OriginalMacVendorTextbox";
             this.OriginalMacVendorTextbox.ReadOnly = true;
-            this.OriginalMacVendorTextbox.Size = new System.Drawing.Size(300, 13);
+            this.OriginalMacVendorTextbox.Size = new System.Drawing.Size(350, 13);
             this.OriginalMacVendorTextbox.TabIndex = 14;
             this.OriginalMacVendorTextbox.TabStop = false;
             this.OriginalMacVendorTextbox.Text = "...";
@@ -255,7 +255,7 @@ namespace MacChanger.Gui.Forms
             this.OriginalMacValueTextbox.Location = new System.Drawing.Point(474, 41);
             this.OriginalMacValueTextbox.Name = "OriginalMacValueTextbox";
             this.OriginalMacValueTextbox.ReadOnly = true;
-            this.OriginalMacValueTextbox.Size = new System.Drawing.Size(150, 13);
+            this.OriginalMacValueTextbox.Size = new System.Drawing.Size(100, 13);
             this.OriginalMacValueTextbox.TabIndex = 13;
             this.OriginalMacValueTextbox.TabStop = false;
             this.OriginalMacValueTextbox.Text = "...";
@@ -508,15 +508,6 @@ namespace MacChanger.Gui.Forms
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
             // 
-            // macTextBox
-            // 
-            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox.Name = "macTextBox";
-            this.macTextBox.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox.TabIndex = 0;
-            // 
             // IPAddressPage
             // 
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
@@ -712,7 +703,7 @@ namespace MacChanger.Gui.Forms
             // DhcpEnabledItem
             // 
             this.DhcpEnabledItem.Name = "DhcpEnabledItem";
-            this.DhcpEnabledItem.Size = new System.Drawing.Size(180, 22);
+            this.DhcpEnabledItem.Size = new System.Drawing.Size(163, 22);
             this.DhcpEnabledItem.Text = "DHCPv4 Enabled";
             this.DhcpEnabledItem.Click += new System.EventHandler(this.Dhcp4EnabledItem_Click);
             // 
@@ -720,7 +711,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.DhcpReleaseIpItem.Enabled = false;
             this.DhcpReleaseIpItem.Name = "DhcpReleaseIpItem";
-            this.DhcpReleaseIpItem.Size = new System.Drawing.Size(180, 22);
+            this.DhcpReleaseIpItem.Size = new System.Drawing.Size(163, 22);
             this.DhcpReleaseIpItem.Text = "Release IP";
             this.DhcpReleaseIpItem.Click += new System.EventHandler(this.DhcpReleaseIpItem_Click);
             // 
@@ -728,7 +719,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.DhcpRenewIpItem.Enabled = false;
             this.DhcpRenewIpItem.Name = "DhcpRenewIpItem";
-            this.DhcpRenewIpItem.Size = new System.Drawing.Size(180, 22);
+            this.DhcpRenewIpItem.Size = new System.Drawing.Size(163, 22);
             this.DhcpRenewIpItem.Text = "Renew IP";
             this.DhcpRenewIpItem.Click += new System.EventHandler(this.DhcpRenewIpItem_Click);
             // 
@@ -752,19 +743,19 @@ namespace MacChanger.Gui.Forms
             this.OptionsMenu.Name = "OptionsMenu";
             this.OptionsMenu.Size = new System.Drawing.Size(61, 20);
             this.OptionsMenu.Text = "&Options";
-            //
+            // 
             // NetworkConnectionsItem
-            //
+            // 
             this.NetworkConnectionsItem.Name = "NetworkConnectionsItem";
-            this.NetworkConnectionsItem.Size = new System.Drawing.Size(223, 22);
+            this.NetworkConnectionsItem.Size = new System.Drawing.Size(211, 22);
             this.NetworkConnectionsItem.Text = "Network Connections";
             this.NetworkConnectionsItem.Click += new System.EventHandler(this.NetworkConnectionsItem_Click);
-            //
+            // 
             // ShowSpeedInKBytesPerSecItem
-            //
+            // 
             this.ShowSpeedInKBytesPerSecItem.CheckOnClick = true;
             this.ShowSpeedInKBytesPerSecItem.Name = "ShowSpeedInKBytesPerSecItem";
-            this.ShowSpeedInKBytesPerSecItem.Size = new System.Drawing.Size(223, 22);
+            this.ShowSpeedInKBytesPerSecItem.Size = new System.Drawing.Size(211, 22);
             this.ShowSpeedInKBytesPerSecItem.Text = "Show Speed In KBytes/sec";
             this.ShowSpeedInKBytesPerSecItem.Click += new System.EventHandler(this.ShowSpeedInKBytesPerSecItem_Click);
             // 
@@ -836,6 +827,15 @@ namespace MacChanger.Gui.Forms
             this.MainStatusBar.SizingGrip = false;
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
+            // 
+            // macTextBox
+            // 
+            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox.Name = "macTextBox";
+            this.macTextBox.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox.TabIndex = 0;
             // 
             // MainForm
             // 
