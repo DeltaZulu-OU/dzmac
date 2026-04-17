@@ -84,7 +84,7 @@ namespace MacChanger
             try
             {
                 using var searcher = new ManagementObjectSearcher("SELECT GUID,PNPDeviceID FROM Win32_NetworkAdapter WHERE GUID IS NOT NULL AND PNPDeviceID IS NOT NULL");
-                foreach (ManagementObject adapter in searcher.Get())
+                foreach (var adapter in searcher.Get().Cast<ManagementObject>())
                 {
                     var guid = adapter["GUID"] as string;
                     var pnpDeviceId = adapter["PNPDeviceID"] as string;

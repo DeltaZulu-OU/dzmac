@@ -383,24 +383,10 @@ namespace MacChanger
         /// </returns>
         public bool TryDhcpRelease(out string message)
         {
-            message = string.Empty;
             EnsureWmiObjects();
-            if (_adapterConfig == null)
-            {
-                return false;
-            }
-
-            var resultObject = _adapterConfig.InvokeMethod("ReleaseDHCPLease", null);
-            if (resultObject == null)
-            {
-                return false;
-            }
-
-            var resultCode = SafeConvertToInt(resultObject);
-
-            message = HResult.TranslateErrorCode(resultCode);
-
-            return resultCode == 0 || resultCode == 1;
+            var success = TryInvokeAdapterConfigMethod("ReleaseDHCPLease", null, out var code);
+            message = HResult.TranslateErrorCode(code);
+            return success && (code == 0 || code == 1);
         }
 
         /// <summary>
@@ -413,24 +399,10 @@ namespace MacChanger
         /// </returns>
         public bool TryDhcpRenew(out string message)
         {
-            message = string.Empty;
             EnsureWmiObjects();
-            if (_adapterConfig == null)
-            {
-                return false;
-            }
-
-            var resultObject = _adapterConfig.InvokeMethod("RenewDHCPLease", null);
-            if (resultObject == null)
-            {
-                return false;
-            }
-
-            var resultCode = SafeConvertToInt(resultObject);
-
-            message = HResult.TranslateErrorCode(resultCode);
-
-            return resultCode == 0 || resultCode == 1;
+            var success = TryInvokeAdapterConfigMethod("RenewDHCPLease", null, out var code);
+            message = HResult.TranslateErrorCode(code);
+            return success && (code == 0 || code == 1);
         }
 
         public IReadOnlyList<AdapterIpv4Address> GetIpv4Addresses()
@@ -668,10 +640,7 @@ namespace MacChanger
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] IP extraction failed for adapter '{Name}': adapter config object is null.");
                 return false;
             }
-
-            var ipAddresses = _adapterConfig.GetPropertyValue("IPAddress") as string[];
-            var subnetMasks = _adapterConfig.GetPropertyValue("IPSubnet") as string[];
-            if (ipAddresses == null || subnetMasks == null || ipAddresses.Length == 0 || subnetMasks.Length == 0)
+            if (!(_adapterConfig.GetPropertyValue("IPAddress") is string[] ipAddresses) || !(_adapterConfig.GetPropertyValue("IPSubnet") is string[] subnetMasks) || ipAddresses.Length == 0 || subnetMasks.Length == 0)
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] IP extraction failed for adapter '{Name}': missing IPAddress/IPSubnet values.");
                 return false;
@@ -790,6 +759,11 @@ namespace MacChanger
                 }
 
                 using var regkey = Registry.LocalMachine.OpenSubKey(registryKey, false);
+                if (regkey == null)
+                {
+                    return new MacAddress(_networkInterface.GetPhysicalAddress());
+                }
+
                 var address = regkey.GetValue("OriginalNetworkAddress");
                 if (address != null)
                 {
@@ -899,15 +873,15 @@ namespace MacChanger
                 try
                 {
                     var escapedId = ConfigId.Replace("'", "''");
-                    _adapter = new ManagementObjectSearcher($"SELECT NetEnabled,PNPDeviceID,GUID,DeviceID FROM Win32_NetworkAdapter WHERE GUID = '{escapedId}'")
-                            .Get()
-                            .Cast<ManagementObject>()
-                            .FirstOrDefault();
+                    using var adapterSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_NetworkAdapter WHERE GUID = '{escapedId}'");
+                    using var adapterResults = adapterSearcher.Get();
+                    var adapterResult = adapterResults.Cast<ManagementObject>().FirstOrDefault();
+                    _adapter = CreateBoundManagementObject(adapterResult);
 
-                    _adapterConfig = new ManagementObjectSearcher($"SELECT SettingID,DNSServerSearchOrder,DefaultIPGateway,IPAddress,IPSubnet FROM Win32_NetworkAdapterConfiguration WHERE SettingID = '{escapedId}'")
-                        .Get()
-                        .Cast<ManagementObject>()
-                        .FirstOrDefault();
+                    using var configSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_NetworkAdapterConfiguration WHERE SettingID = '{escapedId}'");
+                    using var configResults = configSearcher.Get();
+                    var configResult = configResults.Cast<ManagementObject>().FirstOrDefault();
+                    _adapterConfig = CreateBoundManagementObject(configResult);
                 }
                 catch
                 {
@@ -918,6 +892,25 @@ namespace MacChanger
 
                 _enabled = GetEnabled();
                 _hardwareId = GetHardwareId();
+            }
+        }
+
+        private static ManagementObject? CreateBoundManagementObject(ManagementObject? sourceObject)
+        {
+            if (sourceObject == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var boundObject = new ManagementObject(sourceObject.Path.Path);
+                boundObject.Get();
+                return boundObject;
+            }
+            catch
+            {
+                return null;
             }
         }
 

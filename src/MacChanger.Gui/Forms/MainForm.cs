@@ -210,38 +210,46 @@ namespace Dzmac.Gui.Forms
             _ = RefreshConnectionsBackground();
         }
 
-        private void DhcpReleaseIpItem_Click(object sender, EventArgs e)
+        private async void DhcpReleaseIpItem_Click(object sender, EventArgs e)
         {
             if (_selected == null)
             {
                 return;
             }
 
-            if (_selected.TryDhcpRelease(out var message))
-            {
-                MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show(message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            var selectedDetail = _selected;
+            await RunDhcpActionAsync(
+                selectedDetail,
+                actionName: "release IP",
+                inProgressText: "Releasing the IP for",
+                successText: "Released the IP for",
+                failureText: "Failed to release the IP for",
+                action: () =>
+                {
+                    var isSuccess = selectedDetail.TryDhcpRelease(out var message);
+                    return (isSuccess, message);
+                });
         }
 
-        private void DhcpRenewIpItem_Click(object sender, EventArgs e)
+        private async void DhcpRenewIpItem_Click(object sender, EventArgs e)
         {
             if (_selected == null)
             {
                 return;
             }
 
-            if (_selected.TryDhcpRenew(out var message))
-            {
-                MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show(message, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            var selectedDetail = _selected;
+            await RunDhcpActionAsync(
+                selectedDetail,
+                actionName: "renew IP",
+                inProgressText: "Renewing the IP for",
+                successText: "Renewed the IP for",
+                failureText: "Failed to renew the IP for",
+                action: () =>
+                {
+                    var isSuccess = selectedDetail.TryDhcpRenew(out var message);
+                    return (isSuccess, message);
+                });
         }
 
         private void ExitItem_Click(object sender, EventArgs e) => Close();
@@ -306,6 +314,28 @@ namespace Dzmac.Gui.Forms
                     _ = MessageBox.Show(ex.Message, "Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
+        }
+
+        private async Task RunDhcpActionAsync(NetworkConnectionDetail selectedDetail, string actionName, string inProgressText, string successText, string failureText, Func<(bool isSuccess, string operationMessage)> action)
+        {
+            var selectedAdapterName = selectedDetail.Name;
+            MainStatusBar.Text = $"{inProgressText} {selectedAdapterName}...";
+
+            var result = await Task.Run(() =>
+            {
+                return action();
+            });
+
+            if (result.isSuccess)
+            {
+                MainStatusBar.Text = $"{successText} {selectedAdapterName}.";
+                MessageBox.Show(result.operationMessage, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            MainStatusBar.Text = $"{failureText} {selectedAdapterName}.";
+            MessageBox.Show(result.operationMessage, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Diagnostics.Warning($"Could not {actionName} for '{selectedAdapterName}'. {result.operationMessage}");
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
