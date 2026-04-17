@@ -188,9 +188,9 @@ namespace MacChanger
                 return false;
             }
 
-            var enableStaticResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableStatic", ipAddress, null).GetPropertyValue("ReturnValue")) == 0;
-            var setGatewayResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetGateways", gateway, null).GetPropertyValue("ReturnValue")) == 0;
-            var setDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", dnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+            var enableStaticResult = TryInvokeAdapterConfigMethod("EnableStatic", ipAddress, out var enableStaticCode) && enableStaticCode == 0;
+            var setGatewayResult = TryInvokeAdapterConfigMethod("SetGateways", gateway, out var setGatewayCode) && setGatewayCode == 0;
+            var setDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", dnsConfig, out var setDnsCode) && setDnsCode == 0;
 
             var success = enableStaticResult && setGatewayResult && setDnsResult;
 
@@ -202,8 +202,8 @@ namespace MacChanger
                 newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
 
                 // Run command
-                var enableDhcpResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
-                var emptyDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+                var enableDhcpResult = TryInvokeAdapterConfigMethod("EnableDHCP", null, out var enableDhcpCode) && enableDhcpCode == 0;
+                var emptyDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", newDnsConfig, out var emptyDnsCode) && emptyDnsCode == 0;
 
                 var rollbackSuccess = enableDhcpResult && emptyDnsResult;
                 if (rollbackSuccess)
@@ -215,6 +215,8 @@ namespace MacChanger
                 {
                     // something we cannot handle here.
                     Diagnostics.Error("dhcp_disable_failed_rollback_failed", null, "DHCP disable failed and rollback did not complete.", ("adapter", Name));
+
+                    // Display an error dialog to the user 
                     throw new MacChangerException("Failed to disable DHCP");
                 }
             }
@@ -255,17 +257,17 @@ namespace MacChanger
             newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
 
             // Run command
-            var enableDhcpResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableDHCP", null, null).GetPropertyValue("ReturnValue")) == 0;
-            var emptyDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", newDnsConfig, null).GetPropertyValue("ReturnValue")) == 0;
+            var enableDhcpResult = TryInvokeAdapterConfigMethod("EnableDHCP", null, out var enableDhcpCode) && enableDhcpCode == 0;
+            var emptyDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", newDnsConfig, out var emptyDnsCode) && emptyDnsCode == 0;
 
             var success = enableDhcpResult && emptyDnsResult;
 
             // Rollback
             if (!success)
             {
-                var rollbackStaticResult = SafeConvertToInt(_adapterConfig.InvokeMethod("EnableStatic", oldIpAddress, null).GetPropertyValue("ReturnValue")) == 0;
-                var rollbackGatewayResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetGateways", oldGateway, null).GetPropertyValue("ReturnValue")) == 0;
-                var rollbackDnsResult = SafeConvertToInt(_adapterConfig.InvokeMethod("SetDNSServerSearchOrder", oldDnsConfig1, null).GetPropertyValue("ReturnValue")) == 0;
+                var rollbackStaticResult = TryInvokeAdapterConfigMethod("EnableStatic", oldIpAddress, out var rollbackStaticCode) && rollbackStaticCode == 0;
+                var rollbackGatewayResult = TryInvokeAdapterConfigMethod("SetGateways", oldGateway, out var rollbackGatewayCode) && rollbackGatewayCode == 0;
+                var rollbackDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", oldDnsConfig1, out var rollbackDnsCode) && rollbackDnsCode == 0;
 
                 var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult && rollbackDnsResult;
                 if (rollbackSuccess)
@@ -277,6 +279,8 @@ namespace MacChanger
                 {
                     // something we cannot handle here.
                     Diagnostics.Error("dhcp_enable_failed_rollback_failed", null, "DHCP enable failed and rollback did not complete.", ("adapter", Name));
+                    
+                    // Display an error dialog to the user 
                     throw new MacChangerException("Failed to enable DHCP");
                 }
             }
@@ -780,6 +784,39 @@ namespace MacChanger
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to convert WMI return code to int.");
                 return -1;
+            }
+        }
+
+        private bool TryInvokeAdapterConfigMethod(string methodName, ManagementBaseObject? inParameters, out int returnCode)
+        {
+            returnCode = -1;
+            if (_adapterConfig == null)
+            {
+                Diagnostics.Warning("adapter_config_method_skipped", "Adapter configuration object is unavailable.", ("adapter", Name), ("method", methodName));
+                return false;
+            }
+
+            try
+            {
+                var result = _adapterConfig.InvokeMethod(methodName, inParameters, null);
+                if (result == null)
+                {
+                    Diagnostics.Warning("adapter_config_method_failed", "WMI method returned null result.", ("adapter", Name), ("method", methodName));
+                    return false;
+                }
+
+                returnCode = SafeConvertToInt(result.GetPropertyValue("ReturnValue"));
+                return true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Diagnostics.Warning("adapter_config_method_invalid_operation", ex.Message, ("adapter", Name), ("method", methodName));
+                return false;
+            }
+            catch (ManagementException ex)
+            {
+                Diagnostics.Warning("adapter_config_method_management_exception", ex.Message, ("adapter", Name), ("method", methodName));
+                return false;
             }
         }
 
