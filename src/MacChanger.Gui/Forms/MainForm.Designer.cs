@@ -66,6 +66,29 @@ namespace Dzmac.Gui.Forms
             this.RandomMacButton = new System.Windows.Forms.Button();
             this.macTextBox = new Dzmac.Gui.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
+            this.IpAddressLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.Ipv4ColumnLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.Ipv4AddressGroupBox = new System.Windows.Forms.GroupBox();
+            this.Ipv4AddressListView = new System.Windows.Forms.ListView();
+            this.Ipv4AddressColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv4SubnetMaskColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv4GatewayGroupBox = new System.Windows.Forms.GroupBox();
+            this.Ipv4GatewayListView = new System.Windows.Forms.ListView();
+            this.Ipv4GatewayColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv4DnsGroupBox = new System.Windows.Forms.GroupBox();
+            this.Ipv4DnsListView = new System.Windows.Forms.ListView();
+            this.Ipv4DnsColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv6ColumnLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this.Ipv6AddressGroupBox = new System.Windows.Forms.GroupBox();
+            this.Ipv6AddressListView = new System.Windows.Forms.ListView();
+            this.Ipv6AddressColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv6PrefixColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv6GatewayGroupBox = new System.Windows.Forms.GroupBox();
+            this.Ipv6GatewayListView = new System.Windows.Forms.ListView();
+            this.Ipv6GatewayColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Ipv6DnsGroupBox = new System.Windows.Forms.GroupBox();
+            this.Ipv6DnsListView = new System.Windows.Forms.ListView();
+            this.Ipv6DnsColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -109,6 +132,16 @@ namespace Dzmac.Gui.Forms
             this.tableLayoutPanel1.SuspendLayout();
             this.ConnectionDetailsGroup.SuspendLayout();
             this.ChangeMacAddressGroup.SuspendLayout();
+            this.IPAddressPage.SuspendLayout();
+            this.IpAddressLayoutPanel.SuspendLayout();
+            this.Ipv4ColumnLayoutPanel.SuspendLayout();
+            this.Ipv4AddressGroupBox.SuspendLayout();
+            this.Ipv4GatewayGroupBox.SuspendLayout();
+            this.Ipv4DnsGroupBox.SuspendLayout();
+            this.Ipv6ColumnLayoutPanel.SuspendLayout();
+            this.Ipv6AddressGroupBox.SuspendLayout();
+            this.Ipv6GatewayGroupBox.SuspendLayout();
+            this.Ipv6DnsGroupBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
             this.Toolbar.SuspendLayout();
             this.SuspendLayout();
@@ -487,6 +520,7 @@ namespace Dzmac.Gui.Forms
             // 
             // IPAddressPage
             // 
+            this.IPAddressPage.Controls.Add(this.IpAddressLayoutPanel);
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
@@ -494,6 +528,265 @@ namespace Dzmac.Gui.Forms
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
+            // 
+            // IpAddressLayoutPanel
+            // 
+            this.IpAddressLayoutPanel.ColumnCount = 2;
+            this.IpAddressLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.IpAddressLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.IpAddressLayoutPanel.Controls.Add(this.Ipv4ColumnLayoutPanel, 0, 0);
+            this.IpAddressLayoutPanel.Controls.Add(this.Ipv6ColumnLayoutPanel, 1, 0);
+            this.IpAddressLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.IpAddressLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.IpAddressLayoutPanel.Name = "IpAddressLayoutPanel";
+            this.IpAddressLayoutPanel.RowCount = 1;
+            this.IpAddressLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.IpAddressLayoutPanel.Size = new System.Drawing.Size(942, 358);
+            this.IpAddressLayoutPanel.TabIndex = 0;
+            // 
+            // Ipv4ColumnLayoutPanel
+            // 
+            this.Ipv4ColumnLayoutPanel.ColumnCount = 1;
+            this.Ipv4ColumnLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.Ipv4ColumnLayoutPanel.Controls.Add(this.Ipv4AddressGroupBox, 0, 0);
+            this.Ipv4ColumnLayoutPanel.Controls.Add(this.Ipv4GatewayGroupBox, 0, 1);
+            this.Ipv4ColumnLayoutPanel.Controls.Add(this.Ipv4DnsGroupBox, 0, 2);
+            this.Ipv4ColumnLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4ColumnLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.Ipv4ColumnLayoutPanel.Name = "Ipv4ColumnLayoutPanel";
+            this.Ipv4ColumnLayoutPanel.RowCount = 3;
+            this.Ipv4ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.96591F));
+            this.Ipv4ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 26.42045F));
+            this.Ipv4ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 42.61364F));
+            this.Ipv4ColumnLayoutPanel.Size = new System.Drawing.Size(465, 352);
+            this.Ipv4ColumnLayoutPanel.TabIndex = 0;
+            // 
+            // Ipv4AddressGroupBox
+            // 
+            this.Ipv4AddressGroupBox.Controls.Add(this.Ipv4AddressListView);
+            this.Ipv4AddressGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4AddressGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.Ipv4AddressGroupBox.Name = "Ipv4AddressGroupBox";
+            this.Ipv4AddressGroupBox.Size = new System.Drawing.Size(459, 103);
+            this.Ipv4AddressGroupBox.TabIndex = 0;
+            this.Ipv4AddressGroupBox.TabStop = false;
+            this.Ipv4AddressGroupBox.Text = "Internet Protocol v4 (DHCPv4)";
+            // 
+            // Ipv4AddressListView
+            // 
+            this.Ipv4AddressListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Ipv4AddressColumnHeader,
+            this.Ipv4SubnetMaskColumnHeader});
+            this.Ipv4AddressListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4AddressListView.FullRowSelect = true;
+            this.Ipv4AddressListView.GridLines = true;
+            this.Ipv4AddressListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.Ipv4AddressListView.HideSelection = false;
+            this.Ipv4AddressListView.Location = new System.Drawing.Point(3, 16);
+            this.Ipv4AddressListView.Name = "Ipv4AddressListView";
+            this.Ipv4AddressListView.Size = new System.Drawing.Size(453, 84);
+            this.Ipv4AddressListView.TabIndex = 0;
+            this.Ipv4AddressListView.UseCompatibleStateImageBehavior = false;
+            this.Ipv4AddressListView.View = System.Windows.Forms.View.Details;
+            this.Ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            // 
+            // Ipv4AddressColumnHeader
+            // 
+            this.Ipv4AddressColumnHeader.Text = "IP Address";
+            this.Ipv4AddressColumnHeader.Width = 220;
+            // 
+            // Ipv4SubnetMaskColumnHeader
+            // 
+            this.Ipv4SubnetMaskColumnHeader.Text = "Subnet Mask";
+            this.Ipv4SubnetMaskColumnHeader.Width = 200;
+            // 
+            // Ipv4GatewayGroupBox
+            // 
+            this.Ipv4GatewayGroupBox.Controls.Add(this.Ipv4GatewayListView);
+            this.Ipv4GatewayGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4GatewayGroupBox.Location = new System.Drawing.Point(3, 112);
+            this.Ipv4GatewayGroupBox.Name = "Ipv4GatewayGroupBox";
+            this.Ipv4GatewayGroupBox.Size = new System.Drawing.Size(459, 87);
+            this.Ipv4GatewayGroupBox.TabIndex = 1;
+            this.Ipv4GatewayGroupBox.TabStop = false;
+            this.Ipv4GatewayGroupBox.Text = "Gateway";
+            // 
+            // Ipv4GatewayListView
+            // 
+            this.Ipv4GatewayListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Ipv4GatewayColumnHeader});
+            this.Ipv4GatewayListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4GatewayListView.FullRowSelect = true;
+            this.Ipv4GatewayListView.GridLines = true;
+            this.Ipv4GatewayListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.Ipv4GatewayListView.HideSelection = false;
+            this.Ipv4GatewayListView.Location = new System.Drawing.Point(3, 16);
+            this.Ipv4GatewayListView.Name = "Ipv4GatewayListView";
+            this.Ipv4GatewayListView.Size = new System.Drawing.Size(453, 68);
+            this.Ipv4GatewayListView.TabIndex = 0;
+            this.Ipv4GatewayListView.UseCompatibleStateImageBehavior = false;
+            this.Ipv4GatewayListView.View = System.Windows.Forms.View.Details;
+            this.Ipv4GatewayListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            // 
+            // Ipv4GatewayColumnHeader
+            // 
+            this.Ipv4GatewayColumnHeader.Text = "Gateway";
+            this.Ipv4GatewayColumnHeader.Width = 420;
+            // 
+            // Ipv4DnsGroupBox
+            // 
+            this.Ipv4DnsGroupBox.Controls.Add(this.Ipv4DnsListView);
+            this.Ipv4DnsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4DnsGroupBox.Location = new System.Drawing.Point(3, 205);
+            this.Ipv4DnsGroupBox.Name = "Ipv4DnsGroupBox";
+            this.Ipv4DnsGroupBox.Size = new System.Drawing.Size(459, 144);
+            this.Ipv4DnsGroupBox.TabIndex = 2;
+            this.Ipv4DnsGroupBox.TabStop = false;
+            this.Ipv4DnsGroupBox.Text = "DNS Server";
+            // 
+            // Ipv4DnsListView
+            // 
+            this.Ipv4DnsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Ipv4DnsColumnHeader});
+            this.Ipv4DnsListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv4DnsListView.FullRowSelect = true;
+            this.Ipv4DnsListView.GridLines = true;
+            this.Ipv4DnsListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.Ipv4DnsListView.HideSelection = false;
+            this.Ipv4DnsListView.Location = new System.Drawing.Point(3, 16);
+            this.Ipv4DnsListView.Name = "Ipv4DnsListView";
+            this.Ipv4DnsListView.Size = new System.Drawing.Size(453, 125);
+            this.Ipv4DnsListView.TabIndex = 0;
+            this.Ipv4DnsListView.UseCompatibleStateImageBehavior = false;
+            this.Ipv4DnsListView.View = System.Windows.Forms.View.Details;
+            this.Ipv4DnsListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            // 
+            // Ipv4DnsColumnHeader
+            // 
+            this.Ipv4DnsColumnHeader.Text = "DNS Server";
+            this.Ipv4DnsColumnHeader.Width = 420;
+            // 
+            // Ipv6ColumnLayoutPanel
+            // 
+            this.Ipv6ColumnLayoutPanel.ColumnCount = 1;
+            this.Ipv6ColumnLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.Ipv6ColumnLayoutPanel.Controls.Add(this.Ipv6AddressGroupBox, 0, 0);
+            this.Ipv6ColumnLayoutPanel.Controls.Add(this.Ipv6GatewayGroupBox, 0, 1);
+            this.Ipv6ColumnLayoutPanel.Controls.Add(this.Ipv6DnsGroupBox, 0, 2);
+            this.Ipv6ColumnLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6ColumnLayoutPanel.Location = new System.Drawing.Point(474, 3);
+            this.Ipv6ColumnLayoutPanel.Name = "Ipv6ColumnLayoutPanel";
+            this.Ipv6ColumnLayoutPanel.RowCount = 3;
+            this.Ipv6ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 31.25F));
+            this.Ipv6ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 26.42045F));
+            this.Ipv6ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 42.61364F));
+            this.Ipv6ColumnLayoutPanel.Size = new System.Drawing.Size(465, 352);
+            this.Ipv6ColumnLayoutPanel.TabIndex = 1;
+            // 
+            // Ipv6AddressGroupBox
+            // 
+            this.Ipv6AddressGroupBox.Controls.Add(this.Ipv6AddressListView);
+            this.Ipv6AddressGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6AddressGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.Ipv6AddressGroupBox.Name = "Ipv6AddressGroupBox";
+            this.Ipv6AddressGroupBox.Size = new System.Drawing.Size(459, 103);
+            this.Ipv6AddressGroupBox.TabIndex = 0;
+            this.Ipv6AddressGroupBox.TabStop = false;
+            this.Ipv6AddressGroupBox.Text = "Internet Protocol v6 (Stateless)";
+            // 
+            // Ipv6AddressListView
+            // 
+            this.Ipv6AddressListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Ipv6AddressColumnHeader,
+            this.Ipv6PrefixColumnHeader});
+            this.Ipv6AddressListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6AddressListView.FullRowSelect = true;
+            this.Ipv6AddressListView.GridLines = true;
+            this.Ipv6AddressListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.Ipv6AddressListView.HideSelection = false;
+            this.Ipv6AddressListView.Location = new System.Drawing.Point(3, 16);
+            this.Ipv6AddressListView.Name = "Ipv6AddressListView";
+            this.Ipv6AddressListView.Size = new System.Drawing.Size(453, 84);
+            this.Ipv6AddressListView.TabIndex = 0;
+            this.Ipv6AddressListView.UseCompatibleStateImageBehavior = false;
+            this.Ipv6AddressListView.View = System.Windows.Forms.View.Details;
+            this.Ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None);
+
+            // 
+            // Ipv6AddressColumnHeader
+            // 
+            this.Ipv6AddressColumnHeader.Text = "Unicast IPv6 Address";
+            this.Ipv6AddressColumnHeader.Width = 300;
+            // 
+            // Ipv6PrefixColumnHeader
+            // 
+            this.Ipv6PrefixColumnHeader.Text = "Prefix";
+            this.Ipv6PrefixColumnHeader.Width = 200;
+            this.Ipv6PrefixColumnHeader.AutoResize(ColumnHeaderAutoResizeStyle.None);
+            // 
+            // Ipv6GatewayGroupBox
+            // 
+            this.Ipv6GatewayGroupBox.Controls.Add(this.Ipv6GatewayListView);
+            this.Ipv6GatewayGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6GatewayGroupBox.Location = new System.Drawing.Point(3, 112);
+            this.Ipv6GatewayGroupBox.Name = "Ipv6GatewayGroupBox";
+            this.Ipv6GatewayGroupBox.Size = new System.Drawing.Size(459, 86);
+            this.Ipv6GatewayGroupBox.TabIndex = 1;
+            this.Ipv6GatewayGroupBox.TabStop = false;
+            this.Ipv6GatewayGroupBox.Text = "Gateway/Next Hop";
+            // 
+            // Ipv6GatewayListView
+            // 
+            this.Ipv6GatewayListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Ipv6GatewayColumnHeader});
+            this.Ipv6GatewayListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6GatewayListView.FullRowSelect = true;
+            this.Ipv6GatewayListView.GridLines = true;
+            this.Ipv6GatewayListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.Ipv6GatewayListView.HideSelection = false;
+            this.Ipv6GatewayListView.Location = new System.Drawing.Point(3, 16);
+            this.Ipv6GatewayListView.Name = "Ipv6GatewayListView";
+            this.Ipv6GatewayListView.Size = new System.Drawing.Size(453, 67);
+            this.Ipv6GatewayListView.TabIndex = 0;
+            this.Ipv6GatewayListView.UseCompatibleStateImageBehavior = false;
+            this.Ipv6GatewayListView.View = System.Windows.Forms.View.Details;
+            // 
+            // Ipv6GatewayColumnHeader
+            // 
+            this.Ipv6GatewayColumnHeader.Text = "Gateway/Next Hop";
+            this.Ipv6GatewayColumnHeader.Width = 420;
+            // 
+            // Ipv6DnsGroupBox
+            // 
+            this.Ipv6DnsGroupBox.Controls.Add(this.Ipv6DnsListView);
+            this.Ipv6DnsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6DnsGroupBox.Location = new System.Drawing.Point(3, 204);
+            this.Ipv6DnsGroupBox.Name = "Ipv6DnsGroupBox";
+            this.Ipv6DnsGroupBox.Size = new System.Drawing.Size(459, 145);
+            this.Ipv6DnsGroupBox.TabIndex = 2;
+            this.Ipv6DnsGroupBox.TabStop = false;
+            this.Ipv6DnsGroupBox.Text = "DNS Server";
+            // 
+            // Ipv6DnsListView
+            // 
+            this.Ipv6DnsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.Ipv6DnsColumnHeader});
+            this.Ipv6DnsListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Ipv6DnsListView.FullRowSelect = true;
+            this.Ipv6DnsListView.GridLines = true;
+            this.Ipv6DnsListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.Ipv6DnsListView.HideSelection = false;
+            this.Ipv6DnsListView.Location = new System.Drawing.Point(3, 16);
+            this.Ipv6DnsListView.Name = "Ipv6DnsListView";
+            this.Ipv6DnsListView.Size = new System.Drawing.Size(453, 126);
+            this.Ipv6DnsListView.TabIndex = 0;
+            this.Ipv6DnsListView.UseCompatibleStateImageBehavior = false;
+            this.Ipv6DnsListView.View = System.Windows.Forms.View.Details;
+            // 
+            // Ipv6DnsColumnHeader
+            // 
+            this.Ipv6DnsColumnHeader.Text = "DNS Server";
+            this.Ipv6DnsColumnHeader.Width = 420;
             // 
             // PresetsPage
             // 
@@ -832,6 +1125,16 @@ namespace Dzmac.Gui.Forms
             this.ConnectionDetailsGroup.ResumeLayout(false);
             this.ConnectionDetailsGroup.PerformLayout();
             this.ChangeMacAddressGroup.ResumeLayout(false);
+            this.IPAddressPage.ResumeLayout(false);
+            this.IpAddressLayoutPanel.ResumeLayout(false);
+            this.Ipv4ColumnLayoutPanel.ResumeLayout(false);
+            this.Ipv4AddressGroupBox.ResumeLayout(false);
+            this.Ipv4GatewayGroupBox.ResumeLayout(false);
+            this.Ipv4DnsGroupBox.ResumeLayout(false);
+            this.Ipv6ColumnLayoutPanel.ResumeLayout(false);
+            this.Ipv6AddressGroupBox.ResumeLayout(false);
+            this.Ipv6GatewayGroupBox.ResumeLayout(false);
+            this.Ipv6DnsGroupBox.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).EndInit();
             this.Toolbar.ResumeLayout(false);
             this.Toolbar.PerformLayout();
@@ -846,6 +1149,29 @@ namespace Dzmac.Gui.Forms
         private TabControl InfoTabs;
         private TabPage InformationPage;
         private TabPage IPAddressPage;
+        private TableLayoutPanel IpAddressLayoutPanel;
+        private TableLayoutPanel Ipv4ColumnLayoutPanel;
+        private GroupBox Ipv4AddressGroupBox;
+        private ListView Ipv4AddressListView;
+        private ColumnHeader Ipv4AddressColumnHeader;
+        private ColumnHeader Ipv4SubnetMaskColumnHeader;
+        private GroupBox Ipv4GatewayGroupBox;
+        private ListView Ipv4GatewayListView;
+        private ColumnHeader Ipv4GatewayColumnHeader;
+        private GroupBox Ipv4DnsGroupBox;
+        private ListView Ipv4DnsListView;
+        private ColumnHeader Ipv4DnsColumnHeader;
+        private TableLayoutPanel Ipv6ColumnLayoutPanel;
+        private GroupBox Ipv6AddressGroupBox;
+        private ListView Ipv6AddressListView;
+        private ColumnHeader Ipv6AddressColumnHeader;
+        private ColumnHeader Ipv6PrefixColumnHeader;
+        private GroupBox Ipv6GatewayGroupBox;
+        private ListView Ipv6GatewayListView;
+        private ColumnHeader Ipv6GatewayColumnHeader;
+        private GroupBox Ipv6DnsGroupBox;
+        private ListView Ipv6DnsListView;
+        private ColumnHeader Ipv6DnsColumnHeader;
         private TabPage PresetsPage;
         private DataListView ConnectionsGrid;
         private MenuStrip Toolbar;

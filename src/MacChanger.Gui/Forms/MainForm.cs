@@ -41,12 +41,6 @@ namespace Dzmac.Gui.Forms
         private readonly PerformanceSample[] _sentSamples = new PerformanceSample[performanceSampleCapacity];
         private int _sampleCount;
         private int _sampleWriteIndex;
-        private ListView _ipv4AddressListView;
-        private ListView _ipv4DnsListView;
-        private ListView _ipv4GatewayListView;
-        private ListView _ipv6AddressListView;
-        private ListView _ipv6DnsListView;
-        private ListView _ipv6GatewayListView;
         private Label _performanceReceivedLabel;
         private Label _performanceReceivedSpeedLabel;
         private Label _performanceSentLabel;
@@ -74,7 +68,6 @@ namespace Dzmac.Gui.Forms
             _connectionDetailsTooltip = new ToolTip();
             InitializeComponent();
             ConfigureV1Surface();
-            InitializeIpAddressPage();
 
             _loadingProgressBar = new ProgressBar
             {
@@ -467,39 +460,6 @@ namespace Dzmac.Gui.Forms
 
         #region Private Methods
 
-        private static ListView CreateDetailsListView(params string[] columns)
-        {
-            var listView = new ListView
-            {
-                Dock = DockStyle.Fill,
-                View = View.Details,
-                FullRowSelect = true,
-                GridLines = true,
-                HeaderStyle = ColumnHeaderStyle.Nonclickable
-            };
-
-            var columnWidth = columns.Length == 1 ? 600 : 280;
-            foreach (var column in columns)
-            {
-                listView.Columns.Add(column, columnWidth);
-            }
-
-            return listView;
-        }
-
-        private static GroupBox CreateIpSectionGroup(string title, Control content)
-        {
-            var group = new GroupBox
-            {
-                Dock = DockStyle.Fill,
-                Text = title,
-                Padding = new Padding(6)
-            };
-
-            group.Controls.Add(content);
-            return group;
-        }
-
         private static void DisposeConnections(List<NetworkConnection> connections)
         {
             if (connections == null)
@@ -567,18 +527,18 @@ namespace Dzmac.Gui.Forms
 
         private void BindIpAddressDetails()
         {
-            if (_ipv4AddressListView == null)
+            if (Ipv4AddressListView == null)
             {
                 return;
             }
 
             PopulateIpv4AddressRows(_selected?.Ipv4Addresses ?? Array.Empty<AdapterIpv4Address>());
-            PopulateSingleValueRows(_ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), "No IPv4 gateway");
-            PopulateSingleValueRows(_ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), "No IPv4 DNS server");
+            PopulateSingleValueRows(Ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), "No IPv4 gateway");
+            PopulateSingleValueRows(Ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), "No IPv4 DNS server");
 
             PopulateIpv6AddressRows(_selected?.Ipv6Addresses ?? Array.Empty<AdapterIpv6Address>());
-            PopulateSingleValueRows(_ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), "No IPv6 gateway");
-            PopulateSingleValueRows(_ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), "No IPv6 DNS server");
+            PopulateSingleValueRows(Ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), "No IPv6 gateway");
+            PopulateSingleValueRows(Ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), "No IPv6 DNS server");
         }
 
         private void BindSelection()
@@ -646,62 +606,6 @@ namespace Dzmac.Gui.Forms
             }
 
             PersistentAddressCheckBox.Visible = false;
-        }
-
-        private void InitializeIpAddressPage()
-        {
-            IPAddressPage.Controls.Clear();
-
-            var rootLayout = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 1
-            };
-            rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
-            rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50f));
-
-            var ipv4Column = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 3
-            };
-            ipv4Column.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
-            ipv4Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-            ipv4Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-
-            var ipv6Column = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 3
-            };
-            ipv6Column.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
-            ipv6Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-            ipv6Column.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-
-            _ipv4AddressListView = CreateDetailsListView("IP Address", "Subnet Mask");
-            _ipv4GatewayListView = CreateDetailsListView("Gateway");
-            _ipv4DnsListView = CreateDetailsListView("DNS Server");
-
-            _ipv6AddressListView = CreateDetailsListView("Unicast IPv6 Address", "Prefix");
-            _ipv6GatewayListView = CreateDetailsListView("Gateway/Next Hop");
-            _ipv6DnsListView = CreateDetailsListView("DNS Server");
-
-            ipv4Column.Controls.Add(CreateIpSectionGroup("Internet Protocol v4 (DHCPv4)", _ipv4AddressListView), 0, 0);
-            ipv4Column.Controls.Add(CreateIpSectionGroup("Gateway", _ipv4GatewayListView), 0, 1);
-            ipv4Column.Controls.Add(CreateIpSectionGroup("DNS Server", _ipv4DnsListView), 0, 2);
-
-            // DHCPv6 operations are intentionally out of scope; IPv6 is read-only status.
-            ipv6Column.Controls.Add(CreateIpSectionGroup("Internet Protocol v6 (Stateless)", _ipv6AddressListView), 0, 0);
-            ipv6Column.Controls.Add(CreateIpSectionGroup("Gateway/Next Hop", _ipv6GatewayListView), 0, 1);
-            ipv6Column.Controls.Add(CreateIpSectionGroup("DNS Server", _ipv6DnsListView), 0, 2);
-
-            rootLayout.Controls.Add(ipv4Column, 0, 0);
-            rootLayout.Controls.Add(ipv6Column, 1, 0);
-
-            IPAddressPage.Controls.Add(rootLayout);
         }
 
         private async Task InitializeNetworkInterfaceCacheAsync()
@@ -785,40 +689,40 @@ namespace Dzmac.Gui.Forms
 
         private void PopulateIpv4AddressRows(IEnumerable<AdapterIpv4Address> addresses)
         {
-            _ipv4AddressListView.BeginUpdate();
-            _ipv4AddressListView.Items.Clear();
+            Ipv4AddressListView.BeginUpdate();
+            Ipv4AddressListView.Items.Clear();
 
             foreach (var entry in addresses)
             {
-                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.SubnetMask }));
+                Ipv4AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.SubnetMask }));
             }
 
-            if (_ipv4AddressListView.Items.Count == 0)
+            if (Ipv4AddressListView.Items.Count == 0)
             {
-                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { "No IPv4 address", string.Empty }));
+                Ipv4AddressListView.Items.Add(new ListViewItem(new[] { "No IPv4 address", string.Empty }));
             }
 
-            _ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            _ipv4AddressListView.EndUpdate();
+            Ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            Ipv4AddressListView.EndUpdate();
         }
 
         private void PopulateIpv6AddressRows(IEnumerable<AdapterIpv6Address> addresses)
         {
-            _ipv6AddressListView.BeginUpdate();
-            _ipv6AddressListView.Items.Clear();
+            Ipv6AddressListView.BeginUpdate();
+            Ipv6AddressListView.Items.Clear();
 
             foreach (var entry in addresses)
             {
-                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.PrefixLength.ToString() }));
+                Ipv6AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.PrefixLength.ToString() }));
             }
 
-            if (_ipv6AddressListView.Items.Count == 0)
+            if (Ipv6AddressListView.Items.Count == 0)
             {
-                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { "No IPv6 address", string.Empty }));
+                Ipv6AddressListView.Items.Add(new ListViewItem(new[] { "No IPv6 address", string.Empty }));
             }
 
-            _ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            _ipv6AddressListView.EndUpdate();
+            Ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            Ipv6AddressListView.EndUpdate();
         }
 
         private async Task RefreshConnectionsBackground(bool clearListWhileLoading = false)
