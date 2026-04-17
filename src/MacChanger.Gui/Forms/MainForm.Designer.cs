@@ -115,8 +115,6 @@ namespace Dzmac.Gui.Forms
             // 
             // MainTableLayoutPanel
             // 
-            this.MainTableLayoutPanel.AutoSize = true;
-            this.MainTableLayoutPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.MainTableLayoutPanel.CausesValidation = false;
             this.MainTableLayoutPanel.ColumnCount = 1;
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -129,7 +127,7 @@ namespace Dzmac.Gui.Forms
             this.MainTableLayoutPanel.RowCount = 2;
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
-            this.MainTableLayoutPanel.Size = new System.Drawing.Size(962, 503);
+            this.MainTableLayoutPanel.Size = new System.Drawing.Size(962, 528);
             this.MainTableLayoutPanel.TabIndex = 0;
             // 
             // InfoTabs
@@ -138,10 +136,10 @@ namespace Dzmac.Gui.Forms
             this.InfoTabs.Controls.Add(this.IPAddressPage);
             this.InfoTabs.Controls.Add(this.PresetsPage);
             this.InfoTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.InfoTabs.Location = new System.Drawing.Point(3, 128);
+            this.InfoTabs.Location = new System.Drawing.Point(3, 135);
             this.InfoTabs.Name = "InfoTabs";
             this.InfoTabs.SelectedIndex = 0;
-            this.InfoTabs.Size = new System.Drawing.Size(956, 372);
+            this.InfoTabs.Size = new System.Drawing.Size(956, 390);
             this.InfoTabs.TabIndex = 0;
             // 
             // InformationPage
@@ -150,7 +148,7 @@ namespace Dzmac.Gui.Forms
             this.InformationPage.Location = new System.Drawing.Point(4, 22);
             this.InformationPage.Name = "InformationPage";
             this.InformationPage.Padding = new System.Windows.Forms.Padding(3);
-            this.InformationPage.Size = new System.Drawing.Size(948, 346);
+            this.InformationPage.Size = new System.Drawing.Size(948, 364);
             this.InformationPage.TabIndex = 0;
             this.InformationPage.Text = "Information";
             this.InformationPage.UseVisualStyleBackColor = true;
@@ -169,7 +167,7 @@ namespace Dzmac.Gui.Forms
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 340);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 358);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // ConnectionDetailsGroup
@@ -197,7 +195,7 @@ namespace Dzmac.Gui.Forms
             this.ConnectionDetailsGroup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
             this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
-            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 130);
+            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 137);
             this.ConnectionDetailsGroup.TabIndex = 0;
             this.ConnectionDetailsGroup.TabStop = false;
             this.ConnectionDetailsGroup.Text = "Connection Details";
@@ -405,9 +403,9 @@ namespace Dzmac.Gui.Forms
             // PerformanceCounterGroup
             // 
             this.PerformanceCounterGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 139);
+            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 146);
             this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
-            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 198);
+            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 209);
             this.PerformanceCounterGroup.TabIndex = 2;
             this.PerformanceCounterGroup.TabStop = false;
             // 
@@ -423,9 +421,9 @@ namespace Dzmac.Gui.Forms
             this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.macTextBox);
             this.ChangeMacAddressGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 139);
+            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 146);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
-            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 198);
+            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 209);
             this.ChangeMacAddressGroup.TabIndex = 1;
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
@@ -513,7 +511,7 @@ namespace Dzmac.Gui.Forms
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
-            this.IPAddressPage.Size = new System.Drawing.Size(948, 346);
+            this.IPAddressPage.Size = new System.Drawing.Size(948, 364);
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
@@ -523,7 +521,7 @@ namespace Dzmac.Gui.Forms
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PresetsPage.Size = new System.Drawing.Size(948, 346);
+            this.PresetsPage.Size = new System.Drawing.Size(948, 364);
             this.PresetsPage.TabIndex = 2;
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
@@ -544,7 +542,7 @@ namespace Dzmac.Gui.Forms
             this.ConnectionsGrid.Name = "ConnectionsGrid";
             this.ConnectionsGrid.ShowGroups = false;
             this.ConnectionsGrid.ShowItemToolTips = true;
-            this.ConnectionsGrid.Size = new System.Drawing.Size(956, 119);
+            this.ConnectionsGrid.Size = new System.Drawing.Size(956, 126);
             this.ConnectionsGrid.SpaceBetweenGroups = 1;
             this.ConnectionsGrid.TabIndex = 1;
             this.ConnectionsGrid.UseCompatibleStateImageBehavior = false;
@@ -821,9 +819,9 @@ namespace Dzmac.Gui.Forms
             // 
             // MainStatusBar
             // 
-            this.MainStatusBar.Location = new System.Drawing.Point(0, 505);
+            this.MainStatusBar.Location = new System.Drawing.Point(0, 552);
             this.MainStatusBar.Name = "MainStatusBar";
-            this.MainStatusBar.Size = new System.Drawing.Size(962, 22);
+            this.MainStatusBar.Size = new System.Drawing.Size(962, 23);
             this.MainStatusBar.SizingGrip = false;
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
@@ -841,9 +839,9 @@ namespace Dzmac.Gui.Forms
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(962, 527);
-            this.Controls.Add(this.MainStatusBar);
+            this.ClientSize = new System.Drawing.Size(962, 575);
             this.Controls.Add(this.MainTableLayoutPanel);
+            this.Controls.Add(this.MainStatusBar);
             this.Controls.Add(this.Toolbar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.KeyPreview = true;
