@@ -14,7 +14,7 @@ namespace MacChanger
     {
         /// <summary>
         ///     Use 02 as the first octet to mark the MAC address as locally administered.
-        ///     <see href="https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage"/>
+        ///     <see href="https://github.com/zbalkan/dzmac/wiki/Help#why-does-setting-the-first-octet-to-02-help-with-some-wi-fi-mac-changes"/>
         /// </summary>
         private const char locallyAdministeredOctet = '2';
 
@@ -167,7 +167,7 @@ namespace MacChanger
 
         /// <summary>
         ///     Mark the MAC address as locally administered.
-        ///     <see href="https://en.wikipedia.org/wiki/MAC_address#IEEE_802c_local_MAC_address_usage"/>
+        ///     <see href="https://github.com/zbalkan/dzmac/wiki/Help#why-does-setting-the-first-octet-to-02-help-with-some-wi-fi-mac-changes"/>
         /// </summary>
         public void SetAsLocallyAdministered()
         {

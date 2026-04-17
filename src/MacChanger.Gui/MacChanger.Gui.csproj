@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cli\CliHandler.cs" />
+    <Compile Include="Cli\CommandLineHelpContent.cs" />
     <Compile Include="Controls\MacTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>

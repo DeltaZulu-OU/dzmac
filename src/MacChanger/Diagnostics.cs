@@ -14,7 +14,7 @@ namespace MacChanger
     public static class Diagnostics
     {
         private const string EventLogName = "Application";
-        private const string EventLogSource = "MacChanger";
+        private const string EventLogSource = "dzmac";
         private const int PendingQueueLimit = 512;
         private const int EventLogInitRetryDelaySeconds = 30;
 

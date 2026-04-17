@@ -5,6 +5,8 @@ namespace MacChanger
         private const string HelpText =
 @"dzmac Command Line
 
+Visit https://github.com/zbalkan/dzmac/ for more information and usage examples.
+
 Usage: dzmac -n network_connection_name [options]
 
 OPTIONS:
