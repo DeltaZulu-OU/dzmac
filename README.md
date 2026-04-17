@@ -1,14 +1,12 @@
-# MacChanger
+# dzmac
 
-A reimplementation of TMAC in C#.
-
-> In ALPHA stage.
+ In ALPHA stage.
 
 ![Sample](assets/window.png)
 
 ## Overview
 
-MacChanger is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is inspired by legacy tools like TMAC but does **not** aim for feature parity.
+dzmac is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of TMAC but does **not** aim for feature parity.
 
 The goal is to provide a focused, predictable, and maintainable application centered on core adapter management workflows.
 
@@ -55,40 +53,6 @@ As a result:
 ### DHCP disable behavior is safe-by-default
 Disabling DHCPv4 preserves the current configuration instead of discarding it.
 
-## Explicit non-goals
-
-The following are intentionally excluded:
-
-- Feature parity with TMAC
-- DHCPv6 support
-- Proxy management
-- Auto-update functionality
-- System tray behavior
-- File association handling (for now)
-
-These may be revisited later only through explicit design decisions.
-
-## UI principles
-
-- The application remains a **foreground tool**, not a background service
-- Focus on clarity over feature density
-- Avoid placeholder features or misleading UI
-- Prefer predictable behavior over legacy compatibility
-
-## Options menu (current direction)
-
-Supported:
-
-- Open Windows Network Connections
-- Toggle speed display (KB/s)
-
-Not supported:
-
-- Proxy settings
-- Auto updates
-- Tray icon / animation
-- File association checks
-
 ## Acknowledgements
 
 Thanks to the following projects and resources:
@@ -106,4 +70,4 @@ Thanks to the following projects and resources:
 
 This project is in **alpha**.
 
-The focus is on stabilizing core functionality before expanding scope.
+The focus is on stabilizing core functionality before expanding scope for dzmac.
