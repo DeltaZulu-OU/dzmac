@@ -269,6 +269,7 @@ namespace Dzmac.Gui.Forms
         private void MainForm_LoadAsync(object sender, EventArgs e)
         {
             ShowSpeedInKBytesPerSecItem.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
+            ShowAllAdaptersItem.Checked = Settings.Default.ShowAllAdapters;
         }
 
         private void MainForm_ShownAsync(object sender, EventArgs e)
@@ -431,6 +432,13 @@ namespace Dzmac.Gui.Forms
             ConnectionsGrid.BeginUpdate();
             ConnectionsGrid.RefreshObjects(NetworkConnections);
             ConnectionsGrid.EndUpdate();
+        }
+
+        private async void ShowAllAdaptersItem_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.ShowAllAdapters = ShowAllAdaptersItem.Checked;
+            Settings.Default.Save();
+            await RefreshConnectionsBackground();
         }
 
         private async void UpdateOuiItem_ClickAsync(object sender, EventArgs e)
@@ -747,6 +755,7 @@ namespace Dzmac.Gui.Forms
 
                     var adapters = NetworkAdapterFactory
                         .GetNetworkAdapters(_vm)
+                        .Where(adapter => ShowAllAdaptersItem.Checked || adapter.IsPhysicalAdapter)
                         .OrderByDescending(adapter => adapter.Enabled)
                         .ThenBy(adapter => adapter.Name, StringComparer.CurrentCultureIgnoreCase)
                         .ToList();

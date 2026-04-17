@@ -136,6 +136,9 @@ namespace MacChanger
 
         public bool IsIPv4Enabled { get; }
         public bool IsIPv6Enabled { get; }
+        public bool IsPhysical => IsPhysicalAdapter;
+        public bool IsPhysicalAdapter { get; }
+        public bool IsLikelyPhysicalAdapter => IsPhysicalAdapter;
 
         /// <summary>
         ///     Gets the current operational state of the network connection.
@@ -162,10 +165,11 @@ namespace MacChanger
         /// </summary>
         public long Speed => _networkInterface.Speed;
 
-        public NetworkAdapter(NetworkInterface networkInterface, VendorManager? vendorManager = null)
+        public NetworkAdapter(NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false)
         {
             _networkInterface = networkInterface;
             _manager = vendorManager;
+            IsPhysicalAdapter = isPhysicalAdapter;
             Name = _networkInterface.Name;
 
             var props = _networkInterface.GetIPProperties();
@@ -177,8 +181,8 @@ namespace MacChanger
             ActiveMacAddress = GetActiveMac();
         }
 
-        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null)
-            : this(networkInterface, vendorManager)
+        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false)
+            : this(networkInterface, vendorManager, isPhysicalAdapter)
         {
             _adapter = adapterObject;
             _adapterConfig = adapterConfig;

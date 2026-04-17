@@ -117,6 +117,7 @@ namespace Dzmac.Gui.Forms
             this.OptionsMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.NetworkConnectionsItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ShowSpeedInKBytesPerSecItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ShowAllAdaptersItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpTopicsItem = new System.Windows.Forms.ToolStripMenuItem();
             this.CliParamsHelpItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1009,7 +1010,8 @@ namespace Dzmac.Gui.Forms
             // 
             this.OptionsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.NetworkConnectionsItem,
-            this.ShowSpeedInKBytesPerSecItem});
+            this.ShowSpeedInKBytesPerSecItem,
+            this.ShowAllAdaptersItem});
             this.OptionsMenu.Name = "OptionsMenu";
             this.OptionsMenu.Size = new System.Drawing.Size(61, 20);
             this.OptionsMenu.Text = "&Options";
@@ -1028,6 +1030,14 @@ namespace Dzmac.Gui.Forms
             this.ShowSpeedInKBytesPerSecItem.Size = new System.Drawing.Size(211, 22);
             this.ShowSpeedInKBytesPerSecItem.Text = "Show Speed In KBytes/sec";
             this.ShowSpeedInKBytesPerSecItem.CheckedChanged += new System.EventHandler(this.ShowSpeedInKBytesPerSecItem_CheckedChanged);
+            // 
+            // ShowAllAdaptersItem
+            // 
+            this.ShowAllAdaptersItem.CheckOnClick = true;
+            this.ShowAllAdaptersItem.Name = "ShowAllAdaptersItem";
+            this.ShowAllAdaptersItem.Size = new System.Drawing.Size(211, 22);
+            this.ShowAllAdaptersItem.Text = "Show All Adapters";
+            this.ShowAllAdaptersItem.CheckedChanged += new System.EventHandler(this.ShowAllAdaptersItem_CheckedChanged);
             // 
             // HelpMenu
             // 
@@ -1186,6 +1196,7 @@ namespace Dzmac.Gui.Forms
         private ToolStripMenuItem OptionsMenu;
         private ToolStripMenuItem NetworkConnectionsItem;
         private ToolStripMenuItem ShowSpeedInKBytesPerSecItem;
+        private ToolStripMenuItem ShowAllAdaptersItem;
         private ToolStripMenuItem HelpMenu;
         private ToolStripMenuItem AssociateItem;
         private ToolStripMenuItem ExitItem;

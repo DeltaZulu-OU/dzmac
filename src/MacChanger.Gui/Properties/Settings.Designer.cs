@@ -41,5 +41,20 @@ namespace Dzmac.Gui.Properties
                 this["ShowSpeedInKBytesPerSec"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowAllAdapters
+        {
+            get
+            {
+                return ((bool)(this["ShowAllAdapters"]));
+            }
+            set
+            {
+                this["ShowAllAdapters"] = value;
+            }
+        }
     }
 }

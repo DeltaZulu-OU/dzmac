@@ -36,29 +36,43 @@ See [wiki](https://github.com/zbalkan/dzmac/wiki/Help) for help.
 - Display adapter speed (with optional KB/s view)
 - Open Windows Network Connections
 
-## Deviations from TMAC
+## How dzmac differs from TMAC
 
+dzmac started as a reimplementation of TMAC, but it intentionally makes different
+product and UX choices. The list below highlights the most important current
+differences so expectations are clear.
+
+### Physical adapters first (virtual adapters optional)
+By default, dzmac focuses the adapter list on likely physical adapters for a
+cleaner day-to-day experience. Virtual/logical adapters can still be shown
+through **Options → Show All Adapters**.
+
+### Narrower feature scope, fewer bundled utilities
 The following decisions define the current user-facing scope:
 
-### No DHCPv6
+#### No DHCPv6
 Only DHCPv4 is supported. DHCPv6 is intentionally out of scope.
 
-### No proxy management
+#### No proxy management
 Internet Explorer / system proxy configuration is not supported.
 
-### No auto-updater
+#### No auto-updater
 The application does not include update infrastructure.
 
-### No system tray
+#### No system tray
 The application is not a background utility:
 - no system tray icon
 - no tray animation
 
-### Preset file support is postponed
+#### Preset file support is postponed
 Preset files (`.tpf`) are planned but not part of the current milestone.  
 As a result:
 - no startup file association checks
 - no preset import/export in current scope
+
+#### Reduced "all-in-one" behavior
+Unlike TMAC's broader utility surface, dzmac keeps optional/auxiliary behavior
+to a minimum and emphasizes explicit, focused actions in the main UI.
 
 ### DHCP disable behavior is safe-by-default
 Disabling DHCPv4 preserves the current configuration instead of discarding it.
@@ -75,5 +89,4 @@ Thanks to the following projects and resources:
 
 - https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class  
   For MAC address textbox implementation reference
-
 
