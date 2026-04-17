@@ -653,7 +653,7 @@ namespace Dzmac.Gui.Forms
                         return;
                     }
 
-                    _vendors = vendors;
+                    _vendors = vendors.OrderBy(v => v.Oui, StringComparer.OrdinalIgnoreCase).ThenBy(v => v.VendorName, StringComparer.Ordinal).ToList();
                     VendorComboBox.Enabled = true;
                     _isVendorListReady = true;
                     TryBindVendorsWhenReady();
@@ -745,7 +745,11 @@ namespace Dzmac.Gui.Forms
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var adapters = NetworkAdapterFactory.GetNetworkAdapters(_vm).ToList();
+                    var adapters = NetworkAdapterFactory
+                        .GetNetworkAdapters(_vm)
+                        .OrderByDescending(adapter => adapter.Enabled)
+                        .ThenBy(adapter => adapter.Name, StringComparer.CurrentCultureIgnoreCase)
+                        .ToList();
                     cancellationToken.ThrowIfCancellationRequested();
 
                     return adapters.Select(adapter => new NetworkConnection(adapter, ShowSpeedInKBytesPerSecItem.Checked)).ToList();
