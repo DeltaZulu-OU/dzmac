@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,25 +15,55 @@ namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
+        private struct PerformanceSample
+        {
+            public DateTime Timestamp { get; }
+            public double Value { get; }
+
+            public PerformanceSample(DateTime timestamp, double value)
+            {
+                Timestamp = timestamp;
+                Value = value;
+            }
+        }
+
         private const string zeroMacValue = "00-00-00-00-00-00";
+        private const int performanceSampleCapacity = 120;
+        private const int performanceRefreshMs = 1000;
         private readonly Label _loadingLabel;
         private readonly Panel _loadingPanel;
         private readonly ProgressBar _loadingProgressBar;
         private readonly VendorManager _vm;
+        private readonly object _performanceBufferSync = new object();
+        private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
+        private readonly PerformanceSample[] _sentSamples = new PerformanceSample[performanceSampleCapacity];
+        private int _sampleCount;
+        private int _sampleWriteIndex;
         private ListView _ipv4AddressListView;
         private ListView _ipv4DnsListView;
         private ListView _ipv4GatewayListView;
         private ListView _ipv6AddressListView;
         private ListView _ipv6DnsListView;
         private ListView _ipv6GatewayListView;
+        private Label _performanceReceivedLabel;
+        private Label _performanceReceivedSpeedLabel;
+        private Label _performanceSentLabel;
+        private Label _performanceSentSpeedLabel;
+        private Panel _performanceGraphPanel;
+        private NetworkInterface _selectedNetworkInterface;
+        private CancellationTokenSource _performanceLoopCancellation;
+        private int _performanceResolveVersion;
+        private int _performanceUiUpdatePending;
         private bool _isRefreshing;
         private bool _isVendorComboBound;
         private bool _isVendorListLoading;
         private bool _isVendorListReady;
+        private bool _isStartupInitialized;
         private bool _locallyAdministered;
         private bool _reenableOnChange;
         private CancellationTokenSource _refreshCancellation;
         private NetworkConnectionDetail _selected;
+        private IReadOnlyDictionary<string, NetworkInterface> _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
         private List<Vendor> _vendors;
 
         public MainForm()
@@ -81,8 +113,11 @@ namespace MacChanger.Gui.Forms
             MainTableLayoutPanel.Controls.Add(_loadingPanel, 0, 0);
             _loadingPanel.BringToFront();
 
+            InfoTabs.SelectedIndexChanged += InfoTabs_SelectedIndexChanged;
+            Shown += MainForm_ShownAsync;
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             VendorComboBox.Enabled = false;
+            InitializePerformancePanel();
             UpdateSelectionState();
         }
 
@@ -227,19 +262,47 @@ namespace MacChanger.Gui.Forms
         {
             _refreshCancellation?.Cancel();
             _refreshCancellation?.Dispose();
+            _performanceLoopCancellation?.Cancel();
+            _performanceLoopCancellation?.Dispose();
             _selected?.Dispose();
             DisposeConnections(NetworkConnections);
             _vm?.Dispose();
         }
 
-        private async void MainForm_LoadAsync(object sender, EventArgs e)
+        private void MainForm_LoadAsync(object sender, EventArgs e)
         {
             MakeTextboxBackgroundTransparent();
             ShowSpeedInKBytesPerSecItem.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
+        }
 
-            var refreshTask = RefreshConnectionsBackground(clearListWhileLoading: true);
-            _ = LoadVendorsInBackground();
-            await refreshTask;
+        private void MainForm_ShownAsync(object sender, EventArgs e)
+        {
+            if (_isStartupInitialized)
+            {
+                return;
+            }
+
+            _isStartupInitialized = true;
+            BeginInvoke(new Action(() => _ = InitializeStartupAsync()));
+        }
+
+        private async Task InitializeStartupAsync()
+        {
+            try
+            {
+                var interfaceCacheTask = InitializeNetworkInterfaceCacheAsync();
+                var refreshTask = RefreshConnectionsBackground(clearListWhileLoading: true);
+                _ = LoadVendorsInBackground();
+                await Task.WhenAll(interfaceCacheTask, refreshTask);
+            }
+            catch (Exception ex)
+            {
+                if (!IsDisposed)
+                {
+                    MainStatusBar.Text = "Startup initialization failed.";
+                    _ = MessageBox.Show(ex.Message, "Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
@@ -259,6 +322,17 @@ namespace MacChanger.Gui.Forms
         }
 
         private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
+
+        private void InfoTabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_selected == null || !IsPerformanceTabVisible())
+            {
+                StopPerformanceMonitoring();
+                return;
+            }
+
+            _ = RestartPerformanceMonitoringAsync(_selected.ConfigId);
+        }
 
         private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
@@ -525,6 +599,7 @@ namespace MacChanger.Gui.Forms
                 ActiveMacVendorTextbox.Text = "...";
                 DhcpEnabledItem.Checked = false;
                 BindIpAddressDetails();
+                StopPerformanceMonitoring();
                 UpdateSelectionState();
                 return;
             }
@@ -541,6 +616,10 @@ namespace MacChanger.Gui.Forms
             ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
             DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
             BindIpAddressDetails();
+            if (IsPerformanceTabVisible())
+            {
+                _ = RestartPerformanceMonitoringAsync(_selected.ConfigId);
+            }
             UpdateSelectionState();
         }
 
@@ -624,6 +703,26 @@ namespace MacChanger.Gui.Forms
             rootLayout.Controls.Add(ipv6Column, 1, 0);
 
             IPAddressPage.Controls.Add(rootLayout);
+        }
+
+        private async Task InitializeNetworkInterfaceCacheAsync()
+        {
+            try
+            {
+                var map = await Task.Run(() =>
+                {
+                    return NetworkInterface
+                        .GetAllNetworkInterfaces()
+                        .GroupBy(nic => nic.Id)
+                        .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+                });
+
+                _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(map);
+            }
+            catch
+            {
+                _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
+            }
         }
 
         private async Task LoadVendorsInBackground()
@@ -880,6 +979,320 @@ namespace MacChanger.Gui.Forms
             DhcpRenewIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DeleteItem.Enabled = enableActions;
+        }
+
+        private static string FormatBitsPerSecond(long bitsPerSecond)
+        {
+            if (bitsPerSecond >= 1000000000)
+            {
+                return $"{bitsPerSecond / 1000000000f:F2} Gbps";
+            }
+
+            if (bitsPerSecond >= 1000000)
+            {
+                return $"{bitsPerSecond / 1000000f:F2} Mbps";
+            }
+
+            if (bitsPerSecond >= 1000)
+            {
+                return $"{bitsPerSecond / 1000f:F2} Kbps";
+            }
+
+            return $"{bitsPerSecond} bps";
+        }
+
+        private static string FormatDataSize(long bytes)
+        {
+            string[] units = { "B", "KB", "MB", "GB", "TB" };
+            double value = bytes;
+            var unitIndex = 0;
+
+            while (value >= 1024d && unitIndex < units.Length - 1)
+            {
+                value /= 1024d;
+                unitIndex++;
+            }
+
+            return $"{value:F2} {units[unitIndex]}";
+        }
+
+        private bool IsPerformanceTabVisible() => InfoTabs.SelectedTab == InformationPage;
+
+        private void DrawSampleSeries(Graphics graphics, double[] samples, double maxSample, Color color)
+        {
+            if (samples.Length < 2 || _performanceGraphPanel.Width < 2 || _performanceGraphPanel.Height < 2)
+            {
+                return;
+            }
+
+            var step = (_performanceGraphPanel.Width - 1f) / (performanceSampleCapacity - 1f);
+
+            using (var pen = new Pen(color, 1f))
+            {
+                for (var i = 1; i < samples.Length; i++)
+                {
+                    var x1 = (i - 1) * step;
+                    var x2 = i * step;
+                    var y1 = _performanceGraphPanel.Height - 1f - (float)(samples[i - 1] / maxSample * (_performanceGraphPanel.Height - 1f));
+                    var y2 = _performanceGraphPanel.Height - 1f - (float)(samples[i] / maxSample * (_performanceGraphPanel.Height - 1f));
+                    graphics.DrawLine(pen, x1, y1, x2, y2);
+                }
+            }
+        }
+
+        private void InitializePerformancePanel()
+        {
+            var panel = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 5,
+                BackColor = Color.White,
+                Padding = new Padding(6)
+            };
+            panel.RowStyles.Add(new RowStyle(SizeType.Percent, 78f));
+            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            _performanceGraphPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.White
+            };
+            _performanceGraphPanel.Paint += PerformanceGraphPanel_Paint;
+
+            _performanceReceivedLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                ForeColor = Color.FromArgb(192, 0, 0),
+                BackColor = Color.White,
+                AutoSize = false,
+                Font = new Font("Consolas", 8.25f),
+                Height = 16,
+                Text = "Received: 0 B"
+            };
+
+            _performanceReceivedSpeedLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                ForeColor = Color.FromArgb(192, 0, 0),
+                BackColor = Color.White,
+                AutoSize = false,
+                Font = new Font("Consolas", 8.25f),
+                Height = 16,
+                Text = "-Speed  : 0 bps (Peak 0 bps)"
+            };
+
+            _performanceSentLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                ForeColor = Color.Green,
+                BackColor = Color.White,
+                AutoSize = false,
+                Font = new Font("Consolas", 8.25f),
+                Height = 16,
+                Text = "Sent    : 0 B"
+            };
+
+            _performanceSentSpeedLabel = new Label
+            {
+                Dock = DockStyle.Top,
+                ForeColor = Color.Green,
+                BackColor = Color.White,
+                AutoSize = false,
+                Font = new Font("Consolas", 8.25f),
+                Height = 16,
+                Text = "-Speed  : 0 bps (Peak 0 bps)"
+            };
+
+            panel.Controls.Add(_performanceGraphPanel, 0, 0);
+            panel.Controls.Add(_performanceReceivedLabel, 0, 1);
+            panel.Controls.Add(_performanceReceivedSpeedLabel, 0, 2);
+            panel.Controls.Add(_performanceSentLabel, 0, 3);
+            panel.Controls.Add(_performanceSentSpeedLabel, 0, 4);
+            PerformanceCounterGroup.Controls.Add(panel);
+            PerformanceCounterGroup.Text = string.Empty;
+        }
+
+        private void PerformanceGraphPanel_Paint(object sender, PaintEventArgs e)
+        {
+            var receivedValues = new double[performanceSampleCapacity];
+            var sentValues = new double[performanceSampleCapacity];
+
+            lock (_performanceBufferSync)
+            {
+                var start = (_sampleWriteIndex - _sampleCount + performanceSampleCapacity) % performanceSampleCapacity;
+                for (var i = 0; i < _sampleCount; i++)
+                {
+                    var sourceIndex = (start + i) % performanceSampleCapacity;
+                    var targetIndex = performanceSampleCapacity - _sampleCount + i;
+                    receivedValues[targetIndex] = _receivedSamples[sourceIndex].Value;
+                    sentValues[targetIndex] = _sentSamples[sourceIndex].Value;
+                }
+            }
+
+            e.Graphics.Clear(Color.White);
+            var maxSample = Math.Max(1d, Math.Max(receivedValues.Max(), sentValues.Max()));
+            DrawSampleSeries(e.Graphics, receivedValues, maxSample, Color.Red);
+            DrawSampleSeries(e.Graphics, sentValues, maxSample, Color.Green);
+        }
+
+        private async Task RunPerformanceSamplingLoopAsync(NetworkInterface networkInterface, CancellationToken cancellationToken)
+        {
+            long? previousReceivedBytes = null;
+            long? previousSentBytes = null;
+            long peakReceivedBitsPerSecond = 0;
+            long peakSentBitsPerSecond = 0;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var stats = networkInterface.GetIPv4Statistics();
+                    var receivedBytes = stats.BytesReceived;
+                    var sentBytes = stats.BytesSent;
+
+                    if (!previousReceivedBytes.HasValue || !previousSentBytes.HasValue)
+                    {
+                        previousReceivedBytes = receivedBytes;
+                        previousSentBytes = sentBytes;
+                        await Task.Delay(performanceRefreshMs, cancellationToken).ConfigureAwait(false);
+                        continue;
+                    }
+
+                    var receivedDelta = Math.Max(0L, receivedBytes - previousReceivedBytes.Value);
+                    var sentDelta = Math.Max(0L, sentBytes - previousSentBytes.Value);
+
+                    previousReceivedBytes = receivedBytes;
+                    previousSentBytes = sentBytes;
+
+                    var receivedBitsPerSecond = receivedDelta * 8L * 1000 / performanceRefreshMs;
+                    var sentBitsPerSecond = sentDelta * 8L * 1000 / performanceRefreshMs;
+
+                    peakReceivedBitsPerSecond = Math.Max(peakReceivedBitsPerSecond, receivedBitsPerSecond);
+                    peakSentBitsPerSecond = Math.Max(peakSentBitsPerSecond, sentBitsPerSecond);
+
+                    lock (_performanceBufferSync)
+                    {
+                        _receivedSamples[_sampleWriteIndex] = new PerformanceSample(DateTime.UtcNow, receivedBitsPerSecond);
+                        _sentSamples[_sampleWriteIndex] = new PerformanceSample(DateTime.UtcNow, sentBitsPerSecond);
+                        _sampleWriteIndex = (_sampleWriteIndex + 1) % performanceSampleCapacity;
+                        _sampleCount = Math.Min(_sampleCount + 1, performanceSampleCapacity);
+                    }
+
+                    if (IsDisposed || !IsHandleCreated)
+                    {
+                        return;
+                    }
+
+                    if (Interlocked.CompareExchange(ref _performanceUiUpdatePending, 1, 0) == 0)
+                    {
+                        BeginInvoke(new Action(() =>
+                        {
+                            try
+                            {
+                                if (IsDisposed || cancellationToken.IsCancellationRequested || _selectedNetworkInterface == null || _selectedNetworkInterface.Id != networkInterface.Id || !IsPerformanceTabVisible())
+                                {
+                                    return;
+                                }
+
+                                _performanceReceivedLabel.Text = $"Received: {FormatDataSize(receivedBytes)}";
+                                _performanceReceivedSpeedLabel.Text = $"-Speed  : {FormatBitsPerSecond(receivedBitsPerSecond)} (Peak {FormatBitsPerSecond(peakReceivedBitsPerSecond)})";
+                                _performanceSentLabel.Text = $"Sent    : {FormatDataSize(sentBytes)}";
+                                _performanceSentSpeedLabel.Text = $"-Speed  : {FormatBitsPerSecond(sentBitsPerSecond)} (Peak {FormatBitsPerSecond(peakSentBitsPerSecond)})";
+                                _performanceGraphPanel.Invalidate();
+                            }
+                            finally
+                            {
+                                Interlocked.Exchange(ref _performanceUiUpdatePending, 0);
+                            }
+                        }));
+                    }
+
+                    await Task.Delay(performanceRefreshMs, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch
+                {
+                    if (!IsDisposed && IsHandleCreated)
+                    {
+                        BeginInvoke(new Action(StopPerformanceMonitoring));
+                    }
+
+                    return;
+                }
+            }
+        }
+
+        private Task RestartPerformanceMonitoringAsync(string networkConfigId)
+        {
+            StopPerformanceMonitoring();
+            var resolveVersion = Interlocked.Increment(ref _performanceResolveVersion);
+
+            _performanceReceivedLabel.Text = "Received: resolving adapter...";
+            _performanceReceivedSpeedLabel.Text = "-Speed  : waiting for sample...";
+            _performanceSentLabel.Text = "Sent    : resolving adapter...";
+            _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
+            ResetPerformanceBuffers();
+            _performanceGraphPanel.Invalidate();
+
+            _networkInterfacesById.TryGetValue(networkConfigId, out var resolvedInterface);
+
+            if (IsDisposed || resolveVersion != _performanceResolveVersion || !IsPerformanceTabVisible() || _selected == null || _selected.ConfigId != networkConfigId)
+            {
+                return Task.CompletedTask;
+            }
+
+            _selectedNetworkInterface = resolvedInterface;
+            if (resolvedInterface == null)
+            {
+                _performanceReceivedLabel.Text = "Received: unavailable";
+                _performanceReceivedSpeedLabel.Text = "-Speed  : unavailable";
+                _performanceSentLabel.Text = "Sent    : unavailable";
+                _performanceSentSpeedLabel.Text = "-Speed  : unavailable";
+                return Task.CompletedTask;
+            }
+
+            _performanceReceivedLabel.Text = "Received: waiting for sample...";
+            _performanceReceivedSpeedLabel.Text = "-Speed  : waiting for sample...";
+            _performanceSentLabel.Text = "Sent    : waiting for sample...";
+            _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
+
+            _performanceLoopCancellation = new CancellationTokenSource();
+            _ = RunPerformanceSamplingLoopAsync(_selectedNetworkInterface, _performanceLoopCancellation.Token);
+            return Task.CompletedTask;
+        }
+
+        private void StopPerformanceMonitoring()
+        {
+            Interlocked.Increment(ref _performanceResolveVersion);
+            _performanceLoopCancellation?.Cancel();
+            _performanceLoopCancellation?.Dispose();
+            _performanceLoopCancellation = null;
+            Interlocked.Exchange(ref _performanceUiUpdatePending, 0);
+            _selectedNetworkInterface = null;
+            ResetPerformanceBuffers();
+            _performanceReceivedLabel.Text = "Received: 0 B";
+            _performanceReceivedSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+            _performanceSentLabel.Text = "Sent    : 0 B";
+            _performanceSentSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+            _performanceGraphPanel.Invalidate();
+        }
+
+        private void ResetPerformanceBuffers()
+        {
+            lock (_performanceBufferSync)
+            {
+                Array.Clear(_receivedSamples, 0, _receivedSamples.Length);
+                Array.Clear(_sentSamples, 0, _sentSamples.Length);
+                _sampleWriteIndex = 0;
+                _sampleCount = 0;
+            }
         }
 
         #endregion Private Methods
