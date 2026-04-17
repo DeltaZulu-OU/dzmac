@@ -283,7 +283,13 @@ namespace MacChanger.Gui.Forms
             }
 
             _isStartupInitialized = true;
-            BeginInvoke(new Action(() => _ = InitializeStartupAsync()));
+            Application.Idle += MainForm_InitializeStartupOnIdleAsync;
+        }
+
+        private async void MainForm_InitializeStartupOnIdleAsync(object sender, EventArgs e)
+        {
+            Application.Idle -= MainForm_InitializeStartupOnIdleAsync;
+            await InitializeStartupAsync();
         }
 
         private async Task InitializeStartupAsync()
