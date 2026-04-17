@@ -8,14 +8,15 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using MacChanger.Gui.DTO;
-using MacChanger.Gui.Properties;
+using Dzmac.Gui.DTO;
+using Dzmac.Gui.Properties;
+using MacChanger;
 
-namespace MacChanger.Gui.Forms
+namespace Dzmac.Gui.Forms
 {
     public partial class MainForm : Form
     {
-        private struct PerformanceSample
+        private readonly struct PerformanceSample
         {
             public DateTime Timestamp { get; }
             public double Value { get; }
@@ -254,7 +255,7 @@ namespace MacChanger.Gui.Forms
 
         private void ExportReportItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/zbalkan/MacChanger");
+        private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/zbalkan/dzmac");
 
         private void ImportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
@@ -388,10 +389,7 @@ namespace MacChanger.Gui.Forms
             macTextBox.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);
         }
 
-        private async void RefreshItem_Click(object sender, EventArgs e)
-        {
-            await RefreshConnectionsBackground();
-        }
+        private async void RefreshItem_Click(object sender, EventArgs e) => await RefreshConnectionsBackground();
 
         private void RestoreMacButton_Click(object sender, EventArgs e)
         {
@@ -715,13 +713,10 @@ namespace MacChanger.Gui.Forms
         {
             try
             {
-                var map = await Task.Run(() =>
-                {
-                    return NetworkInterface
+                var map = await Task.Run(() => NetworkInterface
                         .GetAllNetworkInterfaces()
                         .GroupBy(nic => nic.Id)
-                        .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
-                });
+                        .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase));
 
                 _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(map);
             }

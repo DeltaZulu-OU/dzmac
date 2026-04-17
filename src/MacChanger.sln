@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger", "MacChanger\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Tests", "MacChanger.Tests\MacChanger.Tests.csproj", "{B4136349-A1E2-4DB3-8618-CB8D55639ECC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Gui", "MacChanger.Gui\MacChanger.Gui.csproj", "{9A3B73F1-4B81-4864-AC91-FAD1474031A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dzmac.Gui", "MacChanger.Gui\MacChanger.Gui.csproj", "{9A3B73F1-4B81-4864-AC91-FAD1474031A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectListView2012", "ObjectListView\ObjectListView2012.csproj", "{18FEDA0C-D147-4286-B39A-01204808106A}"
 EndProject

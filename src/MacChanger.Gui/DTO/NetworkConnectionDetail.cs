@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MacChanger;
 
-namespace MacChanger.Gui.DTO
+namespace Dzmac.Gui.DTO
 {
     /// <summary>
-    ///     A DTO for MacChanger GUI detailed information
+    ///     A DTO for dzmac detailed information
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     internal class NetworkConnectionDetail : IDisposable

@@ -3,9 +3,9 @@ namespace MacChanger
     public static class CommandLineHelpContent
     {
         private const string HelpText =
-@"MacChanger Command Line
+@"dzmac Command Line
 
-Usage: tmac -n network_connection_name [options]
+Usage: dzmac -n network_connection_name [options]
 
 OPTIONS:
 

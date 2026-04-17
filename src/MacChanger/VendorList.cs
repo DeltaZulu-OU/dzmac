@@ -18,7 +18,7 @@ namespace MacChanger
 
         public int Count => _cache.Count;
 
-        private static Cache? _cache;
+        private static Cache _cache;
         private bool disposedValue;
 
         internal VendorList()
@@ -146,10 +146,9 @@ namespace MacChanger
             {
                 if (disposing)
                 {
-                    _cache?.Dispose();
+                    _cache.Dispose();
                 }
 
-                _cache = null;
                 disposedValue = true;
             }
         }

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using MacChanger;
 
-namespace MacChanger.Gui
+namespace Dzmac.Gui
 {
     internal static class CliHandler
     {
@@ -148,10 +149,7 @@ namespace MacChanger.Gui
             return mac;
         }
 
-        private static void ShowHelp()
-        {
-            Console.WriteLine(CommandLineHelpContent.Text);
-        }
+        private static void ShowHelp() => Console.WriteLine(CommandLineHelpContent.Text);
 
         private static bool TryGetAdapter(string connectionName, out NetworkAdapter adapter)
         {

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using BrightIdeasSoftware;
+using MacChanger;
 
-namespace MacChanger.Gui.DTO
+namespace Dzmac.Gui.DTO
 {
     /// <summary>
-    ///     A DTO for MacChanger datagrid which includes basic information
+    ///     A DTO for dzmac datagrid which includes basic information
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     internal class NetworkConnection : IDisposable

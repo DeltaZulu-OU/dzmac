@@ -1,4 +1,4 @@
-namespace MacChanger.Gui.Forms
+﻿namespace Dzmac.Gui.Forms
 {
     partial class AboutBox
     {
@@ -70,7 +70,7 @@ namespace MacChanger.Gui.Forms
             this.ProductNameLabel.Name = "ProductNameLabel";
             this.ProductNameLabel.Size = new System.Drawing.Size(109, 18);
             this.ProductNameLabel.TabIndex = 0;
-            this.ProductNameLabel.Text = "MacChanger";
+            this.ProductNameLabel.Text = "dzmac";
             // 
             // VersionLabel
             // 
@@ -111,7 +111,7 @@ namespace MacChanger.Gui.Forms
             this.ProjectLinkLabel.Size = new System.Drawing.Size(199, 13);
             this.ProjectLinkLabel.TabIndex = 4;
             this.ProjectLinkLabel.TabStop = true;
-            this.ProjectLinkLabel.Text = "https://github.com/zbalkan/MacChanger";
+            this.ProjectLinkLabel.Text = "https://github.com/zbalkan/dzmac";
             this.ProjectLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.ProjectLinkLabel_LinkClicked);
             // 
             // CloseButton

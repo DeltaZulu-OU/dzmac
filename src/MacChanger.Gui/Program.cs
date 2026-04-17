@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using MacChanger.Gui.Forms;
+using Dzmac.Gui.Forms;
+using MacChanger;
 
-namespace MacChanger.Gui
+namespace Dzmac.Gui
 {
     internal static class Program
     {

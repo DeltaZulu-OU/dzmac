@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MacChanger.Gui.Properties
+namespace Dzmac.Gui.Properties
 {
 
 

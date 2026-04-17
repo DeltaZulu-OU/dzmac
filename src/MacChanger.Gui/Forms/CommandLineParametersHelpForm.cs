@@ -2,13 +2,13 @@
 using System.Windows.Forms;
 using MacChanger;
 
-namespace MacChanger.Gui.Forms
+namespace Dzmac.Gui.Forms
 {
     public sealed class CommandLineParametersHelpForm : Form
     {
         public CommandLineParametersHelpForm()
         {
-            Text = "Command Line Parameters Help - MacChanger";
+            Text = "Command Line Parameters Help - dzmac";
             StartPosition = FormStartPosition.CenterParent;
             Size = new Size(860, 620);
             MinimumSize = new Size(700, 500);

@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9A3B73F1-4B81-4864-AC91-FAD1474031A2}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MacChanger.Gui</RootNamespace>
+    <RootNamespace>Dzmac.Gui</RootNamespace>
     <AssemblyName>dzmac</AssemblyName>
     <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>MacChanger.Gui.Program</StartupObject>
+    <StartupObject>Dzmac.Gui.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>

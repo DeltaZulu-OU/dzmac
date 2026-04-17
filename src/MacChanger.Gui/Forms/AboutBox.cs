@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace MacChanger.Gui.Forms
+namespace Dzmac.Gui.Forms
 {
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     internal partial class AboutBox : Form
@@ -48,11 +48,11 @@ namespace MacChanger.Gui.Forms
                 var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
                 if (attributes.Length == 0)
                 {
-                    return "MacChanger";
+                    return "dzmac";
                 }
 
                 var product = ((AssemblyProductAttribute)attributes[0]).Product;
-                return string.IsNullOrWhiteSpace(product) ? "MacChanger" : product;
+                return string.IsNullOrWhiteSpace(product) ? "dzmac" : product;
             }
         }
 
@@ -77,7 +77,7 @@ namespace MacChanger.Gui.Forms
         private void ProjectLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ProjectLinkLabel.LinkVisited = true;
-            Process.Start("https://github.com/zbalkan/MacChanger");
+            Process.Start("https://github.com/zbalkan/dzmac");
         }
 
         private string GetDebuggerDisplay() => "About";

@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using BrightIdeasSoftware;
 
-namespace MacChanger.Gui.Forms
+namespace Dzmac.Gui.Forms
 {
     partial class MainForm
     {
@@ -102,7 +102,7 @@ namespace MacChanger.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this.macTextBox = new MacChanger.Gui.Controls.MacTextBox();
+            this.macTextBox = new Dzmac.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -816,7 +816,7 @@ namespace MacChanger.Gui.Forms
             // 
             this.AboutItem.Name = "AboutItem";
             this.AboutItem.Size = new System.Drawing.Size(262, 22);
-            this.AboutItem.Text = "About MacChanger";
+            this.AboutItem.Text = "About dzmac";
             this.AboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
             // MainStatusBar
@@ -852,7 +852,7 @@ namespace MacChanger.Gui.Forms
             this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MacChanger GUI";
+            this.Text = "dzmac";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_LoadAsync);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
