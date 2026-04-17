@@ -73,6 +73,7 @@
     <Compile Include="MacFormatter.cs" />
     <Compile Include="NetworkAdapter.cs" />
     <Compile Include="NetworkAdapterFactory.cs" />
+    <Compile Include="CommandLineHelpContent.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="Downloader.cs" />
     <Compile Include="Diagnostics.cs" />

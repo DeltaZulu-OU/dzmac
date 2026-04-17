@@ -13,32 +13,27 @@ namespace MacChanger.Gui.Forms
 {
     public partial class MainForm : Form
     {
-        internal List<NetworkConnection> NetworkConnections { get; set; }
-
         private const string zeroMacValue = "00-00-00-00-00-00";
-
-        private readonly VendorManager _vm;
+        private readonly Label _loadingLabel;
         private readonly Panel _loadingPanel;
         private readonly ProgressBar _loadingProgressBar;
-        private readonly Label _loadingLabel;
-
-        private CancellationTokenSource _refreshCancellation;
+        private readonly VendorManager _vm;
+        private bool _hasInitialRenderCompleted;
+        private ListView _ipv4AddressListView;
+        private ListView _ipv4DnsListView;
+        private ListView _ipv4GatewayListView;
+        private ListView _ipv6AddressListView;
+        private ListView _ipv6DnsListView;
+        private ListView _ipv6GatewayListView;
         private bool _isRefreshing;
+        private bool _isVendorComboBound;
         private bool _isVendorListLoading;
         private bool _isVendorListReady;
-        private bool _isVendorComboBound;
-        private bool _hasInitialRenderCompleted;
-        private List<Vendor> _vendors;
-
         private bool _locallyAdministered;
         private bool _reenableOnChange;
+        private CancellationTokenSource _refreshCancellation;
         private NetworkConnectionDetail _selected;
-        private ListView _ipv4AddressListView;
-        private ListView _ipv4GatewayListView;
-        private ListView _ipv4DnsListView;
-        private ListView _ipv6AddressListView;
-        private ListView _ipv6GatewayListView;
-        private ListView _ipv6DnsListView;
+        private List<Vendor> _vendors;
 
         public MainForm()
         {
@@ -93,6 +88,8 @@ namespace MacChanger.Gui.Forms
             UpdateSelectionState();
         }
 
+        internal List<NetworkConnection> NetworkConnections { get; set; }
+
         #region EventHandlers
 
         private void AboutItem_Click(object sender, EventArgs e) => new AboutBox().Show(this);
@@ -129,7 +126,7 @@ namespace MacChanger.Gui.Forms
 
         private void CheckUpdateItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void CliParamsHelpItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void CliParamsHelpItem_Click(object sender, EventArgs e) => new CommandLineParametersHelpForm().Show(this);
 
         private void ConnectionsGrid_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -247,6 +244,8 @@ namespace MacChanger.Gui.Forms
             await refreshTask;
         }
 
+        private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
+
         private void MainForm_Shown(object sender, EventArgs e)
         {
             _hasInitialRenderCompleted = true;
@@ -267,32 +266,9 @@ namespace MacChanger.Gui.Forms
             ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
         }
 
-        private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
-
-        private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
-
         private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
 
-        private void ShowSpeedInKBytesPerSecItem_CheckedChanged(object sender, EventArgs e)
-        {
-            var showSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem.Checked;
-            Settings.Default.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
-            Settings.Default.Save();
-
-            if (NetworkConnections == null || NetworkConnections.Count == 0)
-            {
-                return;
-            }
-
-            foreach (var networkConnection in NetworkConnections)
-            {
-                networkConnection.Detail.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
-            }
-
-            ConnectionsGrid.BeginUpdate();
-            ConnectionsGrid.RefreshObjects(NetworkConnections);
-            ConnectionsGrid.EndUpdate();
-        }
+        private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
         private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
 
@@ -378,6 +354,27 @@ namespace MacChanger.Gui.Forms
 
         private void SavePresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
+        private void ShowSpeedInKBytesPerSecItem_CheckedChanged(object sender, EventArgs e)
+        {
+            var showSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem.Checked;
+            Settings.Default.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
+            Settings.Default.Save();
+
+            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var networkConnection in NetworkConnections)
+            {
+                networkConnection.Detail.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
+            }
+
+            ConnectionsGrid.BeginUpdate();
+            ConnectionsGrid.RefreshObjects(NetworkConnections);
+            ConnectionsGrid.EndUpdate();
+        }
+
         private async void UpdateOuiItem_ClickAsync(object sender, EventArgs e)
         {
             var result = MessageBox.Show("This will initiate OUI download in the background.\n\nAre you sure?", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.YesNo);
@@ -405,6 +402,156 @@ namespace MacChanger.Gui.Forms
 
         #region Private Methods
 
+        private static ListView CreateDetailsListView(params string[] columns)
+        {
+            var listView = new ListView
+            {
+                Dock = DockStyle.Fill,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = true,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable
+            };
+
+            var columnWidth = columns.Length == 1 ? 600 : 280;
+            foreach (var column in columns)
+            {
+                listView.Columns.Add(column, columnWidth);
+            }
+
+            return listView;
+        }
+
+        private static GroupBox CreateIpSectionGroup(string title, Control content)
+        {
+            var group = new GroupBox
+            {
+                Dock = DockStyle.Fill,
+                Text = title,
+                Padding = new Padding(6)
+            };
+
+            group.Controls.Add(content);
+            return group;
+        }
+
+        private static void DisposeConnections(List<NetworkConnection> connections)
+        {
+            if (connections == null)
+            {
+                return;
+            }
+
+            foreach (var networkConnection in connections)
+            {
+                networkConnection.Dispose();
+            }
+        }
+
+        /// <summary>
+        ///     A placeholder method for events not implemented.
+        /// </summary>
+        private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        private static void OpenNetworkConnections()
+        {
+            try
+            {
+                _ = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "ncpa.cpl",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                _ = MessageBox.Show($"Unable to open Network Connections.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "Network Connections", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private static void PopulateSingleValueRows(ListView listView, IEnumerable<string> values, string fallback)
+        {
+            listView.BeginUpdate();
+            listView.Items.Clear();
+
+            foreach (var value in values)
+            {
+                listView.Items.Add(new ListViewItem(value));
+            }
+
+            if (listView.Items.Count == 0)
+            {
+                listView.Items.Add(new ListViewItem(fallback));
+            }
+
+            listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            listView.EndUpdate();
+        }
+
+        private static void VisitUrl(string url)
+        {
+            try
+            {
+                _ = Process.Start(url);
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
+        private void BindIpAddressDetails()
+        {
+            if (_ipv4AddressListView == null)
+            {
+                return;
+            }
+
+            PopulateIpv4AddressRows(_selected?.Ipv4Addresses ?? Array.Empty<AdapterIpv4Address>());
+            PopulateSingleValueRows(_ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), "No IPv4 gateway");
+            PopulateSingleValueRows(_ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), "No IPv4 DNS server");
+
+            PopulateIpv6AddressRows(_selected?.Ipv6Addresses ?? Array.Empty<AdapterIpv6Address>());
+            PopulateSingleValueRows(_ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), "No IPv6 gateway");
+            PopulateSingleValueRows(_ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), "No IPv6 DNS server");
+        }
+
+        private void BindSelection()
+        {
+            var hasSelection = _selected != null;
+            if (!hasSelection)
+            {
+                ConnectionValueTextbox.Text = "...";
+                DeviceValueTextbox.Text = "...";
+                HardwareIdValueTextbox.Text = "...";
+                ConfigIdValueTextbox.Text = "...";
+                Ipv4ValueTextbox.Text = "...";
+                Ipv6ValueTextbox.Text = "...";
+                OriginalMacValueTextbox.Text = "...";
+                OriginalMacVendorTextbox.Text = "...";
+                ActiveMacValueTextbox.Text = "...";
+                ActiveMacVendorTextbox.Text = "...";
+                DhcpEnabledItem.Checked = false;
+                BindIpAddressDetails();
+                UpdateSelectionState();
+                return;
+            }
+
+            ConnectionValueTextbox.Text = _selected.Name;
+            DeviceValueTextbox.Text = _selected.Device;
+            HardwareIdValueTextbox.Text = _selected.HardwareId;
+            ConfigIdValueTextbox.Text = _selected.ConfigId;
+            Ipv4ValueTextbox.Text = _selected.IPv4Status;
+            Ipv6ValueTextbox.Text = _selected.IPv6Status;
+            OriginalMacValueTextbox.Text = _selected.OriginalMac;
+            OriginalMacVendorTextbox.Text = _selected.OriginalVendor;
+            ActiveMacValueTextbox.Text = _selected.ActiveMac;
+            ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
+            DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
+            BindIpAddressDetails();
+            UpdateSelectionState();
+        }
+
         private void ConfigureV1Surface()
         {
             // Keep v1 UI surface aligned with implemented feature set.
@@ -419,8 +566,8 @@ namespace MacChanger.Gui.Forms
             AssociateItem.Visible = false;
             toolStripSeparator7.Visible = false;
             DeleteItem.Visible = false;
-            CliParamsHelpItem.Visible = false;
-            toolStripSeparator6.Visible = false;
+            CliParamsHelpItem.Visible = true;
+            toolStripSeparator6.Visible = true;
             CheckUpdateItem.Visible = false;
 
             if (InfoTabs.TabPages.Contains(PresetsPage))
@@ -487,195 +634,6 @@ namespace MacChanger.Gui.Forms
             IPAddressPage.Controls.Add(rootLayout);
         }
 
-        private static GroupBox CreateIpSectionGroup(string title, Control content)
-        {
-            var group = new GroupBox
-            {
-                Dock = DockStyle.Fill,
-                Text = title,
-                Padding = new Padding(6)
-            };
-
-            group.Controls.Add(content);
-            return group;
-        }
-
-        private static ListView CreateDetailsListView(params string[] columns)
-        {
-            var listView = new ListView
-            {
-                Dock = DockStyle.Fill,
-                View = View.Details,
-                FullRowSelect = true,
-                GridLines = true,
-                HeaderStyle = ColumnHeaderStyle.Nonclickable
-            };
-
-            var columnWidth = columns.Length == 1 ? 600 : 280;
-            foreach (var column in columns)
-            {
-                listView.Columns.Add(column, columnWidth);
-            }
-
-            return listView;
-        }
-
-        /// <summary>
-        ///     A placeholder method for events not implemented.
-        /// </summary>
-        private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        private static void VisitUrl(string url)
-        {
-            try
-            {
-                _ = Process.Start(url);
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-
-        private static void OpenNetworkConnections()
-        {
-            try
-            {
-                _ = Process.Start(new ProcessStartInfo
-                {
-                    FileName = "ncpa.cpl",
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                _ = MessageBox.Show($"Unable to open Network Connections.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "Network Connections", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-
-        private void BindIpAddressDetails()
-        {
-            if (_ipv4AddressListView == null)
-            {
-                return;
-            }
-
-            PopulateIpv4AddressRows(_selected?.Ipv4Addresses ?? Array.Empty<AdapterIpv4Address>());
-            PopulateSingleValueRows(_ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), "No IPv4 gateway");
-            PopulateSingleValueRows(_ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), "No IPv4 DNS server");
-
-            PopulateIpv6AddressRows(_selected?.Ipv6Addresses ?? Array.Empty<AdapterIpv6Address>());
-            PopulateSingleValueRows(_ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), "No IPv6 gateway");
-            PopulateSingleValueRows(_ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), "No IPv6 DNS server");
-        }
-
-        private void PopulateIpv4AddressRows(IEnumerable<AdapterIpv4Address> addresses)
-        {
-            _ipv4AddressListView.BeginUpdate();
-            _ipv4AddressListView.Items.Clear();
-
-            foreach (var entry in addresses)
-            {
-                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.SubnetMask }));
-            }
-
-            if (_ipv4AddressListView.Items.Count == 0)
-            {
-                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { "No IPv4 address", string.Empty }));
-            }
-
-            _ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            _ipv4AddressListView.EndUpdate();
-        }
-
-        private void PopulateIpv6AddressRows(IEnumerable<AdapterIpv6Address> addresses)
-        {
-            _ipv6AddressListView.BeginUpdate();
-            _ipv6AddressListView.Items.Clear();
-
-            foreach (var entry in addresses)
-            {
-                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.PrefixLength.ToString() }));
-            }
-
-            if (_ipv6AddressListView.Items.Count == 0)
-            {
-                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { "No IPv6 address", string.Empty }));
-            }
-
-            _ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            _ipv6AddressListView.EndUpdate();
-        }
-
-        private static void PopulateSingleValueRows(ListView listView, IEnumerable<string> values, string fallback)
-        {
-            listView.BeginUpdate();
-            listView.Items.Clear();
-
-            foreach (var value in values)
-            {
-                listView.Items.Add(new ListViewItem(value));
-            }
-
-            if (listView.Items.Count == 0)
-            {
-                listView.Items.Add(new ListViewItem(fallback));
-            }
-
-            listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listView.EndUpdate();
-        }
-
-        private void BindSelection()
-        {
-            var hasSelection = _selected != null;
-            if (!hasSelection)
-            {
-                ConnectionValueTextbox.Text = "...";
-                DeviceValueTextbox.Text = "...";
-                HardwareIdValueTextbox.Text = "...";
-                ConfigIdValueTextbox.Text = "...";
-                Ipv4ValueTextbox.Text = "...";
-                Ipv6ValueTextbox.Text = "...";
-                OriginalMacValueTextbox.Text = "...";
-                OriginalMacVendorTextbox.Text = "...";
-                ActiveMacValueTextbox.Text = "...";
-                ActiveMacVendorTextbox.Text = "...";
-                DhcpEnabledItem.Checked = false;
-                BindIpAddressDetails();
-                UpdateSelectionState();
-                return;
-            }
-
-            ConnectionValueTextbox.Text = _selected.Name;
-            DeviceValueTextbox.Text = _selected.Device;
-            HardwareIdValueTextbox.Text = _selected.HardwareId;
-            ConfigIdValueTextbox.Text = _selected.ConfigId;
-            Ipv4ValueTextbox.Text = _selected.IPv4Status;
-            Ipv6ValueTextbox.Text = _selected.IPv6Status;
-            OriginalMacValueTextbox.Text = _selected.OriginalMac;
-            OriginalMacVendorTextbox.Text = _selected.OriginalVendor;
-            ActiveMacValueTextbox.Text = _selected.ActiveMac;
-            ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
-            DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
-            BindIpAddressDetails();
-            UpdateSelectionState();
-        }
-
-        private void UpdateSelectionState()
-        {
-            var hasSelection = _selected != null;
-            var enableActions = hasSelection && !_isRefreshing;
-
-            ChangeMacButton.Enabled = enableActions;
-            RestoreMacButton.Enabled = enableActions;
-            RandomMacButton.Enabled = enableActions && _isVendorListReady;
-            DhcpEnabledItem.Enabled = enableActions;
-            DhcpRenewIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
-            DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
-            DeleteItem.Enabled = enableActions;
-        }
-
         private async Task LoadVendorsInBackground()
         {
             if (_isVendorListLoading || _isVendorListReady)
@@ -738,59 +696,42 @@ namespace MacChanger.Gui.Forms
             }
         }
 
-        private void TryBindVendorsAfterFirstRender()
+        private void PopulateIpv4AddressRows(IEnumerable<AdapterIpv4Address> addresses)
         {
-            if (_isVendorComboBound || !_hasInitialRenderCompleted || !_isVendorListReady || _vendors == null)
+            _ipv4AddressListView.BeginUpdate();
+            _ipv4AddressListView.Items.Clear();
+
+            foreach (var entry in addresses)
             {
-                return;
+                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.SubnetMask }));
             }
 
-            var currentText = VendorComboBox.Text;
-            VendorComboBox.BeginUpdate();
-            try
+            if (_ipv4AddressListView.Items.Count == 0)
             {
-                VendorComboBox.DataSource = _vendors;
-                VendorComboBox.SelectedItem = null;
-                if (!string.IsNullOrWhiteSpace(currentText))
-                {
-                    VendorComboBox.Text = currentText;
-                }
-            }
-            finally
-            {
-                VendorComboBox.EndUpdate();
+                _ipv4AddressListView.Items.Add(new ListViewItem(new[] { "No IPv4 address", string.Empty }));
             }
 
-            _isVendorComboBound = true;
+            _ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            _ipv4AddressListView.EndUpdate();
         }
 
-        private void SetLoadingState(bool isLoading, bool clearListWhileLoading)
+        private void PopulateIpv6AddressRows(IEnumerable<AdapterIpv6Address> addresses)
         {
-            _isRefreshing = isLoading;
-            RefreshItem.Enabled = !isLoading;
-            ConnectionsGrid.Enabled = !isLoading;
+            _ipv6AddressListView.BeginUpdate();
+            _ipv6AddressListView.Items.Clear();
 
-            if (isLoading)
+            foreach (var entry in addresses)
             {
-                MainStatusBar.Text = "Loading network adapters...";
-                _loadingLabel.Text = "Loading network adapters...";
-                _loadingPanel.Visible = false;
-
-                if (clearListWhileLoading)
-                {
-                    ConnectionsGrid.EmptyListMsg = "Loading network adapters...";
-                    ConnectionsGrid.DataSource = Array.Empty<NetworkConnection>();
-                    _selected = null;
-                    BindSelection();
-                }
-            }
-            else
-            {
-                _loadingPanel.Visible = false;
-                ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
+                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { entry.Address, entry.PrefixLength.ToString() }));
             }
 
-            UpdateSelectionState();
+            if (_ipv6AddressListView.Items.Count == 0)
+            {
+                _ipv6AddressListView.Items.Add(new ListViewItem(new[] { "No IPv6 address", string.Empty }));
+            }
+
+            _ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+            _ipv6AddressListView.EndUpdate();
         }
 
         private async Task RefreshConnectionsBackground(bool clearListWhileLoading = false)
@@ -880,17 +821,73 @@ namespace MacChanger.Gui.Forms
             }
         }
 
-        private static void DisposeConnections(List<NetworkConnection> connections)
+        private void SetLoadingState(bool isLoading, bool clearListWhileLoading)
         {
-            if (connections == null)
+            _isRefreshing = isLoading;
+            RefreshItem.Enabled = !isLoading;
+            ConnectionsGrid.Enabled = !isLoading;
+
+            if (isLoading)
+            {
+                MainStatusBar.Text = "Loading network adapters...";
+                _loadingLabel.Text = "Loading network adapters...";
+                _loadingPanel.Visible = false;
+
+                if (clearListWhileLoading)
+                {
+                    ConnectionsGrid.EmptyListMsg = "Loading network adapters...";
+                    ConnectionsGrid.DataSource = Array.Empty<NetworkConnection>();
+                    _selected = null;
+                    BindSelection();
+                }
+            }
+            else
+            {
+                _loadingPanel.Visible = false;
+                ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
+            }
+
+            UpdateSelectionState();
+        }
+
+        private void TryBindVendorsAfterFirstRender()
+        {
+            if (_isVendorComboBound || !_hasInitialRenderCompleted || !_isVendorListReady || _vendors == null)
             {
                 return;
             }
 
-            foreach (var networkConnection in connections)
+            var currentText = VendorComboBox.Text;
+            VendorComboBox.BeginUpdate();
+            try
             {
-                networkConnection.Dispose();
+                VendorComboBox.DataSource = _vendors;
+                VendorComboBox.SelectedItem = null;
+                if (!string.IsNullOrWhiteSpace(currentText))
+                {
+                    VendorComboBox.Text = currentText;
+                }
             }
+            finally
+            {
+                VendorComboBox.EndUpdate();
+            }
+
+            _isVendorComboBound = true;
+        }
+
+        private void UpdateSelectionState()
+        {
+            var hasSelection = _selected != null;
+            var enableActions = hasSelection && !_isRefreshing;
+
+            ChangeMacButton.Enabled = enableActions;
+            RestoreMacButton.Enabled = enableActions;
+            RandomMacButton.Enabled = enableActions && _isVendorListReady;
+            DhcpEnabledItem.Enabled = enableActions;
+            DhcpRenewIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
+            DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
+            DeleteItem.Enabled = enableActions;
         }
 
         #endregion Private Methods

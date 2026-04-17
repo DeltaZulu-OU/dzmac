@@ -317,6 +317,59 @@ namespace MacChanger
         }
 
         /// <summary>
+        ///     Tries to set static IPv4 address list for the adapter.
+        /// </summary>
+        public bool TrySetIPv4Addresses(string[] ipAddresses, string[] subnetMasks)
+        {
+            EnsureWmiObjects();
+            if (_adapterConfig == null || ipAddresses == null || subnetMasks == null || ipAddresses.Length == 0 || ipAddresses.Length != subnetMasks.Length)
+            {
+                return false;
+            }
+
+            var parameters = _adapterConfig.GetMethodParameters("EnableStatic");
+            parameters["IPAddress"] = ipAddresses;
+            parameters["SubnetMask"] = subnetMasks;
+            var success = TryInvokeAdapterConfigMethod("EnableStatic", parameters, out var code);
+            return success && (code == 0 || code == 1);
+        }
+
+        /// <summary>
+        ///     Tries to set IPv4 default gateway list for the adapter.
+        /// </summary>
+        public bool TrySetIPv4Gateways(string[] gateways, int[] metrics)
+        {
+            EnsureWmiObjects();
+            if (_adapterConfig == null || gateways == null || metrics == null || gateways.Length == 0 || gateways.Length != metrics.Length)
+            {
+                return false;
+            }
+
+            var parameters = _adapterConfig.GetMethodParameters("SetGateways");
+            parameters["DefaultIPGateway"] = gateways;
+            parameters["GatewayCostMetric"] = metrics;
+            var success = TryInvokeAdapterConfigMethod("SetGateways", parameters, out var code);
+            return success && (code == 0 || code == 1);
+        }
+
+        /// <summary>
+        ///     Tries to set IPv4 DNS server list for the adapter.
+        /// </summary>
+        public bool TrySetIPv4DnsServers(string[] dnsServers)
+        {
+            EnsureWmiObjects();
+            if (_adapterConfig == null)
+            {
+                return false;
+            }
+
+            var parameters = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
+            parameters["DNSServerSearchOrder"] = dnsServers ?? Array.Empty<string>();
+            var success = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", parameters, out var code);
+            return success && (code == 0 || code == 1);
+        }
+
+        /// <summary>
         ///     Tries to release the IP address on specific DHCP-enabled network adapters.
         /// </summary>
         /// <param name="message">Message obtained from return code of the operation.</param>

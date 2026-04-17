@@ -5,8 +5,6 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger", "MacChanger\MacChanger.csproj", "{505010CE-D639-4937-88A6-9E67C12B7F02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Cli", "MacChanger.Cli\MacChanger.Cli.csproj", "{83CE0618-51E0-4069-8482-085AE26E3055}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Tests", "MacChanger.Tests\MacChanger.Tests.csproj", "{B4136349-A1E2-4DB3-8618-CB8D55639ECC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MacChanger.Gui", "MacChanger.Gui\MacChanger.Gui.csproj", "{9A3B73F1-4B81-4864-AC91-FAD1474031A2}"
@@ -23,10 +21,6 @@ Global
 		{505010CE-D639-4937-88A6-9E67C12B7F02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{505010CE-D639-4937-88A6-9E67C12B7F02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{505010CE-D639-4937-88A6-9E67C12B7F02}.Release|Any CPU.Build.0 = Release|Any CPU
-		{83CE0618-51E0-4069-8482-085AE26E3055}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{83CE0618-51E0-4069-8482-085AE26E3055}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{83CE0618-51E0-4069-8482-085AE26E3055}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{83CE0618-51E0-4069-8482-085AE26E3055}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B4136349-A1E2-4DB3-8618-CB8D55639ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B4136349-A1E2-4DB3-8618-CB8D55639ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4136349-A1E2-4DB3-8618-CB8D55639ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
