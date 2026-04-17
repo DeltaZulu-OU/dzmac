@@ -36,23 +36,23 @@ namespace Dzmac.Gui.Forms
             this.InformationPage = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ConnectionDetailsGroup = new System.Windows.Forms.GroupBox();
-            this.ActiveMacVendorTextbox = new System.Windows.Forms.TextBox();
-            this.ActiveMacValueTextbox = new System.Windows.Forms.TextBox();
+            this.ActiveMacVendorTextbox = new System.Windows.Forms.Label();
+            this.ActiveMacValueTextbox = new System.Windows.Forms.Label();
             this.ActiveMacLabel = new System.Windows.Forms.Label();
-            this.OriginalMacVendorTextbox = new System.Windows.Forms.TextBox();
-            this.OriginalMacValueTextbox = new System.Windows.Forms.TextBox();
+            this.OriginalMacVendorTextbox = new System.Windows.Forms.Label();
+            this.OriginalMacValueTextbox = new System.Windows.Forms.Label();
             this.OriginalMacLabel = new System.Windows.Forms.Label();
-            this.Ipv6ValueTextbox = new System.Windows.Forms.TextBox();
+            this.Ipv6ValueTextbox = new System.Windows.Forms.Label();
             this.Ipv6Label = new System.Windows.Forms.Label();
-            this.Ipv4ValueTextbox = new System.Windows.Forms.TextBox();
+            this.Ipv4ValueTextbox = new System.Windows.Forms.Label();
             this.Ipv4Label = new System.Windows.Forms.Label();
-            this.ConfigIdValueTextbox = new System.Windows.Forms.TextBox();
+            this.ConfigIdValueTextbox = new System.Windows.Forms.Label();
             this.ConfigIdLabel = new System.Windows.Forms.Label();
-            this.HardwareIdValueTextbox = new System.Windows.Forms.TextBox();
+            this.HardwareIdValueTextbox = new System.Windows.Forms.Label();
             this.HardwareIdLabel = new System.Windows.Forms.Label();
-            this.DeviceValueTextbox = new System.Windows.Forms.TextBox();
+            this.DeviceValueTextbox = new System.Windows.Forms.Label();
             this.DeviceLabel = new System.Windows.Forms.Label();
-            this.ConnectionValueTextbox = new System.Windows.Forms.TextBox();
+            this.ConnectionValueTextbox = new System.Windows.Forms.Label();
             this.ConnectionLabel = new System.Windows.Forms.Label();
             this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
             this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
@@ -64,6 +64,7 @@ namespace Dzmac.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
+            this.macTextBox = new Dzmac.Gui.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.PresetsPage = new System.Windows.Forms.TabPage();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
@@ -102,7 +103,6 @@ namespace Dzmac.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this.macTextBox = new Dzmac.Gui.Controls.MacTextBox();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
@@ -165,8 +165,8 @@ namespace Dzmac.Gui.Forms
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 41.89944F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 58.10056F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 358);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
@@ -195,33 +195,27 @@ namespace Dzmac.Gui.Forms
             this.ConnectionDetailsGroup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
             this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
-            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 137);
+            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 144);
             this.ConnectionDetailsGroup.TabIndex = 0;
             this.ConnectionDetailsGroup.TabStop = false;
             this.ConnectionDetailsGroup.Text = "Connection Details";
             // 
             // ActiveMacVendorTextbox
             // 
-            this.ActiveMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.ActiveMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ActiveMacVendorTextbox.AutoEllipsis = true;
             this.ActiveMacVendorTextbox.Location = new System.Drawing.Point(580, 107);
             this.ActiveMacVendorTextbox.Name = "ActiveMacVendorTextbox";
-            this.ActiveMacVendorTextbox.ReadOnly = true;
             this.ActiveMacVendorTextbox.Size = new System.Drawing.Size(350, 13);
             this.ActiveMacVendorTextbox.TabIndex = 17;
-            this.ActiveMacVendorTextbox.TabStop = false;
             this.ActiveMacVendorTextbox.Text = "...";
             // 
             // ActiveMacValueTextbox
             // 
-            this.ActiveMacValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.ActiveMacValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ActiveMacValueTextbox.AutoEllipsis = true;
             this.ActiveMacValueTextbox.Location = new System.Drawing.Point(474, 107);
             this.ActiveMacValueTextbox.Name = "ActiveMacValueTextbox";
-            this.ActiveMacValueTextbox.ReadOnly = true;
             this.ActiveMacValueTextbox.Size = new System.Drawing.Size(100, 13);
             this.ActiveMacValueTextbox.TabIndex = 16;
-            this.ActiveMacValueTextbox.TabStop = false;
             this.ActiveMacValueTextbox.Text = "...";
             // 
             // ActiveMacLabel
@@ -236,26 +230,20 @@ namespace Dzmac.Gui.Forms
             // 
             // OriginalMacVendorTextbox
             // 
-            this.OriginalMacVendorTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.OriginalMacVendorTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.OriginalMacVendorTextbox.AutoEllipsis = true;
             this.OriginalMacVendorTextbox.Location = new System.Drawing.Point(580, 41);
             this.OriginalMacVendorTextbox.Name = "OriginalMacVendorTextbox";
-            this.OriginalMacVendorTextbox.ReadOnly = true;
             this.OriginalMacVendorTextbox.Size = new System.Drawing.Size(350, 13);
             this.OriginalMacVendorTextbox.TabIndex = 14;
-            this.OriginalMacVendorTextbox.TabStop = false;
             this.OriginalMacVendorTextbox.Text = "...";
             // 
             // OriginalMacValueTextbox
             // 
-            this.OriginalMacValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.OriginalMacValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.OriginalMacValueTextbox.AutoEllipsis = true;
             this.OriginalMacValueTextbox.Location = new System.Drawing.Point(474, 41);
             this.OriginalMacValueTextbox.Name = "OriginalMacValueTextbox";
-            this.OriginalMacValueTextbox.ReadOnly = true;
             this.OriginalMacValueTextbox.Size = new System.Drawing.Size(100, 13);
             this.OriginalMacValueTextbox.TabIndex = 13;
-            this.OriginalMacValueTextbox.TabStop = false;
             this.OriginalMacValueTextbox.Text = "...";
             // 
             // OriginalMacLabel
@@ -270,14 +258,11 @@ namespace Dzmac.Gui.Forms
             // 
             // Ipv6ValueTextbox
             // 
-            this.Ipv6ValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.Ipv6ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.Ipv6ValueTextbox.AutoEllipsis = true;
             this.Ipv6ValueTextbox.Location = new System.Drawing.Point(303, 110);
             this.Ipv6ValueTextbox.Name = "Ipv6ValueTextbox";
-            this.Ipv6ValueTextbox.ReadOnly = true;
-            this.Ipv6ValueTextbox.Size = new System.Drawing.Size(100, 13);
+            this.Ipv6ValueTextbox.Size = new System.Drawing.Size(100, 14);
             this.Ipv6ValueTextbox.TabIndex = 5;
-            this.Ipv6ValueTextbox.TabStop = false;
             this.Ipv6ValueTextbox.Text = "...";
             // 
             // Ipv6Label
@@ -292,14 +277,11 @@ namespace Dzmac.Gui.Forms
             // 
             // Ipv4ValueTextbox
             // 
-            this.Ipv4ValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.Ipv4ValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.Ipv4ValueTextbox.AutoEllipsis = true;
             this.Ipv4ValueTextbox.Location = new System.Drawing.Point(103, 110);
             this.Ipv4ValueTextbox.Name = "Ipv4ValueTextbox";
-            this.Ipv4ValueTextbox.ReadOnly = true;
-            this.Ipv4ValueTextbox.Size = new System.Drawing.Size(100, 13);
+            this.Ipv4ValueTextbox.Size = new System.Drawing.Size(100, 14);
             this.Ipv4ValueTextbox.TabIndex = 5;
-            this.Ipv4ValueTextbox.TabStop = false;
             this.Ipv4ValueTextbox.Text = "...";
             // 
             // Ipv4Label
@@ -314,14 +296,11 @@ namespace Dzmac.Gui.Forms
             // 
             // ConfigIdValueTextbox
             // 
-            this.ConfigIdValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.ConfigIdValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ConfigIdValueTextbox.AutoEllipsis = true;
             this.ConfigIdValueTextbox.Location = new System.Drawing.Point(103, 84);
             this.ConfigIdValueTextbox.Name = "ConfigIdValueTextbox";
-            this.ConfigIdValueTextbox.ReadOnly = true;
-            this.ConfigIdValueTextbox.Size = new System.Drawing.Size(300, 13);
+            this.ConfigIdValueTextbox.Size = new System.Drawing.Size(300, 14);
             this.ConfigIdValueTextbox.TabIndex = 5;
-            this.ConfigIdValueTextbox.TabStop = false;
             this.ConfigIdValueTextbox.Text = "...";
             // 
             // ConfigIdLabel
@@ -336,14 +315,11 @@ namespace Dzmac.Gui.Forms
             // 
             // HardwareIdValueTextbox
             // 
-            this.HardwareIdValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.HardwareIdValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.HardwareIdValueTextbox.AutoEllipsis = true;
             this.HardwareIdValueTextbox.Location = new System.Drawing.Point(103, 62);
             this.HardwareIdValueTextbox.Name = "HardwareIdValueTextbox";
-            this.HardwareIdValueTextbox.ReadOnly = true;
-            this.HardwareIdValueTextbox.Size = new System.Drawing.Size(300, 13);
+            this.HardwareIdValueTextbox.Size = new System.Drawing.Size(300, 14);
             this.HardwareIdValueTextbox.TabIndex = 5;
-            this.HardwareIdValueTextbox.TabStop = false;
             this.HardwareIdValueTextbox.Text = "...";
             // 
             // HardwareIdLabel
@@ -358,14 +334,11 @@ namespace Dzmac.Gui.Forms
             // 
             // DeviceValueTextbox
             // 
-            this.DeviceValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.DeviceValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.DeviceValueTextbox.AutoEllipsis = true;
             this.DeviceValueTextbox.Location = new System.Drawing.Point(103, 41);
             this.DeviceValueTextbox.Name = "DeviceValueTextbox";
-            this.DeviceValueTextbox.ReadOnly = true;
-            this.DeviceValueTextbox.Size = new System.Drawing.Size(300, 13);
+            this.DeviceValueTextbox.Size = new System.Drawing.Size(300, 14);
             this.DeviceValueTextbox.TabIndex = 18;
-            this.DeviceValueTextbox.TabStop = false;
             this.DeviceValueTextbox.Text = "...";
             // 
             // DeviceLabel
@@ -380,14 +353,11 @@ namespace Dzmac.Gui.Forms
             // 
             // ConnectionValueTextbox
             // 
-            this.ConnectionValueTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.ConnectionValueTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ConnectionValueTextbox.AutoEllipsis = true;
             this.ConnectionValueTextbox.Location = new System.Drawing.Point(103, 20);
             this.ConnectionValueTextbox.Name = "ConnectionValueTextbox";
-            this.ConnectionValueTextbox.ReadOnly = true;
-            this.ConnectionValueTextbox.Size = new System.Drawing.Size(300, 13);
+            this.ConnectionValueTextbox.Size = new System.Drawing.Size(300, 14);
             this.ConnectionValueTextbox.TabIndex = 1;
-            this.ConnectionValueTextbox.TabStop = false;
             this.ConnectionValueTextbox.Text = "...";
             // 
             // ConnectionLabel
@@ -403,9 +373,9 @@ namespace Dzmac.Gui.Forms
             // PerformanceCounterGroup
             // 
             this.PerformanceCounterGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 146);
+            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 153);
             this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
-            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 209);
+            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 202);
             this.PerformanceCounterGroup.TabIndex = 2;
             this.PerformanceCounterGroup.TabStop = false;
             // 
@@ -421,9 +391,9 @@ namespace Dzmac.Gui.Forms
             this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.macTextBox);
             this.ChangeMacAddressGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 146);
+            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 153);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
-            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 209);
+            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 202);
             this.ChangeMacAddressGroup.TabIndex = 1;
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
@@ -505,6 +475,15 @@ namespace Dzmac.Gui.Forms
             this.RandomMacButton.Text = "Random MAC Address";
             this.RandomMacButton.UseVisualStyleBackColor = true;
             this.RandomMacButton.Click += new System.EventHandler(this.RandomMacButton_Click);
+            // 
+            // macTextBox
+            // 
+            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.macTextBox.Location = new System.Drawing.Point(6, 19);
+            this.macTextBox.Name = "macTextBox";
+            this.macTextBox.Size = new System.Drawing.Size(171, 24);
+            this.macTextBox.TabIndex = 0;
             // 
             // IPAddressPage
             // 
@@ -826,15 +805,6 @@ namespace Dzmac.Gui.Forms
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
             // 
-            // macTextBox
-            // 
-            this.macTextBox.BackColor = System.Drawing.SystemColors.Window;
-            this.macTextBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.macTextBox.Location = new System.Drawing.Point(6, 19);
-            this.macTextBox.Name = "macTextBox";
-            this.macTextBox.Size = new System.Drawing.Size(171, 24);
-            this.macTextBox.TabIndex = 0;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -904,9 +874,9 @@ namespace Dzmac.Gui.Forms
         private Label ConnectionLabel;
         private GroupBox ChangeMacAddressGroup;
         private GroupBox PerformanceCounterGroup;
-        private TextBox ConnectionValueTextbox;
+        private Label ConnectionValueTextbox;
         private Label DeviceLabel;
-        private TextBox DeviceValueTextbox;
+        private Label DeviceValueTextbox;
         private StatusBar MainStatusBar;
         private ToolStripMenuItem HelpTopicsItem;
         private ToolStripMenuItem CliParamsHelpItem;
@@ -921,18 +891,18 @@ namespace Dzmac.Gui.Forms
         private ToolStripSeparator toolStripSeparator5;
         private ToolStripSeparator toolStripSeparator7;
         private Label HardwareIdLabel;
-        private TextBox ConfigIdValueTextbox;
+        private Label ConfigIdValueTextbox;
         private Label ConfigIdLabel;
-        private TextBox HardwareIdValueTextbox;
-        private TextBox Ipv4ValueTextbox;
+        private Label HardwareIdValueTextbox;
+        private Label Ipv4ValueTextbox;
         private Label Ipv4Label;
-        private TextBox Ipv6ValueTextbox;
+        private Label Ipv6ValueTextbox;
         private Label Ipv6Label;
-        private TextBox OriginalMacVendorTextbox;
-        private TextBox OriginalMacValueTextbox;
+        private Label OriginalMacVendorTextbox;
+        private Label OriginalMacValueTextbox;
         private Label OriginalMacLabel;
-        private TextBox ActiveMacVendorTextbox;
-        private TextBox ActiveMacValueTextbox;
+        private Label ActiveMacVendorTextbox;
+        private Label ActiveMacValueTextbox;
         private Label ActiveMacLabel;
         private Button RestoreMacButton;
         private Button ChangeMacButton;

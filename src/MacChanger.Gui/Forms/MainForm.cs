@@ -34,6 +34,7 @@ namespace Dzmac.Gui.Forms
         private readonly Label _loadingLabel;
         private readonly Panel _loadingPanel;
         private readonly ProgressBar _loadingProgressBar;
+        private readonly ToolTip _connectionDetailsTooltip;
         private readonly VendorManager _vm;
         private readonly object _performanceBufferSync = new object();
         private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
@@ -70,6 +71,7 @@ namespace Dzmac.Gui.Forms
         public MainForm()
         {
             _vm = new VendorManager();
+            _connectionDetailsTooltip = new ToolTip();
             InitializeComponent();
             ConfigureV1Surface();
             InitializeIpAddressPage();
@@ -267,12 +269,12 @@ namespace Dzmac.Gui.Forms
             _performanceLoopCancellation?.Dispose();
             _selected?.Dispose();
             DisposeConnections(NetworkConnections);
+            _connectionDetailsTooltip?.Dispose();
             _vm?.Dispose();
         }
 
         private void MainForm_LoadAsync(object sender, EventArgs e)
         {
-            MakeTextboxBackgroundTransparent();
             ShowSpeedInKBytesPerSecItem.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
         }
 
@@ -314,21 +316,14 @@ namespace Dzmac.Gui.Forms
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
 
-        private void MakeTextboxBackgroundTransparent()
-        {
-            ConnectionValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            DeviceValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            HardwareIdValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            ConfigIdValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            Ipv4ValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            Ipv6ValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            OriginalMacValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            OriginalMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            ActiveMacValueTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-            ActiveMacVendorTextbox.BackColor = Color.FromArgb(255, InformationPage.BackColor.R, InformationPage.BackColor.G, InformationPage.BackColor.B);
-        }
-
         private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
+
+        private void SetConnectionDetailValue(Label label, string value)
+        {
+            var displayValue = string.IsNullOrWhiteSpace(value) ? "..." : value;
+            label.Text = displayValue;
+            _connectionDetailsTooltip.SetToolTip(label, displayValue == "..." ? string.Empty : displayValue);
+        }
 
         private void InfoTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -591,16 +586,16 @@ namespace Dzmac.Gui.Forms
             var hasSelection = _selected != null;
             if (!hasSelection)
             {
-                ConnectionValueTextbox.Text = "...";
-                DeviceValueTextbox.Text = "...";
-                HardwareIdValueTextbox.Text = "...";
-                ConfigIdValueTextbox.Text = "...";
-                Ipv4ValueTextbox.Text = "...";
-                Ipv6ValueTextbox.Text = "...";
-                OriginalMacValueTextbox.Text = "...";
-                OriginalMacVendorTextbox.Text = "...";
-                ActiveMacValueTextbox.Text = "...";
-                ActiveMacVendorTextbox.Text = "...";
+                SetConnectionDetailValue(ConnectionValueTextbox, null);
+                SetConnectionDetailValue(DeviceValueTextbox, null);
+                SetConnectionDetailValue(HardwareIdValueTextbox, null);
+                SetConnectionDetailValue(ConfigIdValueTextbox, null);
+                SetConnectionDetailValue(Ipv4ValueTextbox, null);
+                SetConnectionDetailValue(Ipv6ValueTextbox, null);
+                SetConnectionDetailValue(OriginalMacValueTextbox, null);
+                SetConnectionDetailValue(OriginalMacVendorTextbox, null);
+                SetConnectionDetailValue(ActiveMacValueTextbox, null);
+                SetConnectionDetailValue(ActiveMacVendorTextbox, null);
                 DhcpEnabledItem.Checked = false;
                 BindIpAddressDetails();
                 StopPerformanceMonitoring();
@@ -608,16 +603,16 @@ namespace Dzmac.Gui.Forms
                 return;
             }
 
-            ConnectionValueTextbox.Text = _selected.Name;
-            DeviceValueTextbox.Text = _selected.Device;
-            HardwareIdValueTextbox.Text = _selected.HardwareId;
-            ConfigIdValueTextbox.Text = _selected.ConfigId;
-            Ipv4ValueTextbox.Text = _selected.IPv4Status;
-            Ipv6ValueTextbox.Text = _selected.IPv6Status;
-            OriginalMacValueTextbox.Text = _selected.OriginalMac;
-            OriginalMacVendorTextbox.Text = _selected.OriginalVendor;
-            ActiveMacValueTextbox.Text = _selected.ActiveMac;
-            ActiveMacVendorTextbox.Text = _selected.ActiveVendor;
+            SetConnectionDetailValue(ConnectionValueTextbox, _selected.Name);
+            SetConnectionDetailValue(DeviceValueTextbox, _selected.Device);
+            SetConnectionDetailValue(HardwareIdValueTextbox, _selected.HardwareId);
+            SetConnectionDetailValue(ConfigIdValueTextbox, _selected.ConfigId);
+            SetConnectionDetailValue(Ipv4ValueTextbox, _selected.IPv4Status);
+            SetConnectionDetailValue(Ipv6ValueTextbox, _selected.IPv6Status);
+            SetConnectionDetailValue(OriginalMacValueTextbox, _selected.OriginalMac);
+            SetConnectionDetailValue(OriginalMacVendorTextbox, _selected.OriginalVendor);
+            SetConnectionDetailValue(ActiveMacValueTextbox, _selected.ActiveMac);
+            SetConnectionDetailValue(ActiveMacVendorTextbox, _selected.ActiveVendor);
             DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
             BindIpAddressDetails();
             if (IsPerformanceTabVisible())
