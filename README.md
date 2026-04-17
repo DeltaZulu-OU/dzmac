@@ -41,10 +41,6 @@ Internet Explorer / system proxy configuration is not supported.
 ### No auto-updater
 The application does not include update infrastructure.
 
-### No graphs
-The original TMAC UI includes traffic graphs. These are intentionally **not implemented**.  
-Speed is shown as text only.
-
 ### No system tray
 The application is not a background utility:
 - no system tray icon
@@ -68,7 +64,6 @@ The following are intentionally excluded:
 - Proxy management
 - Auto-update functionality
 - System tray behavior
-- Traffic graphs / charts
 - File association handling (for now)
 
 These may be revisited later only through explicit design decisions.
@@ -93,7 +88,6 @@ Not supported:
 - Auto updates
 - Tray icon / animation
 - File association checks
-- Graph-related features
 
 ## Acknowledgements
 
