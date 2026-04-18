@@ -55,6 +55,12 @@ namespace Dzmac.Gui.Forms
             this.ConnectionValueTextbox = new System.Windows.Forms.Label();
             this.ConnectionLabel = new System.Windows.Forms.Label();
             this.PerformanceCounterGroup = new System.Windows.Forms.GroupBox();
+            this.PerformancePanel = new System.Windows.Forms.TableLayoutPanel();
+            this._performanceSentSpeedLabel = new System.Windows.Forms.Label();
+            this._performanceSentLabel = new System.Windows.Forms.Label();
+            this._performanceReceivedSpeedLabel = new System.Windows.Forms.Label();
+            this._performanceReceivedLabel = new System.Windows.Forms.Label();
+            this._performanceGraphPanel = new System.Windows.Forms.Panel();
             this.ChangeMacAddressGroup = new System.Windows.Forms.GroupBox();
             this.WikiLink = new System.Windows.Forms.LinkLabel();
             this.RestoreMacButton = new System.Windows.Forms.Button();
@@ -129,11 +135,17 @@ namespace Dzmac.Gui.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
+            this._loadingPanel = new System.Windows.Forms.Panel();
+            this.LoadingLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this._loadingLabel = new System.Windows.Forms.Label();
+            this._loadingProgressBar = new System.Windows.Forms.ProgressBar();
             this.MainTableLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.ConnectionDetailsGroup.SuspendLayout();
+            this.PerformanceCounterGroup.SuspendLayout();
+            this.PerformancePanel.SuspendLayout();
             this.ChangeMacAddressGroup.SuspendLayout();
             this.IPAddressPage.SuspendLayout();
             this.IpAddressLayoutPanel.SuspendLayout();
@@ -155,6 +167,7 @@ namespace Dzmac.Gui.Forms
             this.MainTableLayoutPanel.ColumnCount = 1;
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.MainTableLayoutPanel.Controls.Add(this._loadingPanel, 0, 0);
             this.MainTableLayoutPanel.Controls.Add(this.InfoTabs, 0, 1);
             this.MainTableLayoutPanel.Controls.Add(this.ConnectionsGrid, 0, 0);
             this.MainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -408,12 +421,99 @@ namespace Dzmac.Gui.Forms
             // 
             // PerformanceCounterGroup
             // 
+            this.PerformanceCounterGroup.Controls.Add(this.PerformancePanel);
             this.PerformanceCounterGroup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 153);
             this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
             this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 202);
             this.PerformanceCounterGroup.TabIndex = 2;
             this.PerformanceCounterGroup.TabStop = false;
+            this.PerformanceCounterGroup.Text = " ";
+            //
+            // PerformancePanel
+            //
+            this.PerformancePanel.BackColor = System.Drawing.Color.White;
+            this.PerformancePanel.ColumnCount = 1;
+            this.PerformancePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.PerformancePanel.Controls.Add(this._performanceSentSpeedLabel, 0, 4);
+            this.PerformancePanel.Controls.Add(this._performanceSentLabel, 0, 3);
+            this.PerformancePanel.Controls.Add(this._performanceReceivedSpeedLabel, 0, 2);
+            this.PerformancePanel.Controls.Add(this._performanceReceivedLabel, 0, 1);
+            this.PerformancePanel.Controls.Add(this._performanceGraphPanel, 0, 0);
+            this.PerformancePanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PerformancePanel.Location = new System.Drawing.Point(3, 16);
+            this.PerformancePanel.Name = "PerformancePanel";
+            this.PerformancePanel.Padding = new System.Windows.Forms.Padding(6);
+            this.PerformancePanel.RowCount = 5;
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 78F));
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.PerformancePanel.Size = new System.Drawing.Size(459, 183);
+            this.PerformancePanel.TabIndex = 0;
+            //
+            // _performanceSentSpeedLabel
+            //
+            this._performanceSentSpeedLabel.AutoSize = true;
+            this._performanceSentSpeedLabel.BackColor = System.Drawing.Color.White;
+            this._performanceSentSpeedLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this._performanceSentSpeedLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
+            this._performanceSentSpeedLabel.ForeColor = System.Drawing.Color.Green;
+            this._performanceSentSpeedLabel.Location = new System.Drawing.Point(9, 164);
+            this._performanceSentSpeedLabel.Name = "_performanceSentSpeedLabel";
+            this._performanceSentSpeedLabel.Size = new System.Drawing.Size(441, 13);
+            this._performanceSentSpeedLabel.TabIndex = 4;
+            this._performanceSentSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+            //
+            // _performanceSentLabel
+            //
+            this._performanceSentLabel.AutoSize = true;
+            this._performanceSentLabel.BackColor = System.Drawing.Color.White;
+            this._performanceSentLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this._performanceSentLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
+            this._performanceSentLabel.ForeColor = System.Drawing.Color.Green;
+            this._performanceSentLabel.Location = new System.Drawing.Point(9, 151);
+            this._performanceSentLabel.Name = "_performanceSentLabel";
+            this._performanceSentLabel.Size = new System.Drawing.Size(441, 13);
+            this._performanceSentLabel.TabIndex = 3;
+            this._performanceSentLabel.Text = "Sent    : 0 B";
+            //
+            // _performanceReceivedSpeedLabel
+            //
+            this._performanceReceivedSpeedLabel.AutoSize = true;
+            this._performanceReceivedSpeedLabel.BackColor = System.Drawing.Color.White;
+            this._performanceReceivedSpeedLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this._performanceReceivedSpeedLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
+            this._performanceReceivedSpeedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this._performanceReceivedSpeedLabel.Location = new System.Drawing.Point(9, 138);
+            this._performanceReceivedSpeedLabel.Name = "_performanceReceivedSpeedLabel";
+            this._performanceReceivedSpeedLabel.Size = new System.Drawing.Size(441, 13);
+            this._performanceReceivedSpeedLabel.TabIndex = 2;
+            this._performanceReceivedSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+            //
+            // _performanceReceivedLabel
+            //
+            this._performanceReceivedLabel.AutoSize = true;
+            this._performanceReceivedLabel.BackColor = System.Drawing.Color.White;
+            this._performanceReceivedLabel.Dock = System.Windows.Forms.DockStyle.Top;
+            this._performanceReceivedLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
+            this._performanceReceivedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this._performanceReceivedLabel.Location = new System.Drawing.Point(9, 125);
+            this._performanceReceivedLabel.Name = "_performanceReceivedLabel";
+            this._performanceReceivedLabel.Size = new System.Drawing.Size(441, 13);
+            this._performanceReceivedLabel.TabIndex = 1;
+            this._performanceReceivedLabel.Text = "Received: 0 B";
+            //
+            // _performanceGraphPanel
+            //
+            this._performanceGraphPanel.BackColor = System.Drawing.Color.White;
+            this._performanceGraphPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._performanceGraphPanel.Location = new System.Drawing.Point(9, 9);
+            this._performanceGraphPanel.Name = "_performanceGraphPanel";
+            this._performanceGraphPanel.Size = new System.Drawing.Size(441, 116);
+            this._performanceGraphPanel.TabIndex = 0;
+            this._performanceGraphPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.PerformanceGraphPanel_Paint);
             // 
             // ChangeMacAddressGroup
             // 
@@ -1116,6 +1216,54 @@ namespace Dzmac.Gui.Forms
             this.AboutItem.Text = "About DZMAC";
             this.AboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
+            // _loadingPanel
+            //
+            this._loadingPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
+            this._loadingPanel.Controls.Add(this.LoadingLayoutPanel);
+            this._loadingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._loadingPanel.Location = new System.Drawing.Point(0, 0);
+            this._loadingPanel.Margin = new System.Windows.Forms.Padding(0);
+            this._loadingPanel.Name = "_loadingPanel";
+            this._loadingPanel.Size = new System.Drawing.Size(962, 132);
+            this._loadingPanel.TabIndex = 2;
+            this._loadingPanel.Visible = false;
+            //
+            // LoadingLayoutPanel
+            //
+            this.LoadingLayoutPanel.ColumnCount = 1;
+            this.LoadingLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.LoadingLayoutPanel.Controls.Add(this._loadingLabel, 0, 1);
+            this.LoadingLayoutPanel.Controls.Add(this._loadingProgressBar, 0, 2);
+            this.LoadingLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.LoadingLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.LoadingLayoutPanel.Name = "LoadingLayoutPanel";
+            this.LoadingLayoutPanel.RowCount = 3;
+            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
+            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.LoadingLayoutPanel.Size = new System.Drawing.Size(962, 132);
+            this.LoadingLayoutPanel.TabIndex = 0;
+            //
+            // _loadingLabel
+            //
+            this._loadingLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this._loadingLabel.AutoSize = true;
+            this._loadingLabel.Location = new System.Drawing.Point(403, 59);
+            this._loadingLabel.Name = "_loadingLabel";
+            this._loadingLabel.Size = new System.Drawing.Size(156, 13);
+            this._loadingLabel.TabIndex = 0;
+            this._loadingLabel.Text = "Loading network adapters...";
+            //
+            // _loadingProgressBar
+            //
+            this._loadingProgressBar.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this._loadingProgressBar.Location = new System.Drawing.Point(356, 75);
+            this._loadingProgressBar.MarqueeAnimationSpeed = 20;
+            this._loadingProgressBar.Name = "_loadingProgressBar";
+            this._loadingProgressBar.Size = new System.Drawing.Size(250, 18);
+            this._loadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this._loadingProgressBar.TabIndex = 1;
+            //
             // MainStatusBar
             // 
             this.MainStatusBar.Location = new System.Drawing.Point(0, 552);
@@ -1151,6 +1299,9 @@ namespace Dzmac.Gui.Forms
             this.tableLayoutPanel1.PerformLayout();
             this.ConnectionDetailsGroup.ResumeLayout(false);
             this.ConnectionDetailsGroup.PerformLayout();
+            this.PerformanceCounterGroup.ResumeLayout(false);
+            this.PerformancePanel.ResumeLayout(false);
+            this.PerformancePanel.PerformLayout();
             this.ChangeMacAddressGroup.ResumeLayout(false);
             this.IPAddressPage.ResumeLayout(false);
             this.IpAddressLayoutPanel.ResumeLayout(false);
@@ -1270,5 +1421,15 @@ namespace Dzmac.Gui.Forms
         private Controls.MacTextBox macTextBox;
         private LinkLabel WikiLink;
         private TableLayoutPanel tableLayoutPanel1;
+        private TableLayoutPanel PerformancePanel;
+        private Label _performanceSentSpeedLabel;
+        private Label _performanceSentLabel;
+        private Label _performanceReceivedSpeedLabel;
+        private Label _performanceReceivedLabel;
+        private Panel _performanceGraphPanel;
+        private Panel _loadingPanel;
+        private TableLayoutPanel LoadingLayoutPanel;
+        private Label _loadingLabel;
+        private ProgressBar _loadingProgressBar;
     }
 }

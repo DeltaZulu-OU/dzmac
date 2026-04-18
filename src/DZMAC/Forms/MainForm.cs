@@ -33,9 +33,6 @@ namespace Dzmac.Gui.Forms
         private const string zeroMacValue = "00-00-00-00-00-00";
         private const int performanceSampleCapacity = 120;
         private const int performanceRefreshMs = 1000;
-        private readonly Label _loadingLabel;
-        private readonly Panel _loadingPanel;
-        private readonly ProgressBar _loadingProgressBar;
         private readonly ToolTip _connectionDetailsTooltip;
         private readonly VendorManager _vm;
         private readonly IAdapterAdminService _adminService;
@@ -44,11 +41,6 @@ namespace Dzmac.Gui.Forms
         private readonly PerformanceSample[] _sentSamples = new PerformanceSample[performanceSampleCapacity];
         private int _sampleCount;
         private int _sampleWriteIndex;
-        private Label _performanceReceivedLabel;
-        private Label _performanceReceivedSpeedLabel;
-        private Label _performanceSentLabel;
-        private Label _performanceSentSpeedLabel;
-        private Panel _performanceGraphPanel;
         private NetworkInterface _selectedNetworkInterface;
         private CancellationTokenSource _performanceLoopCancellation;
         private int _performanceResolveVersion;
@@ -74,45 +66,6 @@ namespace Dzmac.Gui.Forms
             _connectionDetailsTooltip = new ToolTip();
             InitializeComponent();
             ConfigureV1Surface();
-
-            _loadingProgressBar = new ProgressBar
-            {
-                Style = ProgressBarStyle.Marquee,
-                MarqueeAnimationSpeed = 20,
-                Width = 250,
-                Height = 18,
-                Anchor = AnchorStyles.None
-            };
-
-            _loadingLabel = new Label
-            {
-                AutoSize = true,
-                Anchor = AnchorStyles.None,
-                Text = "Loading network adapters..."
-            };
-
-            var loadingLayout = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 3,
-                BackColor = Color.FromArgb(225, SystemColors.Control)
-            };
-            loadingLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-            loadingLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 45f));
-            loadingLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            loadingLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            loadingLayout.Controls.Add(_loadingLabel, 0, 1);
-            loadingLayout.Controls.Add(_loadingProgressBar, 0, 2);
-
-            _loadingPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Visible = false
-            };
-            _loadingPanel.Controls.Add(loadingLayout);
-
-            MainTableLayoutPanel.Controls.Add(_loadingPanel, 0, 0);
             _loadingPanel.BringToFront();
 
             InfoTabs.SelectedIndexChanged += InfoTabs_SelectedIndexChanged;
@@ -120,7 +73,6 @@ namespace Dzmac.Gui.Forms
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             VendorComboBox.Enabled = false;
             PersistentAddressCheckBox.Checked = true;
-            InitializePerformancePanel();
             UpdateSelectionState();
         }
 
@@ -1316,82 +1268,6 @@ namespace Dzmac.Gui.Forms
                     graphics.DrawLine(pen, x1, y1, x2, y2);
                 }
             }
-        }
-
-        private void InitializePerformancePanel()
-        {
-            var panel = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 5,
-                BackColor = Color.White,
-                Padding = new Padding(6)
-            };
-            panel.RowStyles.Add(new RowStyle(SizeType.Percent, 78f));
-            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-
-            _performanceGraphPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BackColor = Color.White
-            };
-            _performanceGraphPanel.Paint += PerformanceGraphPanel_Paint;
-
-            _performanceReceivedLabel = new Label
-            {
-                Dock = DockStyle.Top,
-                ForeColor = Color.FromArgb(192, 0, 0),
-                BackColor = Color.White,
-                AutoSize = false,
-                Font = new Font("Consolas", 8.25f),
-                Height = 16,
-                Text = "Received: 0 B"
-            };
-
-            _performanceReceivedSpeedLabel = new Label
-            {
-                Dock = DockStyle.Top,
-                ForeColor = Color.FromArgb(192, 0, 0),
-                BackColor = Color.White,
-                AutoSize = false,
-                Font = new Font("Consolas", 8.25f),
-                Height = 16,
-                Text = "-Speed  : 0 bps (Peak 0 bps)"
-            };
-
-            _performanceSentLabel = new Label
-            {
-                Dock = DockStyle.Top,
-                ForeColor = Color.Green,
-                BackColor = Color.White,
-                AutoSize = false,
-                Font = new Font("Consolas", 8.25f),
-                Height = 16,
-                Text = "Sent    : 0 B"
-            };
-
-            _performanceSentSpeedLabel = new Label
-            {
-                Dock = DockStyle.Top,
-                ForeColor = Color.Green,
-                BackColor = Color.White,
-                AutoSize = false,
-                Font = new Font("Consolas", 8.25f),
-                Height = 16,
-                Text = "-Speed  : 0 bps (Peak 0 bps)"
-            };
-
-            panel.Controls.Add(_performanceGraphPanel, 0, 0);
-            panel.Controls.Add(_performanceReceivedLabel, 0, 1);
-            panel.Controls.Add(_performanceReceivedSpeedLabel, 0, 2);
-            panel.Controls.Add(_performanceSentLabel, 0, 3);
-            panel.Controls.Add(_performanceSentSpeedLabel, 0, 4);
-            PerformanceCounterGroup.Controls.Add(panel);
-            PerformanceCounterGroup.Text = string.Empty;
         }
 
         private void PerformanceGraphPanel_Paint(object sender, PaintEventArgs e)
