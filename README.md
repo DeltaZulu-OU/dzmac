@@ -1,4 +1,4 @@
-# dzmac
+# DZMAC
 
  In ALPHA stage.
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-dzmac is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of TMAC but does **not** aim for feature parity.
+DZMAC is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of TMAC but does **not** aim for feature parity.
 
 The goal is to provide a focused, predictable, and maintainable application centered on core adapter management workflows.
 
@@ -14,11 +14,11 @@ The goal is to provide a focused, predictable, and maintainable application cent
 
 This project is in **alpha**.
 
-The focus is on stabilizing core functionality before expanding scope for dzmac.
+The focus is on stabilizing core functionality before expanding scope for DZMAC.
 
 ## Help
 
-See [wiki](https://github.com/zbalkan/dzmac/wiki/Help) for help.
+See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
 
 ## Features (current scope)
 
@@ -36,14 +36,14 @@ See [wiki](https://github.com/zbalkan/dzmac/wiki/Help) for help.
 - Display adapter speed (with optional KB/s view)
 - Open Windows Network Connections
 
-## How dzmac differs from TMAC
+## How DZMAC differs from TMAC
 
-dzmac started as a reimplementation of TMAC, but it intentionally makes different
+DZMAC started as a reimplementation of TMAC, but it intentionally makes different
 product and UX choices. The list below highlights the most important current
 differences so expectations are clear.
 
 ### Physical adapters first (virtual adapters optional)
-By default, dzmac focuses the adapter list on likely physical adapters for a
+By default, DZMAC focuses the adapter list on likely physical adapters for a
 cleaner day-to-day experience. Virtual/logical adapters can still be shown
 through **Options → Show All Adapters**.
 
@@ -71,7 +71,7 @@ As a result:
 - no preset import/export in current scope
 
 #### Reduced "all-in-one" behavior
-Unlike TMAC's broader utility surface, dzmac keeps optional/auxiliary behavior
+Unlike TMAC's broader utility surface, DZMAC keeps optional/auxiliary behavior
 to a minimum and emphasizes explicit, focused actions in the main UI.
 
 ### DHCP disable behavior is safe-by-default
