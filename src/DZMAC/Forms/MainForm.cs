@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using Dzmac.Gui.Core;
+using Dzmac.Gui.Core.Reporting;
 using Dzmac.Gui.DTO;
 using Dzmac.Gui.Properties;
 
@@ -42,6 +43,7 @@ namespace Dzmac.Gui.Forms
         private readonly ToolTip _connectionDetailsTooltip;
         private readonly VendorManager _vm;
         private readonly IAdapterAdminService _adminService;
+        private readonly INetworkReportBuilder _networkReportBuilder;
         private readonly object _performanceBufferSync = new object();
         private readonly System.Windows.Forms.Timer _loadingProgressTimer;
         private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
@@ -70,6 +72,7 @@ namespace Dzmac.Gui.Forms
         {
             _vm = new VendorManager();
             _adminService = new AdapterAdminService();
+            _networkReportBuilder = new TextNetworkReportBuilder();
             _connectionDetailsTooltip = new ToolTip();
             InitializeComponent();
             ConfigureV1Surface();
@@ -893,85 +896,48 @@ namespace Dzmac.Gui.Forms
 
         private string BuildTextReport()
         {
-            var report = new StringBuilder();
-            var version = Application.ProductVersion;
-            report.AppendLine($"DZMAC MAC Address Changer ${version}");
-            report.AppendLine("===================================================");
-            report.AppendLine();
-            report.AppendLine($"Date: {DateTime.Now:dddd, MMMM d, yyyy  HH:mm:ss}");
-            report.AppendLine();
-            report.AppendLine("Text Report");
-            report.AppendLine("===========");
-            report.AppendLine();
-
-            for (var index = 0; index < NetworkConnections.Count; index++)
-            {
-                var detail = NetworkConnections[index].Detail;
-                report.AppendLine($"Interface #{index + 1}");
-                report.AppendLine("=============");
-                AppendReportField(report, "Connection Name", detail.Name);
-                AppendReportField(report, "Device Name", detail.Device);
-                AppendReportField(report, "Device Manufacturer", detail.DeviceManufacturer);
-                AppendReportField(report, "Hardware ID", detail.HardwareId);
-                AppendReportField(report, "Configuration ID", detail.ConfigId);
-                AppendReportField(report, "Active MAC Address", detail.ActiveMac);
-                AppendReportField(report, "Active MAC Address Vendor", detail.ActiveVendor);
-                AppendReportField(report, "Link Speed", detail.Speed.ToLowerInvariant());
-                AppendReportField(report, "Link Status", FormatReportLinkStatus(detail));
-                AppendReportField(report, "TCP/IPv4", (detail.IPv4Status == "Enabled").ToString());
-                AppendReportField(report, "TCP/IPv6", (detail.IPv6Status == "Enabled").ToString());
-                AppendReportField(report, "DHCPv4 Enabled", detail.IsDhcpEnabled.ToString());
-                AppendIpv4AddressFields(report, detail);
-                AppendMultiValueField(report, "IPv4 Default Gateway", detail.Ipv4Gateways, includeMetricPlaceholder: true);
-                AppendMultiValueField(report, "IPv4 DNS Server", detail.Ipv4DnsServers, includeMetricPlaceholder: false);
-                AppendReportField(report, "DHCPv6 Enabled", bool.FalseString);
-                report.AppendLine();
-            }
-
-            return report.ToString();
+            var entries = NetworkConnections.Select(connection => ToReportEntry(connection.Detail)).ToList();
+            return _networkReportBuilder.BuildReport(entries, DateTime.Now, Application.ProductVersion);
         }
 
-        private static void AppendIpv4AddressFields(StringBuilder report, NetworkConnectionDetail detail)
+        private static NetworkReportEntry ToReportEntry(NetworkConnectionDetail detail)
         {
-            if (detail.Ipv4Addresses == null || detail.Ipv4Addresses.Count == 0)
+            if (detail == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(detail));
             }
 
-            foreach (var address in detail.Ipv4Addresses)
+            var ipv4Addresses = new List<NetworkReportIpv4Address>();
+            if (detail.Ipv4Addresses != null)
             {
-                var subnetMask = string.IsNullOrWhiteSpace(address.SubnetMask) ? "0.0.0.0" : address.SubnetMask;
-                AppendReportField(report, "IPv4 Address", $"{address.Address} ({subnetMask})");
+                foreach (var address in detail.Ipv4Addresses)
+                {
+                    ipv4Addresses.Add(new NetworkReportIpv4Address
+                    {
+                        Address = address.Address,
+                        SubnetMask = address.SubnetMask
+                    });
+                }
             }
-        }
 
-        private static void AppendMultiValueField(StringBuilder report, string label, IReadOnlyList<string> values, bool includeMetricPlaceholder)
-        {
-            if (values == null || values.Count == 0)
+            return new NetworkReportEntry
             {
-                return;
-            }
-
-            foreach (var value in values.Where(v => !string.IsNullOrWhiteSpace(v)))
-            {
-                var formattedValue = includeMetricPlaceholder ? $"{value} (0)" : value;
-                AppendReportField(report, label, formattedValue);
-            }
-        }
-
-        private static void AppendReportField(StringBuilder report, string label, string value)
-        {
-            var safeValue = string.IsNullOrWhiteSpace(value) ? "N/A" : value;
-            report.AppendLine($"{label,-40}{safeValue}");
-        }
-
-        private static string FormatReportLinkStatus(NetworkConnectionDetail detail)
-        {
-            var connectionState = detail.Enabled ? "Up" : "Down";
-            var operationalState = detail.Enabled && !string.Equals(detail.Speed, "0 bps", StringComparison.OrdinalIgnoreCase)
-                ? "Operational"
-                : "Non Operational";
-            return $"{connectionState}, {operationalState}";
+                Name = detail.Name,
+                Device = detail.Device,
+                DeviceManufacturer = detail.DeviceManufacturer,
+                HardwareId = detail.HardwareId,
+                ConfigId = detail.ConfigId,
+                ActiveMac = detail.ActiveMac,
+                ActiveVendor = detail.ActiveVendor,
+                Speed = detail.Speed,
+                Enabled = detail.Enabled,
+                IPv4Status = detail.IPv4Status,
+                IPv6Status = detail.IPv6Status,
+                IsDhcpEnabled = detail.IsDhcpEnabled,
+                Ipv4Addresses = ipv4Addresses,
+                Ipv4Gateways = detail.Ipv4Gateways ?? Array.Empty<string>(),
+                Ipv4DnsServers = detail.Ipv4DnsServers ?? Array.Empty<string>()
+            };
         }
 
         private async Task InitializeNetworkInterfaceCacheAsync()

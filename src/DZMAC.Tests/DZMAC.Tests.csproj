@@ -58,6 +58,7 @@
     <Compile Include="IpAddressValidatorTests.cs" />
     <Compile Include="MacAddressTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextNetworkReportBuilderTests.cs" />
     <Compile Include="VendorListTests.cs" />
   </ItemGroup>
   <ItemGroup>

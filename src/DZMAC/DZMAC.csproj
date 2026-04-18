@@ -118,6 +118,9 @@
     <Compile Include="Core\MacFormatter.cs" />
     <Compile Include="Core\NetworkAdapter.cs" />
     <Compile Include="Core\NetworkAdapterFactory.cs" />
+    <Compile Include="Core\Reporting\INetworkReportBuilder.cs" />
+    <Compile Include="Core\Reporting\NetworkReportEntry.cs" />
+    <Compile Include="Core\Reporting\TextNetworkReportBuilder.cs" />
     <Compile Include="Core\Vendor.cs" />
     <Compile Include="Core\VendorList.cs" />
     <Compile Include="Core\VendorManager.cs" />
