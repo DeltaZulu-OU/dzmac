@@ -53,14 +53,14 @@ namespace Dzmac.Gui.Core
         AdapterAdminResult SetDhcpEnabled(NetworkAdapter adapter, bool enabled);
         AdapterAdminResult ReleaseDhcpLease(NetworkAdapter adapter);
         AdapterAdminResult RenewDhcpLease(NetworkAdapter adapter);
-        AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress);
+        AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true);
         AdapterAdminResult ResetRegistryMac(NetworkAdapter adapter);
 
         Task<AdapterAdminResult> SetAdapterEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> SetDhcpEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> ReleaseDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> RenewDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
-        Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, CancellationToken cancellationToken = default);
+        Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> ResetRegistryMacAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
     }
 
@@ -86,7 +86,7 @@ namespace Dzmac.Gui.Core
 
         public AdapterAdminResult RenewDhcpLease(NetworkAdapter adapter) => RenewDhcpLeaseAsync(adapter).GetAwaiter().GetResult();
 
-        public AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress) => SetRegistryMacAsync(adapter, macAddress).GetAwaiter().GetResult();
+        public AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true) => SetRegistryMacAsync(adapter, macAddress, persistOriginalRecord).GetAwaiter().GetResult();
 
         public AdapterAdminResult ResetRegistryMac(NetworkAdapter adapter) => ResetRegistryMacAsync(adapter).GetAwaiter().GetResult();
 
@@ -110,8 +110,8 @@ namespace Dzmac.Gui.Core
                 return (success, message);
             }, cancellationToken);
 
-        public Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, CancellationToken cancellationToken = default)
-            => ExecuteAsync(adapter, "registry_mac_set", () => adapter.TrySetRegistryMac(macAddress), cancellationToken);
+        public Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true, CancellationToken cancellationToken = default)
+            => ExecuteAsync(adapter, "registry_mac_set", () => adapter.TrySetRegistryMac(macAddress, persistOriginalRecord), cancellationToken);
 
         public Task<AdapterAdminResult> ResetRegistryMacAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
             => ExecuteAsync(adapter, "registry_mac_reset", () => adapter.TrySetRegistryMac(null), cancellationToken);

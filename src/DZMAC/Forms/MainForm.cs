@@ -59,6 +59,7 @@ namespace Dzmac.Gui.Forms
         private bool _isVendorListReady;
         private bool _isStartupInitialized;
         private bool _locallyAdministered;
+        private bool _persistOriginalMacRecord = true;
         private bool _reenableOnChange;
         private CancellationTokenSource _refreshCancellation;
         private CancellationTokenSource _vendorRefreshCancellation;
@@ -118,6 +119,7 @@ namespace Dzmac.Gui.Forms
             Shown += MainForm_ShownAsync;
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             VendorComboBox.Enabled = false;
+            PersistentAddressCheckBox.Checked = true;
             InitializePerformancePanel();
             UpdateSelectionState();
         }
@@ -147,7 +149,7 @@ namespace Dzmac.Gui.Forms
                 return;
             }
 
-            if (_adminService.SetRegistryMac(_selected.Adapter, new MacAddress(targetMac)).IsSuccess)
+            if (_adminService.SetRegistryMac(_selected.Adapter, new MacAddress(targetMac), _persistOriginalMacRecord).IsSuccess)
             {
                 _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _ = RefreshConnectionsBackground();
@@ -392,7 +394,7 @@ namespace Dzmac.Gui.Forms
 
         private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => NotImplemented();
+        private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => _persistOriginalMacRecord = PersistentAddressCheckBox.Checked;
 
         private void RandomMacButton_Click(object sender, EventArgs e)
         {
@@ -718,7 +720,7 @@ namespace Dzmac.Gui.Forms
                 InfoTabs.TabPages.Remove(PresetsPage);
             }
 
-            PersistentAddressCheckBox.Visible = false;
+            PersistentAddressCheckBox.Visible = true;
         }
 
         private string BuildTextReport()

@@ -48,6 +48,8 @@ namespace Dzmac.Gui.Core
     {
         private const string UnknownVendorIdentifier = "Unknown Vendor";
         private const string RegistryClassKey = @"SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
+        private const string RegistryMacOverrideValueName = "NetworkAddress";
+        private const string TmacOriginalMacValueName = "OriginalNetworkAddress";
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
 
@@ -579,7 +581,7 @@ namespace Dzmac.Gui.Core
         ///     <c>false</c> if the operation fails.
         /// </returns>
         /// <exception cref="Dzmac.Gui.CoreException"> </exception>
-        public bool TrySetRegistryMac(MacAddress? mac)
+        public bool TrySetRegistryMac(MacAddress? mac, bool persistOriginalRecord = true)
         {
             var shouldReenable = false;
 
@@ -587,7 +589,7 @@ namespace Dzmac.Gui.Core
             {
                 var targetMac = mac != null ? mac.ToString() : string.Empty;
                 Diagnostics.Info("registry_mac_update_started", ("adapter", Name), ("targetMac", string.IsNullOrEmpty(targetMac) ? "<restore>" : targetMac));
-                return UpdateRegistryMac(GetRegistryKey(), targetMac, _networkInterface.Description, out shouldReenable);
+                return UpdateRegistryMac(GetRegistryKey(), targetMac, _networkInterface.Description, persistOriginalRecord, out shouldReenable);
             }
             catch (Exception ex)
             {
@@ -693,7 +695,7 @@ namespace Dzmac.Gui.Core
                     return null;
                 }
 
-                address = _registryClient.ReadValue(registryKey, "NetworkAddress");
+                address = _registryClient.ReadValue(registryKey, RegistryMacOverrideValueName);
                 if (address == null)
                 {
                     return null;
@@ -779,7 +781,7 @@ namespace Dzmac.Gui.Core
                     return new MacAddress(_networkInterface.GetPhysicalAddress());
                 }
 
-                var address = _registryClient.ReadValue(registryKey, "OriginalNetworkAddress");
+                var address = _registryClient.ReadValue(registryKey, TmacOriginalMacValueName);
                 if (address != null)
                 {
                     var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
@@ -1031,7 +1033,7 @@ namespace Dzmac.Gui.Core
         /// <exception cref="System.Security.SecurityException"></exception>
         /// <exception cref="System.IO.IOException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        private bool UpdateRegistryMac(string registryKey, string newMac, string description, out bool shouldReenable)
+        private bool UpdateRegistryMac(string registryKey, string newMac, string description, bool persistOriginalRecord, out bool shouldReenable)
         {
             // If the value is not the empty string, we want to set NetworkAddress to it, so it had
             // better be valid
@@ -1059,16 +1061,23 @@ namespace Dzmac.Gui.Core
             // If we're here everything is OK; update or clear the registry value
             if (newMac.Length > 0)
             {
-                // rollback value
-                _registryClient.SetStringValue(registryKey, "OriginalNetworkAddress", OriginalMacAddress.ToString());
+                // rollback value (TMAC compatibility marker)
+                if (persistOriginalRecord)
+                {
+                    _registryClient.SetStringValue(registryKey, TmacOriginalMacValueName, OriginalMacAddress.ToString());
+                }
+                else
+                {
+                    _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
+                }
 
                 // active value
-                _registryClient.SetStringValue(registryKey, "NetworkAddress", newMac);
+                _registryClient.SetStringValue(registryKey, RegistryMacOverrideValueName, newMac);
             }
             else
             {
-                _registryClient.DeleteValue(registryKey, "NetworkAddress");
-                _registryClient.DeleteValue(registryKey, "OriginalNetworkAddress");
+                _registryClient.DeleteValue(registryKey, RegistryMacOverrideValueName);
+                _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
             }
 
             return true;
