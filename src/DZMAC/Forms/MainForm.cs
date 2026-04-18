@@ -22,12 +22,10 @@ namespace Dzmac.Gui.Forms
     {
         private readonly struct PerformanceSample
         {
-            public DateTime Timestamp { get; }
             public double Value { get; }
 
-            public PerformanceSample(DateTime timestamp, double value)
+            public PerformanceSample(double value)
             {
-                Timestamp = timestamp;
                 Value = value;
             }
         }
@@ -48,6 +46,8 @@ namespace Dzmac.Gui.Forms
         private readonly System.Windows.Forms.Timer _loadingProgressTimer;
         private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
         private readonly PerformanceSample[] _sentSamples = new PerformanceSample[performanceSampleCapacity];
+        private readonly double[] _receivedPaintBuffer = new double[performanceSampleCapacity];
+        private readonly double[] _sentPaintBuffer = new double[performanceSampleCapacity];
         private int _sampleCount;
         private int _sampleWriteIndex;
         private NetworkInterface _selectedNetworkInterface;
@@ -1422,25 +1422,42 @@ namespace Dzmac.Gui.Forms
 
         private void PerformanceGraphPanel_Paint(object sender, PaintEventArgs e)
         {
-            var receivedValues = new double[performanceSampleCapacity];
-            var sentValues = new double[performanceSampleCapacity];
+            var maxSample = 1d;
 
             lock (_performanceBufferSync)
             {
+                var startFillIndex = performanceSampleCapacity - _sampleCount;
+                if (startFillIndex > 0)
+                {
+                    Array.Clear(_receivedPaintBuffer, 0, startFillIndex);
+                    Array.Clear(_sentPaintBuffer, 0, startFillIndex);
+                }
+
                 var start = (_sampleWriteIndex - _sampleCount + performanceSampleCapacity) % performanceSampleCapacity;
                 for (var i = 0; i < _sampleCount; i++)
                 {
                     var sourceIndex = (start + i) % performanceSampleCapacity;
                     var targetIndex = performanceSampleCapacity - _sampleCount + i;
-                    receivedValues[targetIndex] = _receivedSamples[sourceIndex].Value;
-                    sentValues[targetIndex] = _sentSamples[sourceIndex].Value;
+                    var receivedValue = _receivedSamples[sourceIndex].Value;
+                    var sentValue = _sentSamples[sourceIndex].Value;
+                    _receivedPaintBuffer[targetIndex] = receivedValue;
+                    _sentPaintBuffer[targetIndex] = sentValue;
+
+                    if (receivedValue > maxSample)
+                    {
+                        maxSample = receivedValue;
+                    }
+
+                    if (sentValue > maxSample)
+                    {
+                        maxSample = sentValue;
+                    }
                 }
             }
 
             e.Graphics.Clear(Color.White);
-            var maxSample = Math.Max(1d, Math.Max(receivedValues.Max(), sentValues.Max()));
-            DrawSampleSeries(e.Graphics, receivedValues, maxSample, Color.Red);
-            DrawSampleSeries(e.Graphics, sentValues, maxSample, Color.Green);
+            DrawSampleSeries(e.Graphics, _receivedPaintBuffer, maxSample, Color.Red);
+            DrawSampleSeries(e.Graphics, _sentPaintBuffer, maxSample, Color.Green);
         }
 
         private async Task RunPerformanceSamplingLoopAsync(NetworkInterface networkInterface, CancellationToken cancellationToken)
@@ -1480,8 +1497,8 @@ namespace Dzmac.Gui.Forms
 
                     lock (_performanceBufferSync)
                     {
-                        _receivedSamples[_sampleWriteIndex] = new PerformanceSample(DateTime.UtcNow, receivedBitsPerSecond);
-                        _sentSamples[_sampleWriteIndex] = new PerformanceSample(DateTime.UtcNow, sentBitsPerSecond);
+                        _receivedSamples[_sampleWriteIndex] = new PerformanceSample(receivedBitsPerSecond);
+                        _sentSamples[_sampleWriteIndex] = new PerformanceSample(sentBitsPerSecond);
                         _sampleWriteIndex = (_sampleWriteIndex + 1) % performanceSampleCapacity;
                         _sampleCount = Math.Min(_sampleCount + 1, performanceSampleCapacity);
                     }
