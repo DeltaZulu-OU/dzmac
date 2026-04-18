@@ -54,6 +54,7 @@ namespace Dzmac.Gui.Forms
         private CancellationTokenSource _performanceLoopCancellation;
         private int _performanceResolveVersion;
         private int _performanceUiUpdatePending;
+        private string _performanceHistoryConfigId;
         private bool _isRefreshing;
         private bool _isVendorComboBound;
         private bool _isVendorListLoading;
@@ -419,9 +420,15 @@ namespace Dzmac.Gui.Forms
 
         private void InfoTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_selected == null || !IsPerformanceTabVisible())
+            if (_selected == null)
             {
                 StopPerformanceMonitoring();
+                return;
+            }
+
+            if (!IsPerformanceTabVisible())
+            {
+                StopPerformanceMonitoring(resetPerformanceState: false);
                 return;
             }
 
@@ -1518,7 +1525,7 @@ namespace Dzmac.Gui.Forms
                 {
                     if (!IsDisposed && IsHandleCreated)
                     {
-                        BeginInvoke(new Action(StopPerformanceMonitoring));
+                        BeginInvoke(new Action(() => StopPerformanceMonitoring()));
                     }
 
                     return;
@@ -1528,15 +1535,19 @@ namespace Dzmac.Gui.Forms
 
         private Task RestartPerformanceMonitoringAsync(string networkConfigId)
         {
-            StopPerformanceMonitoring();
+            var shouldResetPerformanceState = !string.Equals(_performanceHistoryConfigId, networkConfigId, StringComparison.OrdinalIgnoreCase);
+            StopPerformanceMonitoring(resetPerformanceState: shouldResetPerformanceState);
             var resolveVersion = Interlocked.Increment(ref _performanceResolveVersion);
 
-            _performanceReceivedLabel.Text = "Received: resolving adapter...";
-            _performanceReceivedSpeedLabel.Text = "-Speed  : waiting for sample...";
-            _performanceSentLabel.Text = "Sent    : resolving adapter...";
-            _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
-            ResetPerformanceBuffers();
-            _performanceGraphPanel.Invalidate();
+            if (shouldResetPerformanceState)
+            {
+                _performanceReceivedLabel.Text = "Received: resolving adapter...";
+                _performanceReceivedSpeedLabel.Text = "-Speed  : waiting for sample...";
+                _performanceSentLabel.Text = "Sent    : resolving adapter...";
+                _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
+                ResetPerformanceBuffers();
+                _performanceGraphPanel.Invalidate();
+            }
 
             _networkInterfacesById.TryGetValue(networkConfigId, out var resolvedInterface);
 
@@ -1548,6 +1559,7 @@ namespace Dzmac.Gui.Forms
             _selectedNetworkInterface = resolvedInterface;
             if (resolvedInterface == null)
             {
+                _performanceHistoryConfigId = null;
                 _performanceReceivedLabel.Text = "Received: unavailable";
                 _performanceReceivedSpeedLabel.Text = "-Speed  : unavailable";
                 _performanceSentLabel.Text = "Sent    : unavailable";
@@ -1561,11 +1573,12 @@ namespace Dzmac.Gui.Forms
             _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
 
             _performanceLoopCancellation = new CancellationTokenSource();
+            _performanceHistoryConfigId = networkConfigId;
             _ = RunPerformanceSamplingLoopAsync(_selectedNetworkInterface, _performanceLoopCancellation.Token);
             return Task.CompletedTask;
         }
 
-        private void StopPerformanceMonitoring()
+        private void StopPerformanceMonitoring(bool resetPerformanceState = true)
         {
             Interlocked.Increment(ref _performanceResolveVersion);
             _performanceLoopCancellation?.Cancel();
@@ -1573,12 +1586,16 @@ namespace Dzmac.Gui.Forms
             _performanceLoopCancellation = null;
             Interlocked.Exchange(ref _performanceUiUpdatePending, 0);
             _selectedNetworkInterface = null;
-            ResetPerformanceBuffers();
-            _performanceReceivedLabel.Text = "Received: 0 B";
-            _performanceReceivedSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
-            _performanceSentLabel.Text = "Sent    : 0 B";
-            _performanceSentSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
-            _performanceGraphPanel.Invalidate();
+            if (resetPerformanceState)
+            {
+                _performanceHistoryConfigId = null;
+                ResetPerformanceBuffers();
+                _performanceReceivedLabel.Text = "Received: 0 B";
+                _performanceReceivedSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+                _performanceSentLabel.Text = "Sent    : 0 B";
+                _performanceSentSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+                _performanceGraphPanel.Invalidate();
+            }
         }
 
         private void ResetPerformanceBuffers()
