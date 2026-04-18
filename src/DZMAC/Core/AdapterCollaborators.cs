@@ -19,6 +19,7 @@ namespace Dzmac.Gui.Core
         bool TryValidateAdapterDescription(string registryKey, string description);
         void SetStringValue(string registryKey, string valueName, string value);
         void DeleteValue(string registryKey, string valueName);
+        void DeleteKeyTree(string registryKey);
     }
 
     public sealed class AdapterWmiClient : IAdapterWmiClient
@@ -107,6 +108,25 @@ namespace Dzmac.Gui.Core
         {
             using var key = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the registry key");
             key.DeleteValue(valueName, false);
+        }
+
+        public void DeleteKeyTree(string registryKey)
+        {
+            var separatorIndex = registryKey.LastIndexOf('\\');
+            if (separatorIndex <= 0 || separatorIndex >= registryKey.Length - 1)
+            {
+                throw new DZMACException("Invalid registry key path.");
+            }
+
+            var parentPath = registryKey.Substring(0, separatorIndex);
+            var subKeyName = registryKey.Substring(separatorIndex + 1);
+            if (subKeyName.Length != 4 || !int.TryParse(subKeyName, out _))
+            {
+                throw new DZMACException("Invalid adapter registry key name.");
+            }
+
+            using var parentKey = Registry.LocalMachine.OpenSubKey(parentPath, true) ?? throw new DZMACException("Failed to open the parent registry key");
+            parentKey.DeleteSubKeyTree(subKeyName, false);
         }
     }
 }

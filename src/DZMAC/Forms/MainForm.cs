@@ -190,7 +190,47 @@ namespace Dzmac.Gui.Forms
             }
         }
 
-        private void DeleteItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void DeleteItem_Click(object sender, EventArgs e)
+        {
+            if (_selected == null)
+            {
+                return;
+            }
+
+            var selectedAdapterName = _selected.Name;
+            Diagnostics.Info("adapter_registry_delete_requested", ("adapter", selectedAdapterName));
+            var confirmResult = MessageBox.Show(
+                $"Are you sure you want to delete '{selectedAdapterName}' from the registry?\n\nThis can make Windows reinstall the adapter after a reboot or hardware re-scan.",
+                "Confirm Registry Adapter Deletion",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (confirmResult != DialogResult.Yes)
+            {
+                MainStatusBar.Text = $"Registry delete canceled for {selectedAdapterName}.";
+                Diagnostics.Info("adapter_registry_delete_cancelled", ("adapter", selectedAdapterName));
+                return;
+            }
+
+            MainStatusBar.Text = $"Deleting {selectedAdapterName} from registry...";
+            var result = _adminService.DeleteAdapterFromRegistry(_selected.Adapter);
+            if (result.IsSuccess)
+            {
+                MainStatusBar.Text = $"Deleted {selectedAdapterName} from registry.";
+                Diagnostics.Info("adapter_registry_delete_succeeded", ("adapter", selectedAdapterName));
+                _ = MessageBox.Show("Successfully deleted the adapter's registry key.", "Delete Adapter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _ = RefreshConnectionsBackground();
+                return;
+            }
+
+            MainStatusBar.Text = $"Failed to delete {selectedAdapterName} from registry.";
+            Diagnostics.Warning("adapter_registry_delete_failed", result.Message, ("adapter", selectedAdapterName), ("operationCode", result.Code.ToString()));
+            _ = MessageBox.Show(
+                $"Failed to delete network adapter from registry.\n\n{result.Message}",
+                "Delete Adapter Failed",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
 
         private void Dhcp4EnabledItem_Click(object sender, EventArgs e)
         {
@@ -710,7 +750,6 @@ namespace Dzmac.Gui.Forms
             ExportPresetItem.Visible = false;
             AssociateItem.Visible = false;
             toolStripSeparator7.Visible = false;
-            DeleteItem.Visible = false;
             CliParamsHelpItem.Visible = true;
             toolStripSeparator6.Visible = true;
             CheckUpdateItem.Visible = false;

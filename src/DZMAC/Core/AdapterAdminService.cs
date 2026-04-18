@@ -55,6 +55,7 @@ namespace Dzmac.Gui.Core
         AdapterAdminResult RenewDhcpLease(NetworkAdapter adapter);
         AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true);
         AdapterAdminResult ResetRegistryMac(NetworkAdapter adapter);
+        AdapterAdminResult DeleteAdapterFromRegistry(NetworkAdapter adapter);
 
         Task<AdapterAdminResult> SetAdapterEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> SetDhcpEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
@@ -62,6 +63,7 @@ namespace Dzmac.Gui.Core
         Task<AdapterAdminResult> RenewDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true, CancellationToken cancellationToken = default);
         Task<AdapterAdminResult> ResetRegistryMacAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
+        Task<AdapterAdminResult> DeleteAdapterFromRegistryAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
     }
 
     public sealed class AdapterAdminService : IAdapterAdminService
@@ -90,6 +92,8 @@ namespace Dzmac.Gui.Core
 
         public AdapterAdminResult ResetRegistryMac(NetworkAdapter adapter) => ResetRegistryMacAsync(adapter).GetAwaiter().GetResult();
 
+        public AdapterAdminResult DeleteAdapterFromRegistry(NetworkAdapter adapter) => DeleteAdapterFromRegistryAsync(adapter).GetAwaiter().GetResult();
+
         public Task<AdapterAdminResult> SetAdapterEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default)
             => ExecuteAsync(adapter, enabled ? "adapter_enable" : "adapter_disable", () => enabled ? adapter.TryEnableAdapter() : adapter.TryDisableAdapter(), cancellationToken);
 
@@ -115,6 +119,9 @@ namespace Dzmac.Gui.Core
 
         public Task<AdapterAdminResult> ResetRegistryMacAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
             => ExecuteAsync(adapter, "registry_mac_reset", () => adapter.TrySetRegistryMac(null), cancellationToken);
+
+        public Task<AdapterAdminResult> DeleteAdapterFromRegistryAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
+            => ExecuteAsync(adapter, "registry_adapter_delete", () => adapter.TryDeleteFromRegistry(), cancellationToken);
 
         private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, System.Func<bool> operation, CancellationToken cancellationToken)
             => ExecuteAsync(adapter, operationName, () =>

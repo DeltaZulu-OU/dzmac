@@ -1020,6 +1020,7 @@ namespace Dzmac.Gui.Forms
             this.DeleteItem.Name = "DeleteItem";
             this.DeleteItem.Size = new System.Drawing.Size(274, 22);
             this.DeleteItem.Text = "Delete Network Adapter from Registry";
+            this.DeleteItem.Visible = true;
             this.DeleteItem.Click += new System.EventHandler(this.DeleteItem_Click);
             // 
             // OptionsMenu

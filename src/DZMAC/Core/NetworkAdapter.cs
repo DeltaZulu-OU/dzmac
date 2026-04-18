@@ -605,6 +605,37 @@ namespace Dzmac.Gui.Core
             }
         }
 
+        /// <summary>
+        ///     Deletes this adapter's registry key from the network adapter class hive.
+        /// </summary>
+        /// <returns>
+        ///     A tuple where <c>Success</c> indicates whether deletion succeeded and
+        ///     <c>Message</c> contains a user-facing result message.
+        /// </returns>
+        public (bool Success, string Message) TryDeleteFromRegistry()
+        {
+            try
+            {
+                var registryKey = GetRegistryKey();
+                if (string.IsNullOrWhiteSpace(registryKey))
+                {
+                    return (false, "Could not locate the adapter's registry key.");
+                }
+
+                if (!_registryClient.TryValidateAdapterDescription(registryKey, _networkInterface.Description))
+                {
+                    return (false, "Adapter validation failed for the selected registry key.");
+                }
+
+                _registryClient.DeleteKeyTree(registryKey);
+                return (true, "Deleted adapter registry key.");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
+            }
+        }
+
         private int ExtractDeviceNumber()
         {
             if (_adapter == null)
