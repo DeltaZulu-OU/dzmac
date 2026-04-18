@@ -9,8 +9,11 @@ namespace Dzmac.Gui.Core
     public interface IAppSettings
     {
         string GetString(string key);
+
         int GetInt(string key);
+
         bool GetBool(string key);
+
         void ValidateAndWarn();
     }
 

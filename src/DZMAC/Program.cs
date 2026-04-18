@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Dzmac.Gui.Forms;
 using Dzmac.Gui.Core;
+using Dzmac.Gui.Forms;
 
 namespace Dzmac.Gui
 {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dzmac.Gui.Core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests
 {

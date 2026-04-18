@@ -50,19 +50,31 @@ namespace Dzmac.Gui.Core
     public interface IAdapterAdminService
     {
         AdapterAdminResult SetAdapterEnabled(NetworkAdapter adapter, bool enabled);
+
         AdapterAdminResult SetDhcpEnabled(NetworkAdapter adapter, bool enabled);
+
         AdapterAdminResult ReleaseDhcpLease(NetworkAdapter adapter);
+
         AdapterAdminResult RenewDhcpLease(NetworkAdapter adapter);
+
         AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true);
+
         AdapterAdminResult ResetRegistryMac(NetworkAdapter adapter);
+
         AdapterAdminResult DeleteAdapterFromRegistry(NetworkAdapter adapter);
 
         Task<AdapterAdminResult> SetAdapterEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
+
         Task<AdapterAdminResult> SetDhcpEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
+
         Task<AdapterAdminResult> ReleaseDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
+
         Task<AdapterAdminResult> RenewDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
+
         Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true, CancellationToken cancellationToken = default);
+
         Task<AdapterAdminResult> ResetRegistryMacAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
+
         Task<AdapterAdminResult> DeleteAdapterFromRegistryAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
     }
 

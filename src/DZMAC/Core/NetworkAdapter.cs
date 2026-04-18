@@ -276,7 +276,7 @@ namespace Dzmac.Gui.Core
                     // something we cannot handle here.
                     Diagnostics.Error("dhcp_disable_failed_rollback_failed", null, "DHCP disable failed and rollback did not complete.", ("adapter", Name));
 
-                    // Display an error dialog to the user 
+                    // Display an error dialog to the user
                     throw new DZMACException("Failed to disable DHCP");
                 }
             }
@@ -339,8 +339,8 @@ namespace Dzmac.Gui.Core
                 {
                     // something we cannot handle here.
                     Diagnostics.Error("dhcp_enable_failed_rollback_failed", null, "DHCP enable failed and rollback did not complete.", ("adapter", Name));
-                    
-                    // Display an error dialog to the user 
+
+                    // Display an error dialog to the user
                     throw new DZMACException("Failed to enable DHCP");
                 }
             }

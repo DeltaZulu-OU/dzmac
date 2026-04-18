@@ -194,6 +194,7 @@ namespace Dzmac.Gui.Core
                 case TraceEventType.Warning:
                     Trace.TraceWarning(message);
                     break;
+
                 case TraceEventType.Verbose:
                     if (!VerboseEnabled)
                     {
@@ -202,10 +203,12 @@ namespace Dzmac.Gui.Core
 
                     Trace.WriteLine($"DEBUG {message}");
                     break;
+
                 case TraceEventType.Error:
                 case TraceEventType.Critical:
                     Trace.TraceError(message);
                     break;
+
                 default:
                     Trace.TraceInformation(message);
                     break;
@@ -218,9 +221,11 @@ namespace Dzmac.Gui.Core
             {
                 case TraceEventType.Warning:
                     return EventLogEntryType.Warning;
+
                 case TraceEventType.Error:
                 case TraceEventType.Critical:
                     return EventLogEntryType.Error;
+
                 default:
                     return EventLogEntryType.Information;
             }

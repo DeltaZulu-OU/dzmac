@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +11,7 @@ namespace Dzmac.Gui.Core
     {
         string Name { get; }
         string AdapterName { get; }
+
         (bool Success, string Message) Execute();
     }
 

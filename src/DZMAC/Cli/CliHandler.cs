@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Dzmac.Gui.Core;
 using Dzmac.Gui.Cli;
+using Dzmac.Gui.Core;
 
 namespace Dzmac.Gui
 {

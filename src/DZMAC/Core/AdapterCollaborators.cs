@@ -15,10 +15,15 @@ namespace Dzmac.Gui.Core
     public interface IAdapterRegistryClient
     {
         string? TryResolveRegistryKey(string registryClassKey, string configId);
+
         object? ReadValue(string registryKey, string valueName);
+
         bool TryValidateAdapterDescription(string registryKey, string description);
+
         void SetStringValue(string registryKey, string valueName, string value);
+
         void DeleteValue(string registryKey, string valueName);
+
         void DeleteKeyTree(string registryKey);
     }
 

@@ -20,6 +20,7 @@ namespace Dzmac.Gui.Core
         private Task? _refreshTask;
         private readonly Random _random = new Random();
         private bool disposedValue;
+
         internal VendorList Vendors
         {
             get

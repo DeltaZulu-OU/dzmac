@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Collections.ObjectModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using BrightIdeasSoftware;
+using Dzmac.Gui.Core;
 using Dzmac.Gui.DTO;
 using Dzmac.Gui.Properties;
-using Dzmac.Gui.Core;
-using BrightIdeasSoftware;
 
 namespace Dzmac.Gui.Forms
 {
