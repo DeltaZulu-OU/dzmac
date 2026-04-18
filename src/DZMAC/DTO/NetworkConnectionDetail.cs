@@ -18,6 +18,7 @@ namespace Dzmac.Gui.DTO
         public string Changed => IsChanged ? "Yes" : "No";
         public string ConfigId { get; }
         public string Device { get; }
+        public string DeviceManufacturer { get; }
         public bool Enabled { get; }
         public string HardwareId { get; }
         public bool IsDhcpEnabled { get; }
@@ -45,6 +46,7 @@ namespace Dzmac.Gui.DTO
             ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
             Name = _adapter.Name;
             Device = _adapter.DeviceDescription;
+            DeviceManufacturer = _adapter.DeviceManufacturer;
             ConfigId = _adapter.ConfigId;
             Enabled = _adapter.Enabled;
             HardwareId = _adapter.HardwareId;

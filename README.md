@@ -48,6 +48,7 @@ Canonical keys:
   - gateways
   - DNS servers
 - Display adapter speed (with optional KB/s view)
+- Export text report for currently displayed adapters
 - Open Windows Network Connections
 
 ## How DZMAC differs from TMAC
@@ -60,6 +61,10 @@ differences so expectations are clear.
 By default, DZMAC focuses the adapter list on likely physical adapters for a
 cleaner day-to-day experience. Virtual/logical adapters can still be shown
 through **Options → Show All Adapters**.
+
+This also affects **File → Export Text Report**: the export contains exactly
+what is currently shown in the adapter list. To export all adapters (including
+virtual/logical), enable **Options → Show All Adapters** first.
 
 ### Narrower feature scope, fewer bundled utilities
 The following decisions define the current user-facing scope:

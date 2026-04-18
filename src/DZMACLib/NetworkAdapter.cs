@@ -92,6 +92,30 @@ namespace DZMACLib
         public string DeviceDescription => _networkInterface.Description;
 
         /// <summary>
+        ///     Gets the adapter manufacturer from WMI.
+        /// </summary>
+        public string DeviceManufacturer
+        {
+            get
+            {
+                EnsureWmiObjects();
+                if (_adapter == null)
+                {
+                    return string.Empty;
+                }
+
+                try
+                {
+                    return _adapter.GetPropertyValue("Manufacturer") as string ?? string.Empty;
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        /// <summary>
         ///     Gets if the adapter is enabled or not.
         /// </summary>
         public bool Enabled

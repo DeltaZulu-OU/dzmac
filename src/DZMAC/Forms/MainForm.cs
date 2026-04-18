@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -252,7 +253,39 @@ namespace Dzmac.Gui.Forms
 
         private void ExportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
 
-        private void ExportReportItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void ExportReportItem_Click(object sender, EventArgs e)
+        {
+            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            {
+                _ = MessageBox.Show("No network adapter information is available to export.", "Export Text Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var dialog = new SaveFileDialog())
+            {
+                dialog.Title = "Export Text Report";
+                dialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+                dialog.DefaultExt = "txt";
+                dialog.FileName = $"DZMAC-Text-Report-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                try
+                {
+                    var report = BuildTextReport();
+                    System.IO.File.WriteAllText(dialog.FileName, report, Encoding.UTF8);
+                    MainStatusBar.Text = $"Report exported: {dialog.FileName}";
+                }
+                catch (Exception ex)
+                {
+                    MainStatusBar.Text = "Failed to export text report.";
+                    _ = MessageBox.Show(ex.Message, "Export Text Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
 
         private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/zbalkan/DZMAC/wiki/Help");
 
@@ -636,7 +669,7 @@ namespace Dzmac.Gui.Forms
         private void ConfigureV1Surface()
         {
             // Keep v1 UI surface aligned with implemented feature set.
-            ExportReportItem.Visible = false;
+            ExportReportItem.Visible = true;
             toolStripSeparator1.Visible = false;
             OpenPresetItem.Visible = false;
             SavePresetItem.Visible = false;
@@ -657,6 +690,89 @@ namespace Dzmac.Gui.Forms
             }
 
             PersistentAddressCheckBox.Visible = false;
+        }
+
+        private string BuildTextReport()
+        {
+            var report = new StringBuilder();
+            var version = Application.ProductVersion;
+            report.AppendLine($"DZMAC MAC Address Changer");
+            report.AppendLine("===================================================");
+            report.AppendLine();
+            report.AppendLine($"Date: {DateTime.Now:dddd, MMMM d, yyyy  HH:mm:ss}");
+            report.AppendLine();
+            report.AppendLine("Text Report");
+            report.AppendLine("===========");
+            report.AppendLine();
+
+            for (var index = 0; index < NetworkConnections.Count; index++)
+            {
+                var detail = NetworkConnections[index].Detail;
+                report.AppendLine($"Interface #{index + 1}");
+                report.AppendLine("=============");
+                AppendReportField(report, "Connection Name", detail.Name);
+                AppendReportField(report, "Device Name", detail.Device);
+                AppendReportField(report, "Device Manufacturer", detail.DeviceManufacturer);
+                AppendReportField(report, "Hardware ID", detail.HardwareId);
+                AppendReportField(report, "Configuration ID", detail.ConfigId);
+                AppendReportField(report, "Active MAC Address", detail.ActiveMac);
+                AppendReportField(report, "Active MAC Address Vendor", detail.ActiveVendor);
+                AppendReportField(report, "Link Speed", detail.Speed.ToLowerInvariant());
+                AppendReportField(report, "Link Status", FormatReportLinkStatus(detail));
+                AppendReportField(report, "TCP/IPv4", (detail.IPv4Status == "Enabled").ToString());
+                AppendReportField(report, "TCP/IPv6", (detail.IPv6Status == "Enabled").ToString());
+                AppendReportField(report, "DHCPv4 Enabled", detail.IsDhcpEnabled.ToString());
+                AppendIpv4AddressFields(report, detail);
+                AppendMultiValueField(report, "IPv4 Default Gateway", detail.Ipv4Gateways, includeMetricPlaceholder: true);
+                AppendMultiValueField(report, "IPv4 DNS Server", detail.Ipv4DnsServers, includeMetricPlaceholder: false);
+                AppendReportField(report, "DHCPv6 Enabled", bool.FalseString);
+                report.AppendLine();
+            }
+
+            return report.ToString();
+        }
+
+        private static void AppendIpv4AddressFields(StringBuilder report, NetworkConnectionDetail detail)
+        {
+            if (detail.Ipv4Addresses == null || detail.Ipv4Addresses.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var address in detail.Ipv4Addresses)
+            {
+                var subnetMask = string.IsNullOrWhiteSpace(address.SubnetMask) ? "0.0.0.0" : address.SubnetMask;
+                AppendReportField(report, "IPv4 Address", $"{address.Address} ({subnetMask})");
+            }
+        }
+
+        private static void AppendMultiValueField(StringBuilder report, string label, IReadOnlyList<string> values, bool includeMetricPlaceholder)
+        {
+            if (values == null || values.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var value in values.Where(v => !string.IsNullOrWhiteSpace(v)))
+            {
+                var formattedValue = includeMetricPlaceholder ? $"{value} (0)" : value;
+                AppendReportField(report, label, formattedValue);
+            }
+        }
+
+        private static void AppendReportField(StringBuilder report, string label, string value)
+        {
+            var safeValue = string.IsNullOrWhiteSpace(value) ? "N/A" : value;
+            report.AppendLine($"{label,-40}{safeValue}");
+        }
+
+        private static string FormatReportLinkStatus(NetworkConnectionDetail detail)
+        {
+            var connectionState = detail.Enabled ? "Up" : "Down";
+            var operationalState = detail.Enabled && !string.Equals(detail.Speed, "0 bps", StringComparison.OrdinalIgnoreCase)
+                ? "Operational"
+                : "Non Operational";
+            return $"{connectionState}, {operationalState}";
         }
 
         private async Task InitializeNetworkInterfaceCacheAsync()
