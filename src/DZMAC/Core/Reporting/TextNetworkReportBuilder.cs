@@ -15,7 +15,7 @@ namespace Dzmac.Gui.Core.Reporting
             }
 
             var report = new StringBuilder();
-            report.AppendLine($"DZMAC MAC Address Changer ${productVersion}");
+            report.AppendLine($"DZMAC MAC Address Changer v{productVersion}");
             report.AppendLine("===================================================");
             report.AppendLine();
             report.AppendLine($"Date: {generatedAt:dddd, MMMM d, yyyy  HH:mm:ss}");
