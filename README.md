@@ -19,22 +19,7 @@ The focus is on stabilizing core functionality before expanding scope for DZMAC.
 ## Help
 
 See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
-Architecture decisions are documented in [`docs/adr`](docs/adr), including
-[ADR 0001](docs/adr/0001-adapter-toggle-menu-only.md) for adapter toggle UX.
 
-## Configuration migration note (v1 hardening P0)
-
-Application-facing settings now use the canonical `Dzmac.*` prefix.
-Legacy `DZMACLib.*` keys are still recognized for one release cycle as compatibility aliases.
-
-Canonical keys:
-
-- `Dzmac.VerboseDiagnostics`
-- `Dzmac.OuiCachePath`
-- `Dzmac.OuiEndpoint`
-- `Dzmac.OuiDownloadTimeoutSeconds`
-- `Dzmac.OuiDownloadRetryCount`
-- `Dzmac.AdminOperationTimeoutSeconds`
 
 ## Features (current scope)
 
