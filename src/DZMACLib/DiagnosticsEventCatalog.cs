@@ -55,6 +55,8 @@ namespace DZMACLib
                 ["oui_download_failed"] = new DiagnosticsEventDefinition(1605, "OUI download failed."),
                 ["oui_parse_start"] = new DiagnosticsEventDefinition(1701, "OUI parse started."),
                 ["oui_parse_completed"] = new DiagnosticsEventDefinition(1702, "OUI parse completed."),
+                ["admin_operation_completed"] = new DiagnosticsEventDefinition(1801, "Admin operation completed."),
+                ["admin_operation_retry"] = new DiagnosticsEventDefinition(1802, "Admin operation retry."),
                 ["application_start"] = new DiagnosticsEventDefinition(9001, "Application started."),
                 ["application_stop"] = new DiagnosticsEventDefinition(9002, "Application stopped."),
                 ["application_unhandled_exception"] = new DiagnosticsEventDefinition(9003, "Application unhandled exception."),

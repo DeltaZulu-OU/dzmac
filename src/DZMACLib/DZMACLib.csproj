@@ -67,12 +67,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterAdminService.cs" />
+    <Compile Include="AdapterCollaborators.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HResult.cs" />
     <Compile Include="MacAddress.cs" />
     <Compile Include="MacAddress.MacDelimiter.cs" />
     <Compile Include="MacFormatter.cs" />
+    <Compile Include="IpAddressValidator.cs" />
     <Compile Include="NetworkAdapter.cs" />
     <Compile Include="NetworkAdapterFactory.cs" />
     <Compile Include="Cache.cs" />

@@ -262,7 +262,17 @@ namespace Dzmac.Gui
                             return false;
                         }
 
-                        options.Ipv4DnsServers.AddRange(dnsServers);
+                        foreach (var dnsServer in dnsServers)
+                        {
+                            if (!IpAddressValidator.TryValidateIpv4Address(dnsServer, out var normalizedDns))
+                            {
+                                error = $"Invalid DNS server '{dnsServer}'. Expected an IPv4 address.";
+                                return false;
+                            }
+
+                            options.Ipv4DnsServers.Add(normalizedDns);
+                        }
+
                         break;
 
                     case "-h":
@@ -337,7 +347,22 @@ namespace Dzmac.Gui
                     return false;
                 }
 
-                items.Add(new Ipv4AddressSpec(parts[0].Trim(), parts[1].Trim()));
+                var ipText = parts[0].Trim();
+                var subnetText = parts[1].Trim();
+
+                if (!IpAddressValidator.TryValidateIpv4Address(ipText, out var normalizedIp))
+                {
+                    error = $"Invalid IPv4 address '{ipText}'.";
+                    return false;
+                }
+
+                if (!IpAddressValidator.TryValidateIpv4SubnetMask(subnetText, out var normalizedSubnet))
+                {
+                    error = $"Invalid subnet mask '{subnetText}'.";
+                    return false;
+                }
+
+                items.Add(new Ipv4AddressSpec(normalizedIp, normalizedSubnet));
             }
 
             return true;
@@ -357,13 +382,20 @@ namespace Dzmac.Gui
                     return false;
                 }
 
-                if (!int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var metric))
+                if (!int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var metric) || metric < 0)
                 {
                     error = $"Invalid gateway metric in '{entry}'.";
                     return false;
                 }
 
-                items.Add(new Ipv4GatewaySpec(parts[0].Trim(), metric));
+                var gatewayText = parts[0].Trim();
+                if (!IpAddressValidator.TryValidateIpv4Address(gatewayText, out var normalizedGateway))
+                {
+                    error = $"Invalid gateway IPv4 address '{gatewayText}'.";
+                    return false;
+                }
+
+                items.Add(new Ipv4GatewaySpec(normalizedGateway, metric));
             }
 
             return true;

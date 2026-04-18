@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using Microsoft.Win32;
 
 #nullable enable
 
@@ -54,6 +53,8 @@ namespace DZMACLib
 
         private readonly VendorManager? _manager;
         private readonly NetworkInterface _networkInterface;
+        private readonly IAdapterWmiClient _wmiClient;
+        private readonly IAdapterRegistryClient _registryClient;
         private readonly object _syncRoot = new object();
 
         private ManagementObject? _adapter;
@@ -189,10 +190,12 @@ namespace DZMACLib
         /// </summary>
         public long Speed => _networkInterface.Speed;
 
-        public NetworkAdapter(NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false)
+        public NetworkAdapter(NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
         {
             _networkInterface = networkInterface;
             _manager = vendorManager;
+            _wmiClient = wmiClient ?? new AdapterWmiClient();
+            _registryClient = registryClient ?? new AdapterRegistryClient();
             IsPhysicalAdapter = isPhysicalAdapter;
             Name = _networkInterface.Name;
 
@@ -205,8 +208,8 @@ namespace DZMACLib
             ActiveMacAddress = GetActiveMac();
         }
 
-        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false)
-            : this(networkInterface, vendorManager, isPhysicalAdapter)
+        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
+            : this(networkInterface, vendorManager, isPhysicalAdapter, wmiClient, registryClient)
         {
             _adapter = adapterObject;
             _adapterConfig = adapterConfig;
@@ -690,13 +693,7 @@ namespace DZMACLib
                     return null;
                 }
 
-                using var regkey = Registry.LocalMachine.OpenSubKey(registryKey, false);
-                if (regkey == null)
-                {
-                    return null;
-                }
-
-                address = regkey.GetValue("NetworkAddress");
+                address = _registryClient.ReadValue(registryKey, "NetworkAddress");
                 if (address == null)
                 {
                     return null;
@@ -782,13 +779,7 @@ namespace DZMACLib
                     return new MacAddress(_networkInterface.GetPhysicalAddress());
                 }
 
-                using var regkey = Registry.LocalMachine.OpenSubKey(registryKey, false);
-                if (regkey == null)
-                {
-                    return new MacAddress(_networkInterface.GetPhysicalAddress());
-                }
-
-                var address = regkey.GetValue("OriginalNetworkAddress");
+                var address = _registryClient.ReadValue(registryKey, "OriginalNetworkAddress");
                 if (address != null)
                 {
                     var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
@@ -857,30 +848,13 @@ namespace DZMACLib
 
         private string? TryResolveRegistryKey()
         {
-            try
+            var registryKey = _registryClient.TryResolveRegistryKey(RegistryClassKey, ConfigId);
+            if (!string.IsNullOrWhiteSpace(registryKey))
             {
-                using var baseKey = Registry.LocalMachine.OpenSubKey(RegistryClassKey, false);
-                if (baseKey == null)
-                {
-                    return null;
-                }
-
-                foreach (var name in baseKey.GetSubKeyNames())
-                {
-                    using var adapterKey = baseKey.OpenSubKey(name, false);
-                    var configId = adapterKey?.GetValue("NetCfgInstanceId") as string;
-                    if (string.Equals(configId, ConfigId, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return $"{RegistryClassKey}\\{name}";
-                    }
-                }
-            }
-            catch
-            {
-                Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to resolve registry key from class map for adapter '{Name}'.");
-                return null;
+                return registryKey;
             }
 
+            Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to resolve registry key from class map for adapter '{Name}'.");
             return null;
         }
 
@@ -894,24 +868,16 @@ namespace DZMACLib
                 }
 
                 _wmiResolved = true;
-                try
-                {
-                    var escapedId = ConfigId.Replace("'", "''");
-                    using var adapterSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_NetworkAdapter WHERE GUID = '{escapedId}'");
-                    using var adapterResults = adapterSearcher.Get();
-                    var adapterResult = adapterResults.Cast<ManagementObject>().FirstOrDefault();
-                    _adapter = CreateBoundManagementObject(adapterResult);
-
-                    using var configSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_NetworkAdapterConfiguration WHERE SettingID = '{escapedId}'");
-                    using var configResults = configSearcher.Get();
-                    var configResult = configResults.Cast<ManagementObject>().FirstOrDefault();
-                    _adapterConfig = CreateBoundManagementObject(configResult);
-                }
-                catch
+                if (!_wmiClient.TryResolveByConfigId(ConfigId, out var adapterObject, out var adapterConfigObject))
                 {
                     Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to resolve WMI objects for adapter '{Name}'.");
                     _adapter = null;
                     _adapterConfig = null;
+                }
+                else
+                {
+                    _adapter = adapterObject;
+                    _adapterConfig = adapterConfigObject;
                 }
 
                 _enabled = GetEnabled();
@@ -919,7 +885,7 @@ namespace DZMACLib
             }
         }
 
-        private static ManagementObject? CreateBoundManagementObject(ManagementObject? sourceObject)
+        internal static ManagementObject? CreateBoundManagementObject(ManagementObject? sourceObject)
         {
             if (sourceObject == null)
             {
@@ -1074,11 +1040,8 @@ namespace DZMACLib
                 throw new DZMACLibException(newMac + " is not a valid mac address");
             }
 
-            using var regkey = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACLibException("Failed to open the registry key");
-
             // Sanity check
-            if (regkey.GetValue("AdapterModel") as string != description
-                && regkey.GetValue("DriverDesc") as string != description)
+            if (!_registryClient.TryValidateAdapterDescription(registryKey, description))
             {
                 throw new DZMACLibException("Adapter not found in registry");
             }
@@ -1097,15 +1060,15 @@ namespace DZMACLib
             if (newMac.Length > 0)
             {
                 // rollback value
-                regkey.SetValue("OriginalNetworkAddress", OriginalMacAddress.ToString(), RegistryValueKind.String);
+                _registryClient.SetStringValue(registryKey, "OriginalNetworkAddress", OriginalMacAddress.ToString());
 
                 // active value
-                regkey.SetValue("NetworkAddress", newMac, RegistryValueKind.String);
+                _registryClient.SetStringValue(registryKey, "NetworkAddress", newMac);
             }
             else
             {
-                regkey.DeleteValue("NetworkAddress", false);
-                regkey.DeleteValue("OriginalNetworkAddress", false);
+                _registryClient.DeleteValue(registryKey, "NetworkAddress");
+                _registryClient.DeleteValue(registryKey, "OriginalNetworkAddress");
             }
 
             return true;

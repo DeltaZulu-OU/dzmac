@@ -23,6 +23,7 @@ namespace DZMACLib
         public const string OuiDownloadTimeoutSeconds = "Dzmac.OuiDownloadTimeoutSeconds";
         public const string OuiDownloadRetryCount = "Dzmac.OuiDownloadRetryCount";
         public const string AdminOperationTimeoutSeconds = "Dzmac.AdminOperationTimeoutSeconds";
+        public const string AdminOperationRetryCount = "Dzmac.AdminOperationRetryCount";
 
         public const string LegacyVerboseDiagnostics = "DZMACLib.VerboseDiagnostics";
         public const string LegacyOuiCachePath = "DZMACLib.OuiCachePath";
@@ -31,6 +32,7 @@ namespace DZMACLib
         public const string LegacyOuiDownloadTimeoutSeconds = "DZMACLib.OuiDownloadTimeoutSeconds";
         public const string LegacyOuiDownloadRetryCount = "DZMACLib.OuiDownloadRetryCount";
         public const string LegacyAdminOperationTimeoutSeconds = "DZMACLib.AdminOperationTimeoutSeconds";
+        public const string LegacyAdminOperationRetryCount = "DZMACLib.AdminOperationRetryCount";
     }
 
     public sealed class ConfigReader : IAppSettings
@@ -50,7 +52,8 @@ namespace DZMACLib
                 [AppSettingKeys.OuiIntegrityManifestEndpoint] = new SettingDefinition(AppSettingKeys.OuiIntegrityManifestEndpoint, string.Empty, AppSettingKeys.LegacyOuiIntegrityManifestEndpoint),
                 [AppSettingKeys.OuiDownloadTimeoutSeconds] = new SettingDefinition(AppSettingKeys.OuiDownloadTimeoutSeconds, "15", AppSettingKeys.LegacyOuiDownloadTimeoutSeconds),
                 [AppSettingKeys.OuiDownloadRetryCount] = new SettingDefinition(AppSettingKeys.OuiDownloadRetryCount, "3", AppSettingKeys.LegacyOuiDownloadRetryCount),
-                [AppSettingKeys.AdminOperationTimeoutSeconds] = new SettingDefinition(AppSettingKeys.AdminOperationTimeoutSeconds, "20", AppSettingKeys.LegacyAdminOperationTimeoutSeconds)
+                [AppSettingKeys.AdminOperationTimeoutSeconds] = new SettingDefinition(AppSettingKeys.AdminOperationTimeoutSeconds, "20", AppSettingKeys.LegacyAdminOperationTimeoutSeconds),
+                [AppSettingKeys.AdminOperationRetryCount] = new SettingDefinition(AppSettingKeys.AdminOperationRetryCount, "1", AppSettingKeys.LegacyAdminOperationRetryCount)
             };
         }
 
@@ -104,6 +107,7 @@ namespace DZMACLib
             ValidateInt(AppSettingKeys.OuiDownloadTimeoutSeconds, minInclusive: 1);
             ValidateInt(AppSettingKeys.OuiDownloadRetryCount, minInclusive: 1);
             ValidateInt(AppSettingKeys.AdminOperationTimeoutSeconds, minInclusive: 1);
+            ValidateInt(AppSettingKeys.AdminOperationRetryCount, minInclusive: 1);
 
             var endpoint = GetString(AppSettingKeys.OuiEndpoint);
             if (!Uri.TryCreate(endpoint, UriKind.Absolute, out _))
