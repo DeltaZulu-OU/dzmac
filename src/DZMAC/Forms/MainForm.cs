@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using Dzmac.Gui.DTO;
 using Dzmac.Gui.Properties;
 using DZMACLib;
+using BrightIdeasSoftware;
 
 namespace Dzmac.Gui.Forms
 {
@@ -36,6 +37,7 @@ namespace Dzmac.Gui.Forms
         private readonly ProgressBar _loadingProgressBar;
         private readonly ToolTip _connectionDetailsTooltip;
         private readonly VendorManager _vm;
+        private readonly IAdapterAdminService _adminService;
         private readonly object _performanceBufferSync = new object();
         private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
         private readonly PerformanceSample[] _sentSamples = new PerformanceSample[performanceSampleCapacity];
@@ -65,6 +67,7 @@ namespace Dzmac.Gui.Forms
         public MainForm()
         {
             _vm = new VendorManager();
+            _adminService = new AdapterAdminService();
             _connectionDetailsTooltip = new ToolTip();
             InitializeComponent();
             ConfigureV1Surface();
@@ -142,7 +145,7 @@ namespace Dzmac.Gui.Forms
                 return;
             }
 
-            if (_selected.TryUpdateMac(new MacAddress(targetMac)))
+            if (_adminService.SetRegistryMac(_selected.Adapter, new MacAddress(targetMac)).IsSuccess)
             {
                 _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _ = RefreshConnectionsBackground();
@@ -194,14 +197,14 @@ namespace Dzmac.Gui.Forms
 
             if (DhcpEnabledItem.Checked)
             {
-                if (_selected.TryDhcpDisable())
+                if (_adminService.SetDhcpEnabled(_selected.Adapter, false).IsSuccess)
                 {
                     DhcpEnabledItem.Checked = false;
                 }
             }
             else
             {
-                if (_selected.TryDhcpEnable())
+                if (_adminService.SetDhcpEnabled(_selected.Adapter, true).IsSuccess)
                 {
                     DhcpEnabledItem.Checked = true;
                 }
@@ -226,8 +229,8 @@ namespace Dzmac.Gui.Forms
                 failureText: "Failed to release the IP for",
                 action: () =>
                 {
-                    var isSuccess = selectedDetail.TryDhcpRelease(out var message);
-                    return (isSuccess, message);
+                    var result = _adminService.ReleaseDhcpLease(selectedDetail.Adapter);
+                    return (result.IsSuccess, result.Message);
                 });
         }
 
@@ -247,8 +250,8 @@ namespace Dzmac.Gui.Forms
                 failureText: "Failed to renew the IP for",
                 action: () =>
                 {
-                    var isSuccess = selectedDetail.TryDhcpRenew(out var message);
-                    return (isSuccess, message);
+                    var result = _adminService.RenewDhcpLease(selectedDetail.Adapter);
+                    return (result.IsSuccess, result.Message);
                 });
         }
 
@@ -321,21 +324,18 @@ namespace Dzmac.Gui.Forms
             var selectedAdapterName = selectedDetail.Name;
             MainStatusBar.Text = $"{inProgressText} {selectedAdapterName}...";
 
-            var result = await Task.Run(() =>
-            {
-                return action();
-            });
+            var (isSuccess, operationMessage) = await Task.Run(() => action());
 
-            if (result.isSuccess)
+            if (isSuccess)
             {
                 MainStatusBar.Text = $"{successText} {selectedAdapterName}.";
-                MessageBox.Show(result.operationMessage, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(operationMessage, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             MainStatusBar.Text = $"{failureText} {selectedAdapterName}.";
-            MessageBox.Show(result.operationMessage, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            Diagnostics.Warning($"Could not {actionName} for '{selectedAdapterName}'. {result.operationMessage}");
+            MessageBox.Show(operationMessage, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Diagnostics.Warning($"Could not {actionName} for '{selectedAdapterName}'. {operationMessage}");
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
@@ -422,13 +422,13 @@ namespace Dzmac.Gui.Forms
                 return;
             }
 
-            if (_selected.TryReset())
+            if (_adminService.ResetRegistryMac(_selected.Adapter).IsSuccess)
             {
                 _ = MessageBox.Show("Successfully restored MAC address", "MAC Address Restore", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                if (_reenableOnChange && _selected.TryDisable())
+                if (_reenableOnChange && _adminService.SetAdapterEnabled(_selected.Adapter, false).IsSuccess)
                 {
-                    _ = _selected.TryEnable();
+                    _ = _adminService.SetAdapterEnabled(_selected.Adapter, true);
                 }
 
                 _ = RefreshConnectionsBackground();
@@ -774,6 +774,7 @@ namespace Dzmac.Gui.Forms
             _refreshCancellation?.Dispose();
             _refreshCancellation = new CancellationTokenSource();
             var cancellationToken = _refreshCancellation.Token;
+            var selectedConfigId = _selected?.ConfigId;
 
             SetLoadingState(true, clearListWhileLoading);
 
@@ -791,7 +792,7 @@ namespace Dzmac.Gui.Forms
                         .ToList();
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    return adapters.Select(adapter => new NetworkConnection(adapter, ShowSpeedInKBytesPerSecItem.Checked)).ToList();
+                    return adapters.Select(adapter => new NetworkConnection(adapter, ShowSpeedInKBytesPerSecItem.Checked, _adminService)).ToList();
                 }, cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested || IsDisposed)
@@ -800,7 +801,7 @@ namespace Dzmac.Gui.Forms
                     return;
                 }
 
-                BeginInvoke(new Action(() =>
+                RunOnUiThread(() =>
                 {
                     if (IsDisposed)
                     {
@@ -814,12 +815,10 @@ namespace Dzmac.Gui.Forms
                     ConnectionsGrid.DataSource = NetworkConnections;
                     ConnectionsGrid.EndUpdate();
                     ConnectionsGrid.AutoResizeColumns();
-
-                    ConnectionsGrid.SelectedItem = null;
-                    _selected = null;
+                    RestoreSelection(selectedConfigId);
                     BindSelection();
                     MainStatusBar.Text = $"Loaded {NetworkConnections.Count} adapters.";
-                }));
+                });
             }
             catch (OperationCanceledException)
             {
@@ -840,7 +839,7 @@ namespace Dzmac.Gui.Forms
             {
                 if (!IsDisposed)
                 {
-                    BeginInvoke(new Action(() =>
+                    RunOnUiThread(() =>
                     {
                         if (!IsDisposed)
                         {
@@ -850,7 +849,7 @@ namespace Dzmac.Gui.Forms
                                 MainStatusBar.Text = "Ready";
                             }
                         }
-                    }));
+                    });
                 }
             }
         }
@@ -865,7 +864,7 @@ namespace Dzmac.Gui.Forms
             {
                 MainStatusBar.Text = "Loading network adapters...";
                 _loadingLabel.Text = "Loading network adapters...";
-                _loadingPanel.Visible = false;
+                _loadingPanel.Visible = true;
 
                 if (clearListWhileLoading)
                 {
@@ -882,6 +881,50 @@ namespace Dzmac.Gui.Forms
             }
 
             UpdateSelectionState();
+        }
+
+        private void RestoreSelection(string selectedConfigId)
+        {
+            if (string.IsNullOrWhiteSpace(selectedConfigId) || NetworkConnections == null || NetworkConnections.Count == 0)
+            {
+                ConnectionsGrid.SelectedItem = ConnectionsGrid.GetItem(0);
+                _selected = ConnectionsGrid.SelectedItem?.RowObject is NetworkConnection first ? first.Detail : null;
+                return;
+            }
+
+            foreach (OLVListItem item in ConnectionsGrid.Items)
+            {
+                if (!(item.RowObject is NetworkConnection row))
+                {
+                    continue;
+                }
+
+                if (string.Equals(row.Detail.ConfigId, selectedConfigId, StringComparison.OrdinalIgnoreCase))
+                {
+                    ConnectionsGrid.SelectedItem = item;
+                    _selected = row.Detail;
+                    return;
+                }
+            }
+
+            ConnectionsGrid.SelectedItem = ConnectionsGrid.GetItem(0);
+            _selected = ConnectionsGrid.SelectedItem?.RowObject is NetworkConnection fallback ? fallback.Detail : null;
+        }
+
+        private void RunOnUiThread(Action action)
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            if (InvokeRequired)
+            {
+                BeginInvoke(action);
+                return;
+            }
+
+            action();
         }
 
         private void TryBindVendorsWhenReady()

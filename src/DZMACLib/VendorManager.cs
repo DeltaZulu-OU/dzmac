@@ -11,10 +11,20 @@ namespace DZMACLib
     /// </summary>
     public class VendorManager : IDisposable
     {
-        private static VendorList? _vendors;
+        private readonly object _sync = new object();
+        private VendorList? _vendors;
         private readonly Random _random = new Random();
         private bool disposedValue;
-        internal VendorList Vendors => _vendors ??= new VendorList();
+        internal VendorList Vendors
+        {
+            get
+            {
+                lock (_sync)
+                {
+                    return _vendors ?? (_vendors = new VendorList());
+                }
+            }
+        }
 
         /// <summary>
         ///     Checks if a vendor with the provided OUI exists.
@@ -40,12 +50,8 @@ namespace DZMACLib
 
         public Vendor GetRandom()
         {
-            if (_vendors == null)
-            {
-                throw new DZMACLibException($"{nameof(_vendors)} cannot be null.");
-            }
-
-            var max = _vendors.Count;
+            var vendors = Vendors;
+            var max = vendors.Count;
             if (max == 0)
             {
                 throw new DZMACLibException("Vendor list is empty. Update the OUI list from the About menu.");
@@ -54,14 +60,25 @@ namespace DZMACLib
             while (selected == null)
             {
                 var offset = _random.Next(max);
-                selected = _vendors[offset];
+                selected = vendors[offset];
             }
             return selected.Value;
         }
 
         public VendorList GetVendorList() => Vendors;
 
-        public void Refresh() => Vendors.Refresh();
+        public void Refresh()
+        {
+            lock (_sync)
+            {
+                var replacement = new VendorList();
+                replacement.Refresh();
+
+                var previous = _vendors;
+                _vendors = replacement;
+                previous?.Dispose();
+            }
+        }
 
         #region Dispose
 
@@ -78,10 +95,12 @@ namespace DZMACLib
             {
                 if (disposing)
                 {
-                    _vendors?.Dispose();
+                    lock (_sync)
+                    {
+                        _vendors?.Dispose();
+                        _vendors = null;
+                    }
                 }
-
-                _vendors = null;
                 disposedValue = true;
             }
         }

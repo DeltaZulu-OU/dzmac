@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -26,9 +25,23 @@ namespace DZMACLib
 
         private static async Task<string> DownloadAsync(CancellationToken cancellationToken)
         {
-            var ouiAddress = ConfigurationManager.AppSettings["DZMACLib.OuiEndpoint"] ?? DefaultOuiAddress;
-            var timeoutSeconds = ReadIntSetting("DZMACLib.OuiDownloadTimeoutSeconds", DefaultTimeoutSeconds);
-            var retryCount = Math.Max(1, ReadIntSetting("DZMACLib.OuiDownloadRetryCount", DefaultRetryCount));
+            var ouiAddress = ConfigReader.Current.GetString(AppSettingKeys.OuiEndpoint);
+            if (string.IsNullOrWhiteSpace(ouiAddress))
+            {
+                ouiAddress = DefaultOuiAddress;
+            }
+
+            var timeoutSeconds = Math.Max(1, ConfigReader.Current.GetInt(AppSettingKeys.OuiDownloadTimeoutSeconds));
+            if (timeoutSeconds <= 0)
+            {
+                timeoutSeconds = DefaultTimeoutSeconds;
+            }
+
+            var retryCount = Math.Max(1, ConfigReader.Current.GetInt(AppSettingKeys.OuiDownloadRetryCount));
+            if (retryCount <= 0)
+            {
+                retryCount = DefaultRetryCount;
+            }
 
             using var httpClient = new HttpClient
             {
@@ -82,12 +95,6 @@ namespace DZMACLib
 
             Diagnostics.Info("oui_parse_completed", ("vendorCount", vendors.Count));
             return vendors;
-        }
-
-        private static int ReadIntSetting(string key, int defaultValue)
-        {
-            var value = ConfigurationManager.AppSettings[key];
-            return int.TryParse(value, out var parsed) ? parsed : defaultValue;
         }
     }
 }

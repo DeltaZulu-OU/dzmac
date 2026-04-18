@@ -66,23 +66,9 @@ namespace Dzmac.Gui.DTO
             Ipv6DnsServers = _adapter.GetIpv6DnsServers();
         }
 
+        internal NetworkAdapter Adapter => _adapter;
+
         public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);
-
-        public bool TryEnable() => _adapter.TryEnableAdapter();
-
-        public bool TryDisable() => _adapter.TryDisableAdapter();
-
-        public bool TryDhcpEnable() => _adapter.TryDhcpEnable();
-
-        public bool TryDhcpDisable() => _adapter.TryDhcpDisable();
-
-        public bool TryDhcpRelease(out string message) => _adapter.TryDhcpRelease(out message);
-
-        public bool TryDhcpRenew(out string message) => _adapter.TryDhcpRenew(out message);
-
-        public bool TryUpdateMac(MacAddress mac) => _adapter.TrySetRegistryMac(mac);
-
-        public bool TryReset() => _adapter.Changed && _adapter.TrySetRegistryMac(null);
 
         private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) : OriginalMac;
 

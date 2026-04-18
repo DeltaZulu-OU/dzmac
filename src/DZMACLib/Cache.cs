@@ -38,9 +38,9 @@ namespace DZMACLib
         {
             Debug.WriteLine($"Updating database (OUI: {oui}, Vendor: {vendor})...");
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var command = _connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "INSERT INTO vendors (oui, value) VALUES($oui, $vendor);";
+            command.CommandText = "INSERT INTO vendors (oui, vendor) VALUES($oui, $vendor);";
             command.Parameters.AddWithValue("$oui", oui);
             command.Parameters.AddWithValue("$vendor", vendor);
             command.ExecuteNonQuery();
@@ -58,13 +58,20 @@ namespace DZMACLib
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             using (var transaction = _connection.BeginTransaction())
             {
-                var command = _connection.CreateCommand();
+                using var command = _connection.CreateCommand();
                 command.CommandText = "INSERT INTO vendors VALUES ($oui, $vendor)";
+                var ouiParameter = command.CreateParameter();
+                ouiParameter.ParameterName = "$oui";
+                command.Parameters.Add(ouiParameter);
+
+                var vendorParameter = command.CreateParameter();
+                vendorParameter.ParameterName = "$vendor";
+                command.Parameters.Add(vendorParameter);
 
                 foreach (var record in vendors)
                 {
-                    command.Parameters.AddWithValue("$oui", record.Oui);
-                    command.Parameters.AddWithValue("$vendor", record.VendorName);
+                    ouiParameter.Value = record.Oui;
+                    vendorParameter.Value = record.VendorName;
                     command.ExecuteNonQuery();
                 }
                 transaction.Commit();
@@ -89,7 +96,7 @@ namespace DZMACLib
 
             Debug.WriteLine($"Querying database (OUI: {oui})...");
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var command = _connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT oui,vendor FROM vendors WHERE oui LIKE $oui LIMIT 1";
 
@@ -100,7 +107,7 @@ namespace DZMACLib
                 oui = new string(charArray);
             }
             command.Parameters.AddWithValue("$oui", oui);
-            var reader = command.ExecuteReader();
+            using var reader = command.ExecuteReader();
 
             if (!reader.Read())
             {
@@ -120,10 +127,10 @@ namespace DZMACLib
         {
             Debug.WriteLine("Querying database (ALL)...");
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var command = _connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT oui,vendor FROM vendors";
-            var reader = command.ExecuteReader();
+            using var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 yield return new Vendor(reader.GetString(0).Replace("\r", ""), reader.GetString(1).Replace("\r", ""));
@@ -136,7 +143,7 @@ namespace DZMACLib
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             using (var transaction = _connection.BeginTransaction())
             {
-                var command = _connection.CreateCommand();
+                using var command = _connection.CreateCommand();
                 command.CommandText = "DELETE FROM vendors;";
                 command.ExecuteNonQuery();
                 transaction.Commit();
@@ -156,10 +163,10 @@ namespace DZMACLib
             {
                 Debug.WriteLine("Querying database if empty...");
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                var command = _connection.CreateCommand();
+                using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 command.CommandText = "SELECT COUNT(*) FROM vendors";
-                var reader = command.ExecuteReader();
+                using var reader = command.ExecuteReader();
                 reader.Read();
                 return reader.GetInt32(0) == 0;
             }
@@ -178,7 +185,7 @@ namespace DZMACLib
             Debug.WriteLine("Creating vendor table (if not exists)...");
             const string newTableCommand = "CREATE TABLE IF NOT EXISTS vendors (oui VARCHAR(6), vendor VARCHAR(128))";
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var command = _connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = newTableCommand;
             command.ExecuteNonQuery();
@@ -199,11 +206,11 @@ namespace DZMACLib
             }
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var command = _connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT * FROM vendors LIMIT 1 OFFSET $offset";
             command.Parameters.AddWithValue("$offset", index);
-            var reader = command.ExecuteReader();
+            using var reader = command.ExecuteReader();
             if (!reader.Read())
             {
                 return null;
@@ -218,10 +225,10 @@ namespace DZMACLib
         {
             Debug.WriteLine("Querying database for record count...");
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var command = _connection.CreateCommand();
+            using var command = _connection.CreateCommand();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             command.CommandText = "SELECT COUNT(*) FROM vendors";
-            var reader = command.ExecuteReader();
+            using var reader = command.ExecuteReader();
             reader.Read();
             Count = reader.GetInt32(0);
         }

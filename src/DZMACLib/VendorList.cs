@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 
 namespace DZMACLib
@@ -18,7 +17,7 @@ namespace DZMACLib
 
         public int Count => _cache.Count;
 
-        private static Cache _cache;
+        private readonly Cache _cache;
         private bool disposedValue;
 
         internal VendorList()
@@ -89,7 +88,7 @@ namespace DZMACLib
         private static string ResolveDatabasePath()
         {
             var envPath = Environment.GetEnvironmentVariable("DZMACLib_OUI_CACHE_PATH");
-            var configuredPath = ConfigurationManager.AppSettings["DZMACLib.OuiCachePath"];
+            var configuredPath = ConfigReader.Current.GetString(AppSettingKeys.OuiCachePath);
             var path = FirstNonEmpty(envPath, configuredPath);
 
             if (string.IsNullOrWhiteSpace(path))

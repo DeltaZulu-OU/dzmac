@@ -20,6 +20,20 @@ The focus is on stabilizing core functionality before expanding scope for DZMAC.
 
 See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
 
+## Configuration migration note (v1 hardening P0)
+
+Application-facing settings now use the canonical `Dzmac.*` prefix.
+Legacy `DZMACLib.*` keys are still recognized for one release cycle as compatibility aliases.
+
+Canonical keys:
+
+- `Dzmac.VerboseDiagnostics`
+- `Dzmac.OuiCachePath`
+- `Dzmac.OuiEndpoint`
+- `Dzmac.OuiDownloadTimeoutSeconds`
+- `Dzmac.OuiDownloadRetryCount`
+- `Dzmac.AdminOperationTimeoutSeconds`
+
 ## Features (current scope)
 
 - Enumerate network adapters
@@ -89,4 +103,3 @@ Thanks to the following projects and resources:
 
 - https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class  
   For MAC address textbox implementation reference
-

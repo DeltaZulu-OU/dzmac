@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -235,8 +234,7 @@ namespace DZMACLib
                 return envEnabled;
             }
 
-            var appSetting = ConfigurationManager.AppSettings["DZMACLib.VerboseDiagnostics"];
-            return bool.TryParse(appSetting, out var appSettingEnabled) && appSettingEnabled;
+            return ConfigReader.Current.GetBool(AppSettingKeys.VerboseDiagnostics);
         }
 
         private static string NormalizeValue(object? value)

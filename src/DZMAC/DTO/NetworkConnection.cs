@@ -25,14 +25,14 @@ namespace Dzmac.Gui.DTO
                 {
                     if (Detail.Enabled)
                     {
-                        if (Detail.TryDisable())
+                        if (_adminService.SetAdapterEnabled(Detail.Adapter, false).IsSuccess)
                         {
                             enabled = false;
                         }
                     }
                     else
                     {
-                        if (Detail.TryEnable())
+                        if (_adminService.SetAdapterEnabled(Detail.Adapter, true).IsSuccess)
                         {
                             enabled = true;
                         }
@@ -57,17 +57,19 @@ namespace Dzmac.Gui.DTO
         public string Speed => Detail.Speed;
 
         internal NetworkConnectionDetail Detail { get; set; }
+        private readonly IAdapterAdminService _adminService;
         private bool enabled;
 
         private bool disposedValue;
 
-        public NetworkConnection(NetworkConnectionDetail advanced)
+        public NetworkConnection(NetworkConnectionDetail advanced, IAdapterAdminService adminService)
         {
             Detail = advanced;
+            _adminService = adminService;
             enabled = Detail.Enabled;
         }
 
-        public NetworkConnection(NetworkAdapter adapter, bool showSpeedInKBytesPerSec) : this(new NetworkConnectionDetail(adapter, showSpeedInKBytesPerSec))
+        public NetworkConnection(NetworkAdapter adapter, bool showSpeedInKBytesPerSec, IAdapterAdminService adminService) : this(new NetworkConnectionDetail(adapter, showSpeedInKBytesPerSec), adminService)
         {
         }
 

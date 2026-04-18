@@ -66,6 +66,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdapterAdminService.cs" />
+    <Compile Include="AppSettings.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="HResult.cs" />
     <Compile Include="MacAddress.cs" />

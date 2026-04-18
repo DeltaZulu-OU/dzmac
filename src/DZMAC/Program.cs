@@ -15,6 +15,7 @@ namespace Dzmac.Gui
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
             Application.ApplicationExit += ApplicationExitHandler;
+            ConfigReader.Current.ValidateAndWarn();
 
             if (args == null || args.Length == 0)
             {

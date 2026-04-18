@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterTests.cs" />
+    <Compile Include="CacheTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MacAddressTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
