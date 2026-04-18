@@ -234,7 +234,7 @@ namespace DZMACLib
         {
             Debug.WriteLine($"Querying database (index: {index})...");
 
-            if (index > Count)
+            if (index < 0 || index >= Count)
             {
                 throw new IndexOutOfRangeException();
             }

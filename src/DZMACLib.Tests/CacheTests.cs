@@ -76,5 +76,32 @@ namespace DZMACLib.Tests
                 }
             }
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(IndexOutOfRangeException))]
+        public void IndexerShouldThrowWhenIndexEqualsCount()
+        {
+            var dbPath = Path.Combine(Path.GetTempPath(), $"dzmac-cache-index-test-{Guid.NewGuid():N}.db");
+
+            try
+            {
+                using (var cache = new Cache(dbPath))
+                {
+                    cache.AddRange(new List<Vendor>
+                    {
+                        new Vendor("A1B2C3", "Vendor A")
+                    });
+
+                    _ = cache[cache.Count];
+                }
+            }
+            finally
+            {
+                if (File.Exists(dbPath))
+                {
+                    File.Delete(dbPath);
+                }
+            }
+        }
     }
 }

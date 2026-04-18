@@ -15,8 +15,6 @@ namespace DZMACLib
     internal static class Downloader
     {
         private const string DefaultOuiAddress = "https://standards-oui.ieee.org/oui/oui.txt";
-        private const int DefaultTimeoutSeconds = 15;
-        private const int DefaultRetryCount = 3;
 
         public static List<Vendor> GetAll() => GetAllAsync(CancellationToken.None).GetAwaiter().GetResult();
 
@@ -35,16 +33,8 @@ namespace DZMACLib
             }
 
             var timeoutSeconds = Math.Max(1, ConfigReader.Current.GetInt(AppSettingKeys.OuiDownloadTimeoutSeconds));
-            if (timeoutSeconds <= 0)
-            {
-                timeoutSeconds = DefaultTimeoutSeconds;
-            }
 
             var retryCount = Math.Max(1, ConfigReader.Current.GetInt(AppSettingKeys.OuiDownloadRetryCount));
-            if (retryCount <= 0)
-            {
-                retryCount = DefaultRetryCount;
-            }
 
             using var httpClient = new HttpClient
             {

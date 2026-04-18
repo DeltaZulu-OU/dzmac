@@ -48,7 +48,7 @@ namespace DZMACLib
     public class NetworkAdapter : IDisposable
     {
         private const string UnknownVendorIdentifier = "Unknown Vendor";
-        private const string RegistryClassKey = @"SYSTEM\ControlSet001\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
+        private const string RegistryClassKey = @"SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
 
@@ -607,7 +607,7 @@ namespace DZMACLib
                 return -1;
             }
 
-            // Extract adapter number; this should correspond to the keys under HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}
+            // Extract adapter number; this should correspond to the keys under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}
             Match? match;
             try
             {

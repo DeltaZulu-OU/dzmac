@@ -13,5 +13,13 @@ namespace DZMACLib.Tests
 
         [TestMethod]
         public void IsValidMacShouldRejectWrongLength() => Assert.IsFalse(MacAddress.IsValidMac("A1B2C3D4E5"));
+
+        [TestMethod]
+        public void EqualsShouldReturnFalseForDifferentObjectType()
+        {
+            var mac = new MacAddress("A1B2C3D4E5F6");
+
+            Assert.IsFalse(mac.Equals("A1B2C3D4E5F6"));
+        }
     }
 }

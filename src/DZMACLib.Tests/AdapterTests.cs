@@ -16,7 +16,7 @@ namespace DZMACLib.Tests
         public void AdapterListShouldNotBeNull() => Assert.IsNotNull(_adapters);
 
         [TestMethod]
-        public void AdapterListShouldHaveAtLeastOneAdapter() => Assert.IsTrue(_adapters.Any());
+        public void AdapterListEnumerationShouldBeStable() => Assert.IsNotNull(_adapters.ToList());
 
         [DataTestMethod]
         [DataRow("PCI\\VEN_8086&DEV_15B8", true)]

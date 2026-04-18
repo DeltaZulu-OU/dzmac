@@ -161,7 +161,7 @@ namespace DZMACLib
             return obj1.Equals(obj2);
         }
 
-        public override bool Equals(object obj) => Equals((MacAddress)obj);
+        public override bool Equals(object obj) => obj is MacAddress macAddress && Equals(macAddress);
 
         public override int GetHashCode() => _macAddress.GetHashCode();
 
