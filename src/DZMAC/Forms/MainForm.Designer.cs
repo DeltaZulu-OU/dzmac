@@ -108,6 +108,8 @@ namespace Dzmac.Gui.Forms
             this.ActionMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.RefreshItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToggleAdapterEnabledItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.Dhcp4Item = new System.Windows.Forms.ToolStripMenuItem();
             this.DhcpEnabledItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DhcpReleaseIpItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -941,6 +943,8 @@ namespace Dzmac.Gui.Forms
             this.ActionMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.RefreshItem,
             this.toolStripSeparator4,
+            this.ToggleAdapterEnabledItem,
+            this.toolStripSeparator8,
             this.Dhcp4Item,
             this.toolStripSeparator7,
             this.DeleteItem});
@@ -961,6 +965,18 @@ namespace Dzmac.Gui.Forms
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(271, 6);
             // 
+            // ToggleAdapterEnabledItem
+            //
+            this.ToggleAdapterEnabledItem.Name = "ToggleAdapterEnabledItem";
+            this.ToggleAdapterEnabledItem.Size = new System.Drawing.Size(274, 22);
+            this.ToggleAdapterEnabledItem.Text = "Disable Adapter";
+            this.ToggleAdapterEnabledItem.Click += new System.EventHandler(this.ToggleAdapterEnabledItem_Click);
+            //
+            // toolStripSeparator8
+            //
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(271, 6);
+            //
             // Dhcp4Item
             // 
             this.Dhcp4Item.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1201,6 +1217,7 @@ namespace Dzmac.Gui.Forms
         private ToolStripMenuItem AssociateItem;
         private ToolStripMenuItem ExitItem;
         private ToolStripMenuItem RefreshItem;
+        private ToolStripMenuItem ToggleAdapterEnabledItem;
         private ToolStripMenuItem Dhcp4Item;
         private ToolStripMenuItem DeleteItem;
         private ToolStripMenuItem DhcpEnabledItem;
@@ -1224,6 +1241,7 @@ namespace Dzmac.Gui.Forms
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripSeparator toolStripSeparator3;
         private ToolStripSeparator toolStripSeparator4;
+        private ToolStripSeparator toolStripSeparator8;
         private ToolStripSeparator toolStripSeparator6;
         private ToolStripSeparator toolStripSeparator5;
         private ToolStripSeparator toolStripSeparator7;

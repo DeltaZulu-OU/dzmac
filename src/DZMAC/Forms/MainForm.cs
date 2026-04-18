@@ -501,6 +501,17 @@ namespace Dzmac.Gui.Forms
             await RefreshConnectionsBackground();
         }
 
+        private async void ToggleAdapterEnabledItem_Click(object sender, EventArgs e)
+        {
+            var selectedConnection = ConnectionsGrid?.SelectedObject as NetworkConnection;
+            if (selectedConnection == null)
+            {
+                return;
+            }
+
+            await ToggleAdapterEnabledAsync(selectedConnection);
+        }
+
         private async void UpdateOuiItem_ClickAsync(object sender, EventArgs e)
         {
             var result = MessageBox.Show("This will initiate OUI download in the background.\n\nAre you sure?", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.YesNo);
@@ -553,6 +564,24 @@ namespace Dzmac.Gui.Forms
 
             foreach (var networkConnection in connections)
             {
+                networkConnection.Dispose();
+            }
+        }
+
+        private static void DisposeConnections(List<NetworkConnection> connections, ISet<NetworkConnection> excludedConnections)
+        {
+            if (connections == null)
+            {
+                return;
+            }
+
+            foreach (var networkConnection in connections)
+            {
+                if (excludedConnections != null && excludedConnections.Contains(networkConnection))
+                {
+                    continue;
+                }
+
                 networkConnection.Dispose();
             }
         }
@@ -938,8 +967,18 @@ namespace Dzmac.Gui.Forms
                         return;
                     }
 
+                    var retainedDisabledConnections = GetRetainedDisabledConnections(updatedConnections);
+                    if (retainedDisabledConnections.Count > 0)
+                    {
+                        updatedConnections.AddRange(retainedDisabledConnections);
+                        updatedConnections = updatedConnections
+                            .OrderByDescending(connection => connection.Enabled)
+                            .ThenBy(connection => connection.Detail.Name, StringComparer.CurrentCultureIgnoreCase)
+                            .ToList();
+                    }
+
                     ConnectionsGrid.BeginUpdate();
-                    DisposeConnections(NetworkConnections);
+                    DisposeConnections(NetworkConnections, new HashSet<NetworkConnection>(retainedDisabledConnections));
                     NetworkConnections = updatedConnections;
                     ConnectionsGrid.DataSource = NetworkConnections;
                     ConnectionsGrid.EndUpdate();
@@ -1094,6 +1133,89 @@ namespace Dzmac.Gui.Forms
             DhcpRenewIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DeleteItem.Enabled = enableActions;
+            ToggleAdapterEnabledItem.Enabled = enableActions;
+            var selectedConnection = ConnectionsGrid?.SelectedObject as NetworkConnection;
+            ToggleAdapterEnabledItem.Text = !hasSelection || selectedConnection == null || selectedConnection.Enabled ? "Disable Adapter" : "Enable Adapter";
+        }
+
+        private List<NetworkConnection> GetRetainedDisabledConnections(IReadOnlyCollection<NetworkConnection> refreshedConnections)
+        {
+            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            {
+                return new List<NetworkConnection>();
+            }
+
+            var refreshedConfigIds = new HashSet<string>(
+                refreshedConnections.Select(connection => connection.Detail.ConfigId),
+                StringComparer.OrdinalIgnoreCase);
+
+            var retainedConnections = NetworkConnections
+                .Where(connection => !connection.Enabled && !refreshedConfigIds.Contains(connection.Detail.ConfigId))
+                .ToList();
+
+            if (retainedConnections.Count > 0)
+            {
+                Diagnostics.Info(
+                    "adapter_discovery_retained_disabled",
+                    ("retainedCount", retainedConnections.Count),
+                    ("retainedAdapters", string.Join(", ", retainedConnections.Select(connection => $"{connection.Detail.Name}[{connection.Detail.ConfigId}]"))));
+            }
+
+            return retainedConnections;
+        }
+
+        private async Task ToggleAdapterEnabledAsync(NetworkConnection connection)
+        {
+            if (_isRefreshing || connection?.Detail == null)
+            {
+                return;
+            }
+
+            var shouldEnable = !connection.Enabled;
+            var selectedAdapterName = connection.Detail.Name;
+            var targetState = shouldEnable ? "enable" : "disable";
+            Diagnostics.Info("adapter_toggle_requested", ("adapter", selectedAdapterName), ("targetState", targetState));
+
+            var approvalResult = MessageBox.Show(
+                $"Are you sure you want to {targetState} '{selectedAdapterName}'?",
+                "Confirm Adapter State Change",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (approvalResult != DialogResult.Yes)
+            {
+                MainStatusBar.Text = $"Adapter {targetState} canceled for {selectedAdapterName}.";
+                Diagnostics.Info("adapter_toggle_cancelled", ("adapter", selectedAdapterName), ("targetState", targetState));
+                return;
+            }
+
+            MainStatusBar.Text = $"{(shouldEnable ? "Enabling" : "Disabling")} {selectedAdapterName}...";
+
+            var operationResult = await Task.Run(() => connection.TrySetEnabled(shouldEnable));
+            if (operationResult.IsSuccess)
+            {
+                MainStatusBar.Text = $"{(shouldEnable ? "Enabled" : "Disabled")} {selectedAdapterName}.";
+                Diagnostics.Info("adapter_toggle_succeeded", ("adapter", selectedAdapterName), ("targetState", targetState));
+                _selected = connection.Detail;
+                UpdateSelectionState();
+                ConnectionsGrid.RefreshObject(connection);
+                _ = RefreshConnectionsBackground();
+                return;
+            }
+
+            MainStatusBar.Text = $"Failed to {targetState} {selectedAdapterName}.";
+            Diagnostics.Warning(
+                "adapter_toggle_failed",
+                operationResult.Message,
+                ("adapter", selectedAdapterName),
+                ("targetState", targetState),
+                ("operationCode", operationResult.Code.ToString()));
+            _ = MessageBox.Show(
+                $"{operationResult.Message} (Code: {operationResult.Code})",
+                "Adapter State Change Failed",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            ConnectionsGrid.RefreshObject(connection);
         }
 
         private static string FormatBitsPerSecond(long bitsPerSecond)

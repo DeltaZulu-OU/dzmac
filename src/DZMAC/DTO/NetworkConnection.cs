@@ -11,34 +11,11 @@ namespace Dzmac.Gui.DTO
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
     internal class NetworkConnection : IDisposable
     {
-        // TODO: Disabling does not work
-        [OLVColumn("Enabled", CheckBoxes = true, IsEditable = true, DisplayIndex = 0)]
+        [OLVColumn("Enabled", CheckBoxes = true, IsEditable = false, DisplayIndex = 0)]
         public bool Enabled
         {
-            get
-            {
-                return enabled;
-            }
-            set
-            {
-                if (Detail.Enabled != value)
-                {
-                    if (Detail.Enabled)
-                    {
-                        if (_adminService.SetAdapterEnabled(Detail.Adapter, false).IsSuccess)
-                        {
-                            enabled = false;
-                        }
-                    }
-                    else
-                    {
-                        if (_adminService.SetAdapterEnabled(Detail.Adapter, true).IsSuccess)
-                        {
-                            enabled = true;
-                        }
-                    }
-                }
-            }
+            get => enabled;
+            set => _ = TrySetEnabled(value);
         }
 
         [OLVColumn("Network Connections", DisplayIndex = 1)]
@@ -71,6 +48,22 @@ namespace Dzmac.Gui.DTO
 
         public NetworkConnection(NetworkAdapter adapter, bool showSpeedInKBytesPerSec, IAdapterAdminService adminService) : this(new NetworkConnectionDetail(adapter, showSpeedInKBytesPerSec), adminService)
         {
+        }
+
+        public AdapterAdminResult TrySetEnabled(bool shouldEnable)
+        {
+            if (enabled == shouldEnable)
+            {
+                return AdapterAdminResult.Success("Adapter state already matches requested value.");
+            }
+
+            var result = _adminService.SetAdapterEnabled(Detail.Adapter, shouldEnable);
+            if (result.IsSuccess)
+            {
+                enabled = shouldEnable;
+            }
+
+            return result;
         }
 
         private string GetDebuggerDisplay() => ConnectionName;

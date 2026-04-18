@@ -26,14 +26,36 @@ namespace Dzmac.Gui.Core
             var networkInterfaces = GetAll();
             var hardwareIdsByConfigId = GetPnpDeviceIdsByConfigId();
             Diagnostics.Debug("adapter_discovery_raw_count", ("totalDiscovered", networkInterfaces.Length));
+            var allAdapters = networkInterfaces
+                .Select(networkInterface => new
+                {
+                    Interface = networkInterface,
+                    HasValidMac = MacAddress.IsValidMac(networkInterface.GetPhysicalAddress().GetAddressBytes()),
+                    HardwareId = ResolveHardwareId(networkInterface.Id, hardwareIdsByConfigId)
+                })
+                .ToList();
 
-            var filtered = networkInterfaces.Where(a => MacAddress.IsValidMac(a.GetPhysicalAddress().GetAddressBytes()))
-                                            .OrderByDescending(a => a.Name)
-                                            .ToList();
+            var filtered = allAdapters
+                .Where(adapter => adapter.HasValidMac || IsLikelyPhysicalAdapter(adapter.HardwareId))
+                .Select(adapter => adapter.Interface)
+                .OrderByDescending(a => a.Name)
+                .ToList();
+
+            var ignored = allAdapters
+                .Where(adapter => !adapter.HasValidMac && !IsLikelyPhysicalAdapter(adapter.HardwareId))
+                .Select(adapter => adapter.Interface)
+                .OrderBy(a => a.Name, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            Diagnostics.Info(
+                "adapter_discovery_inventory",
+                ("allAdapters", string.Join(", ", allAdapters.Select(a => $"{a.Interface.Name}[{a.Interface.Id}]"))),
+                ("ignoredAdapters", string.Join(", ", ignored.Select(a => $"{a.Name}[{a.Id}]"))),
+                ("ignoredCount", ignored.Count));
 
             if (!filtered.Any())
             {
-                Diagnostics.Warning("adapter_discovery_completed", "No adapters with valid MAC addresses were found.", ("totalDiscovered", networkInterfaces.Length), ("usableAdapters", 0));
+                Diagnostics.Warning("adapter_discovery_completed", "No compatible adapters were found.", ("totalDiscovered", networkInterfaces.Length), ("usableAdapters", 0));
                 return Array.Empty<NetworkAdapter>();
             }
 

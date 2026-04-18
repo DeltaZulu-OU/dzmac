@@ -19,6 +19,8 @@ The focus is on stabilizing core functionality before expanding scope for DZMAC.
 ## Help
 
 See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
+Architecture decisions are documented in [`docs/adr`](docs/adr), including
+[ADR 0001](docs/adr/0001-adapter-toggle-menu-only.md) for adapter toggle UX.
 
 ## Configuration migration note (v1 hardening P0)
 
@@ -65,6 +67,14 @@ through **Options → Show All Adapters**.
 This also affects **File → Export Text Report**: the export contains exactly
 what is currently shown in the adapter list. To export all adapters (including
 virtual/logical), enable **Options → Show All Adapters** first.
+
+### Adapter enable/disable is menu-driven
+The **Enabled** checkbox in the adapter list is intentionally read-only and
+serves as a status indicator only.
+
+Adapter state changes are performed exclusively through
+**Action → Enable Adapter** / **Action → Disable Adapter** so the flow can
+consistently enforce confirmation dialogs, status-bar feedback, and diagnostics.
 
 ### Narrower feature scope, fewer bundled utilities
 The following decisions define the current user-facing scope:
