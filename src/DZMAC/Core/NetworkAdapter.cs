@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using Microsoft.Win32;
 
 #nullable enable
 
@@ -569,6 +570,65 @@ namespace Dzmac.Gui.Core
             return success;
         }
 
+        public bool IsAdapterEnabled()
+        {
+            EnsureWmiObjects();
+            if (_adapter == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                _adapter.Get();
+            }
+            catch
+            {
+                return false;
+            }
+
+            return GetEnabled();
+        }
+
+        public MacAddress? GetLiveLinkAddress()
+        {
+            try
+            {
+                var liveInterface = NetworkInterface.GetAllNetworkInterfaces()
+                    .FirstOrDefault(i => string.Equals(i.Id, _networkInterface.Id, StringComparison.OrdinalIgnoreCase));
+                if (liveInterface == null)
+                {
+                    return null;
+                }
+
+                var physicalAddressBytes = liveInterface.GetPhysicalAddress().GetAddressBytes();
+                if (physicalAddressBytes.Length != 6)
+                {
+                    return null;
+                }
+                
+                return new MacAddress(MacAddress.MacToString(physicalAddressBytes));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public void EnsureNetworkAddressRegistryParameter()
+        {
+            var registryKey = GetRegistryKey();
+            using var adapterKey = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the adapter registry key.");
+            using var ndiKey = adapterKey.CreateSubKey("Ndi");
+            using var paramsKey = ndiKey?.CreateSubKey("params");
+            using var networkAddressKey = paramsKey?.CreateSubKey(RegistryMacOverrideValueName) ?? throw new DZMACException("Failed to create NetworkAddress registry parameter key.");
+
+            networkAddressKey.SetValue("ParamDesc", "Network Address", RegistryValueKind.String);
+            networkAddressKey.SetValue("type", "edit", RegistryValueKind.String);
+            networkAddressKey.SetValue("LimitText", "12", RegistryValueKind.String);
+            networkAddressKey.SetValue("UpperCase", "1", RegistryValueKind.String);
+        }
+
         /// <summary>
         ///     Sets and resets the NetworkAddress registry value of this adapter.
         /// </summary>
@@ -1111,6 +1171,41 @@ namespace Dzmac.Gui.Core
                 _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
             }
 
+            return true;
+        }
+
+        public bool TryUpdateRegistryMacValue(MacAddress? mac, bool persistOriginalRecord = true)
+        {
+            var targetMac = mac != null ? mac.ToString() : string.Empty;
+            var registryKey = GetRegistryKey();
+
+            if (!_registryClient.TryValidateAdapterDescription(registryKey, _networkInterface.Description))
+            {
+                throw new DZMACException("Adapter not found in registry");
+            }
+
+            if (targetMac.Length > 0 && !MacAddress.IsValidMac(targetMac))
+            {
+                throw new DZMACException(targetMac + " is not a valid mac address");
+            }
+
+            if (targetMac.Length == 0)
+            {
+                _registryClient.DeleteValue(registryKey, RegistryMacOverrideValueName);
+                _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
+                return true;
+            }
+
+            if (persistOriginalRecord)
+            {
+                _registryClient.SetStringValue(registryKey, TmacOriginalMacValueName, OriginalMacAddress.ToString());
+            }
+            else
+            {
+                _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
+            }
+
+            _registryClient.SetStringValue(registryKey, RegistryMacOverrideValueName, targetMac);
             return true;
         }
 

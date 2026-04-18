@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +32,11 @@ namespace Dzmac.Gui.Forms
         }
 
         private const string zeroMacValue = "00-00-00-00-00-00";
+        private const int macPollingIntervalMs = 200;
+        private const int disablePollTimeoutMs = 10000;
+        private const int enablePollTimeoutMs = 10000;
+        private const int attemptWatchdogTimeoutMs = 20000;
+        private static readonly string[] laaPrefixes = { "02", "06", "0A", "0E" };
         private const int performanceSampleCapacity = 120;
         private const int performanceRefreshMs = 1000;
         private readonly ToolTip _connectionDetailsTooltip;
@@ -91,14 +97,14 @@ namespace Dzmac.Gui.Forms
 
         private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => _reenableOnChange = AutoStartCheckBox.Checked;
 
-        private void ChangeMacButton_Click(object sender, EventArgs e)
+        private async void ChangeMacButton_Click(object sender, EventArgs e)
         {
             if (_selected == null)
             {
                 return;
             }
 
-            var targetMac = macTextBox.Text;
+            var targetMac = macTextBox.Text.Replace("-", string.Empty).Replace(":", string.Empty);
 
             // Ignore default value to prevend accidents
             if (targetMac.Equals(zeroMacValue))
@@ -106,14 +112,33 @@ namespace Dzmac.Gui.Forms
                 return;
             }
 
-            if (_adminService.SetRegistryMac(_selected.Adapter, new MacAddress(targetMac), _persistOriginalMacRecord).IsSuccess)
+            if (!MacAddress.IsValidMac(targetMac))
             {
-                _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                _ = RefreshConnectionsBackground();
+                _ = MessageBox.Show("Please enter a valid MAC address.", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            else
+
+            var target = new MacAddress(targetMac);
+            var progress = new Progress<string>(status => MainStatusBar.Text = status);
+            ChangeMacButton.Enabled = false;
+            RestoreMacButton.Enabled = false;
+
+            try
             {
-                _ = MessageBox.Show("Failed to update MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var updateResult = await Task.Run(() => TryRotateMacUpdate(_selected.Adapter, target, _persistOriginalMacRecord, progress));
+                if (updateResult.Success)
+                {
+                    _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _ = RefreshConnectionsBackground();
+                }
+                else
+                {
+                    _ = MessageBox.Show(updateResult.Message, "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            finally
+            {
+                UpdateSelectionState();
             }
         }
 
@@ -260,29 +285,27 @@ namespace Dzmac.Gui.Forms
                 return;
             }
 
-            using (var dialog = new SaveFileDialog())
+            using var dialog = new SaveFileDialog();
+            dialog.Title = "Export Text Report";
+            dialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+            dialog.DefaultExt = "txt";
+            dialog.FileName = $"DZMAC-Text-Report-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
+
+            if (dialog.ShowDialog(this) != DialogResult.OK)
             {
-                dialog.Title = "Export Text Report";
-                dialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
-                dialog.DefaultExt = "txt";
-                dialog.FileName = $"DZMAC-Text-Report-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
+                return;
+            }
 
-                if (dialog.ShowDialog(this) != DialogResult.OK)
-                {
-                    return;
-                }
-
-                try
-                {
-                    var report = BuildTextReport();
-                    System.IO.File.WriteAllText(dialog.FileName, report, Encoding.UTF8);
-                    MainStatusBar.Text = $"Report exported: {dialog.FileName}";
-                }
-                catch (Exception ex)
-                {
-                    MainStatusBar.Text = "Failed to export text report.";
-                    _ = MessageBox.Show(ex.Message, "Export Text Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+            try
+            {
+                var report = BuildTextReport();
+                System.IO.File.WriteAllText(dialog.FileName, report, Encoding.UTF8);
+                MainStatusBar.Text = $"Report exported: {dialog.FileName}";
+            }
+            catch (Exception ex)
+            {
+                MainStatusBar.Text = "Failed to export text report.";
+                _ = MessageBox.Show(ex.Message, "Export Text Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -515,8 +538,7 @@ namespace Dzmac.Gui.Forms
 
         private async void ToggleAdapterEnabledItem_Click(object sender, EventArgs e)
         {
-            var selectedConnection = ConnectionsGrid?.SelectedObject as NetworkConnection;
-            if (selectedConnection == null)
+            if (!(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection))
             {
                 return;
             }
@@ -602,6 +624,143 @@ namespace Dzmac.Gui.Forms
         ///     A placeholder method for events not implemented.
         /// </summary>
         private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        private static (bool Success, string Message) TryRotateMacUpdate(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
+        {
+            progress.Report("Starting MAC update...");
+
+            try
+            {
+                progress.Report("Configuring Registry...");
+                adapter.EnsureNetworkAddressRegistryParameter();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
+            }
+            catch (SecurityException)
+            {
+                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
+            }
+
+            var suffix = target.ToString().Substring(2);
+            foreach (var prefix in laaPrefixes)
+            {
+                var attemptMac = new MacAddress(prefix + suffix);
+                var attemptResult = TryApplyMacAttempt(adapter, attemptMac, persistOriginalRecord, progress);
+                if (attemptResult.Success)
+                {
+                    return attemptResult;
+                }
+
+                if (attemptResult.Message.Contains("ERR_TIMEOUT"))
+                {
+                    RevertToFactoryState(adapter, progress);
+                    return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+                }
+
+                if (attemptResult.Message.Contains("ERR_REG_DENIED") || attemptResult.Message.Contains("ERR_WMI_FAIL"))
+                {
+                    return attemptResult;
+                }
+            }
+
+            RevertToFactoryState(adapter, progress);
+            return (false, "This device is hardware-locked against MAC spoofing. (ERR_HW_LOCKED)");
+        }
+
+        private static (bool Success, string Message) TryApplyMacAttempt(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
+        {
+            using var watchdogCts = new CancellationTokenSource(attemptWatchdogTimeoutMs);
+            var token = watchdogCts.Token;
+
+            try
+            {
+                progress.Report("Configuring Registry...");
+                adapter.TryUpdateRegistryMacValue(target, persistOriginalRecord);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
+            }
+            catch (SecurityException)
+            {
+                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
+            }
+
+            try
+            {
+                progress.Report("Requesting adapter shutdown...");
+                if (!adapter.TryDisableAdapter())
+                {
+                    return (false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)");
+                }
+
+                var disableAttempts = 0;
+                while (adapter.IsAdapterEnabled())
+                {
+                    token.ThrowIfCancellationRequested();
+                    disableAttempts++;
+                    progress.Report($"Disconnecting... [Attempt {disableAttempts}]");
+                    Thread.Sleep(macPollingIntervalMs);
+
+                    if (disableAttempts * macPollingIntervalMs >= disablePollTimeoutMs)
+                    {
+                        return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+                    }
+                }
+
+                progress.Report("Requesting adapter start...");
+                if (!adapter.TryEnableAdapter())
+                {
+                    return (false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)");
+                }
+
+                var enableAttempts = 0;
+                while (!adapter.IsAdapterEnabled())
+                {
+                    token.ThrowIfCancellationRequested();
+                    enableAttempts++;
+                    progress.Report("Initializing Hardware...");
+                    Thread.Sleep(macPollingIntervalMs);
+
+                    if (enableAttempts * macPollingIntervalMs >= enablePollTimeoutMs)
+                    {
+                        return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+            }
+
+            progress.Report("Verifying MAC change...");
+            var liveMac = adapter.GetLiveLinkAddress();
+            if (liveMac != null && liveMac.Equals(target))
+            {
+                return (true, "OK");
+            }
+
+            return (false, "Verification failed.");
+        }
+
+        private static void RevertToFactoryState(NetworkAdapter adapter, IProgress<string> progress)
+        {
+            try
+            {
+                adapter.TryUpdateRegistryMacValue(null, false);
+                _ = adapter.TryDisableAdapter();
+                Thread.Sleep(macPollingIntervalMs);
+                _ = adapter.TryEnableAdapter();
+            }
+            catch
+            {
+                // no-op
+            }
+
+            progress.Report("Change failed. Reverted to factory settings.");
+        }
 
         private static void OpenNetworkConnections()
         {
@@ -736,7 +895,7 @@ namespace Dzmac.Gui.Forms
         {
             var report = new StringBuilder();
             var version = Application.ProductVersion;
-            report.AppendLine($"DZMAC MAC Address Changer");
+            report.AppendLine($"DZMAC MAC Address Changer ${version}");
             report.AppendLine("===================================================");
             report.AppendLine();
             report.AppendLine($"Date: {DateTime.Now:dddd, MMMM d, yyyy  HH:mm:ss}");
@@ -1148,8 +1307,7 @@ namespace Dzmac.Gui.Forms
             DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DeleteItem.Enabled = enableActions;
             ToggleAdapterEnabledItem.Enabled = enableActions;
-            var selectedConnection = ConnectionsGrid?.SelectedObject as NetworkConnection;
-            ToggleAdapterEnabledItem.Text = !hasSelection || selectedConnection == null || selectedConnection.Enabled ? "Disable Adapter" : "Enable Adapter";
+            ToggleAdapterEnabledItem.Text = !hasSelection || !(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection) || selectedConnection.Enabled ? "Disable Adapter" : "Enable Adapter";
         }
 
         private List<NetworkConnection> GetRetainedDisabledConnections(IReadOnlyCollection<NetworkConnection> refreshedConnections)
@@ -1278,16 +1436,14 @@ namespace Dzmac.Gui.Forms
 
             var step = (_performanceGraphPanel.Width - 1f) / (performanceSampleCapacity - 1f);
 
-            using (var pen = new Pen(color, 1f))
+            using var pen = new Pen(color, 1f);
+            for (var i = 1; i < samples.Length; i++)
             {
-                for (var i = 1; i < samples.Length; i++)
-                {
-                    var x1 = (i - 1) * step;
-                    var x2 = i * step;
-                    var y1 = _performanceGraphPanel.Height - 1f - (float)(samples[i - 1] / maxSample * (_performanceGraphPanel.Height - 1f));
-                    var y2 = _performanceGraphPanel.Height - 1f - (float)(samples[i] / maxSample * (_performanceGraphPanel.Height - 1f));
-                    graphics.DrawLine(pen, x1, y1, x2, y2);
-                }
+                var x1 = (i - 1) * step;
+                var x2 = i * step;
+                var y1 = _performanceGraphPanel.Height - 1f - (float)(samples[i - 1] / maxSample * (_performanceGraphPanel.Height - 1f));
+                var y2 = _performanceGraphPanel.Height - 1f - (float)(samples[i] / maxSample * (_performanceGraphPanel.Height - 1f));
+                graphics.DrawLine(pen, x1, y1, x2, y2);
             }
         }
 
