@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Dzmac.Gui.Forms;
-using DZMACLib;
+using Dzmac.Gui.Core;
 
 namespace Dzmac.Gui
 {

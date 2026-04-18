@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Dzmac.Gui.DTO;
 using Dzmac.Gui.Properties;
-using DZMACLib;
+using Dzmac.Gui.Core;
 using BrightIdeasSoftware;
 
 namespace Dzmac.Gui.Forms
@@ -412,7 +412,7 @@ namespace Dzmac.Gui.Forms
             {
                 randomVendor = _vm.GetRandom();
             }
-            catch (DZMACLibException ex)
+            catch (DZMACException ex)
             {
                 _ = MessageBox.Show(ex.Message, "Vendor List Unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
-using DZMACLib;
+using Dzmac.Gui.Cli;
 
 namespace Dzmac.Gui.Forms
 {

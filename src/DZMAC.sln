@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DZMACLib", "DZMACLib\DZMACLib.csproj", "{505010CE-D639-4937-88A6-9E67C12B7F02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DZMAC.Tests", "DZMAC.Tests\DZMAC.Tests.csproj", "{B4136349-A1E2-4DB3-8618-CB8D55639ECC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DZMACLib.Tests", "DZMACLib.Tests\DZMACLib.Tests.csproj", "{B4136349-A1E2-4DB3-8618-CB8D55639ECC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DZMAC.Gui", "DZMAC\DZMAC.csproj", "{9A3B73F1-4B81-4864-AC91-FAD1474031A2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DZMAC", "DZMAC\DZMAC.csproj", "{9A3B73F1-4B81-4864-AC91-FAD1474031A2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectListView2012", "ObjectListView\ObjectListView2012.csproj", "{18FEDA0C-D147-4286-B39A-01204808106A}"
 EndProject
@@ -17,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{505010CE-D639-4937-88A6-9E67C12B7F02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{505010CE-D639-4937-88A6-9E67C12B7F02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{505010CE-D639-4937-88A6-9E67C12B7F02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{505010CE-D639-4937-88A6-9E67C12B7F02}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B4136349-A1E2-4DB3-8618-CB8D55639ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B4136349-A1E2-4DB3-8618-CB8D55639ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4136349-A1E2-4DB3-8618-CB8D55639ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU

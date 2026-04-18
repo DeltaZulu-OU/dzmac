@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using DZMACLib;
+using Dzmac.Gui.Core;
 
 namespace Dzmac.Gui.DTO
 {
