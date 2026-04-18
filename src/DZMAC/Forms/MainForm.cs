@@ -38,6 +38,8 @@ namespace Dzmac.Gui.Forms
         private static readonly string[] laaPrefixes = { "02", "06", "0A", "0E" };
         private const int performanceSampleCapacity = 120;
         private const int performanceRefreshMs = 1000;
+        private const int vendorComboBatchSize = 200;
+        private const int vendorComboLoadAheadThreshold = 20;
         private readonly ToolTip _connectionDetailsTooltip;
         private readonly VendorManager _vm;
         private readonly IAdapterAdminService _adminService;
@@ -56,9 +58,10 @@ namespace Dzmac.Gui.Forms
         private int _performanceUiUpdatePending;
         private string _performanceHistoryConfigId;
         private bool _isRefreshing;
-        private bool _isVendorComboBound;
         private bool _isVendorListLoading;
         private bool _isVendorListReady;
+        private bool _isVendorComboLoading;
+        private bool _isAppendingVendorBatch;
         private bool _isStartupInitialized;
         private bool _locallyAdministered;
         private bool _persistOriginalMacRecord = true;
@@ -67,7 +70,8 @@ namespace Dzmac.Gui.Forms
         private CancellationTokenSource _vendorRefreshCancellation;
         private NetworkConnectionDetail _selected;
         private IReadOnlyDictionary<string, NetworkInterface> _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
-        private List<Vendor> _vendors;
+        private List<Vendor> _vendorComboItems;
+        private int _vendorComboLoadedCount;
 
         public MainForm()
         {
@@ -87,6 +91,11 @@ namespace Dzmac.Gui.Forms
             Shown += MainForm_ShownAsync;
             ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             VendorComboBox.Enabled = false;
+            VendorComboBox.DropDown += VendorComboBox_DropDown;
+            VendorComboBox.SelectionChangeCommitted += VendorComboBox_SelectionChangeCommitted;
+            VendorComboBox.SelectedIndexChanged += VendorComboBox_SelectedIndexChanged;
+            VendorComboBox.MouseWheel += VendorComboBox_MouseWheel;
+            VendorComboBox.KeyDown += VendorComboBox_KeyDown;
             PersistentAddressCheckBox.Checked = true;
             UpdateSelectionState();
         }
@@ -466,14 +475,9 @@ namespace Dzmac.Gui.Forms
             var randomMac = _selected.GetRandom(randomVendor.Oui);
 
             var matchedVendor = _vm.FindByMac(randomMac, _locallyAdministered);
-            if (_isVendorComboBound)
-            {
-                VendorComboBox.SelectedItem = matchedVendor;
-            }
-            else
-            {
-                VendorComboBox.Text = matchedVendor?.VendorName ?? string.Empty;
-            }
+            var vendorDisplayName = matchedVendor?.VendorName ?? randomVendor.VendorName;
+            VendorComboBox.SelectedItem = null;
+            VendorComboBox.Text = vendorDisplayName;
 
             if (_locallyAdministered)
             {
@@ -484,6 +488,39 @@ namespace Dzmac.Gui.Forms
         }
 
         private async void RefreshItem_Click(object sender, EventArgs e) => await RefreshConnectionsBackground();
+
+        private async void VendorComboBox_DropDown(object sender, EventArgs e) => await EnsureVendorComboDataSourceAsync();
+
+        private void VendorComboBox_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            if (!(VendorComboBox.SelectedItem is Vendor selectedVendor))
+            {
+                return;
+            }
+
+            var selectedVendorName = selectedVendor.VendorName;
+            BeginInvoke(new Action(() =>
+            {
+                if (IsDisposed)
+                {
+                    return;
+                }
+
+                ResetVendorComboData(selectedVendorName);
+            }));
+        }
+
+        private async void VendorComboBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Down || e.KeyCode == Keys.PageDown || e.KeyCode == Keys.End)
+            {
+                await TryLoadNextVendorBatchIfNeededAsync();
+            }
+        }
+
+        private async void VendorComboBox_MouseWheel(object sender, MouseEventArgs e) => await TryLoadNextVendorBatchIfNeededAsync();
+
+        private async void VendorComboBox_SelectedIndexChanged(object sender, EventArgs e) => await TryLoadNextVendorBatchIfNeededAsync();
 
         private void RestoreMacButton_Click(object sender, EventArgs e)
         {
@@ -574,6 +611,7 @@ namespace Dzmac.Gui.Forms
             {
                 await _vm.RefreshAsync(_vendorRefreshCancellation.Token);
                 _ = MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
+                ResetVendorComboData();
                 MainStatusBar.Text = "Ready";
             }
             catch (OperationCanceledException)
@@ -979,7 +1017,10 @@ namespace Dzmac.Gui.Forms
 
             try
             {
-                var vendors = await Task.Run(() => _vm.GetVendorList().ToList());
+                await Task.Run(() =>
+                {
+                    _ = _vm.GetVendorList().Count;
+                });
                 if (IsDisposed)
                 {
                     return;
@@ -992,10 +1033,8 @@ namespace Dzmac.Gui.Forms
                         return;
                     }
 
-                    _vendors = vendors.OrderBy(v => v.Oui, StringComparer.OrdinalIgnoreCase).ThenBy(v => v.VendorName, StringComparer.Ordinal).ToList();
                     VendorComboBox.Enabled = true;
                     _isVendorListReady = true;
-                    TryBindVendorsWhenReady();
                     UpdateSelectionState();
 
                     if (MainStatusBar.Text == "Loading vendor list...")
@@ -1023,6 +1062,137 @@ namespace Dzmac.Gui.Forms
             finally
             {
                 _isVendorListLoading = false;
+            }
+        }
+
+        private async Task EnsureVendorComboDataSourceAsync()
+        {
+            if (!_isVendorListReady || _isVendorComboLoading || IsDisposed)
+            {
+                return;
+            }
+
+            _isVendorComboLoading = true;
+            var existingStatus = MainStatusBar.Text;
+            MainStatusBar.Text = "Preparing vendor list...";
+
+            try
+            {
+                if (_vendorComboItems == null)
+                {
+                    _vendorComboItems = await Task.Run(() => _vm
+                        .GetVendorList()
+                        .OrderBy(v => v.Oui, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(v => v.VendorName, StringComparer.Ordinal)
+                        .ToList());
+                }
+
+                if (IsDisposed)
+                {
+                    return;
+                }
+
+                if (VendorComboBox.Items.Count == 0)
+                {
+                    await AppendNextVendorBatchAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!IsDisposed)
+                {
+                    _ = MessageBox.Show(ex.Message, "Vendor List Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            finally
+            {
+                if (!IsDisposed && MainStatusBar.Text == "Preparing vendor list...")
+                {
+                    MainStatusBar.Text = string.IsNullOrWhiteSpace(existingStatus) ? "Ready" : existingStatus;
+                }
+
+                _isVendorComboLoading = false;
+            }
+        }
+
+        private async Task AppendNextVendorBatchAsync()
+        {
+            if (_isAppendingVendorBatch || _vendorComboItems == null || _vendorComboLoadedCount >= _vendorComboItems.Count || IsDisposed)
+            {
+                return;
+            }
+
+            _isAppendingVendorBatch = true;
+            try
+            {
+                var startIndex = _vendorComboLoadedCount;
+                var batch = await Task.Run(() => _vendorComboItems
+                    .Skip(startIndex)
+                    .Take(vendorComboBatchSize)
+                    .ToArray());
+                if (batch.Length == 0)
+                {
+                    return;
+                }
+
+                VendorComboBox.BeginUpdate();
+                try
+                {
+                    VendorComboBox.Items.AddRange(batch.Cast<object>().ToArray());
+                }
+                finally
+                {
+                    VendorComboBox.EndUpdate();
+                }
+
+                _vendorComboLoadedCount += batch.Length;
+                await Task.Yield();
+            }
+            finally
+            {
+                _isAppendingVendorBatch = false;
+            }
+        }
+
+        private async Task TryLoadNextVendorBatchIfNeededAsync()
+        {
+            if (!VendorComboBox.DroppedDown || _vendorComboItems == null || _vendorComboLoadedCount >= _vendorComboItems.Count)
+            {
+                return;
+            }
+
+            var selectedIndex = VendorComboBox.SelectedIndex;
+            if (selectedIndex < 0)
+            {
+                return;
+            }
+
+            var thresholdIndex = VendorComboBox.Items.Count - vendorComboLoadAheadThreshold;
+            if (selectedIndex >= thresholdIndex)
+            {
+                await AppendNextVendorBatchAsync();
+            }
+        }
+
+        private void ResetVendorComboData(string preserveText = null)
+        {
+            _vendorComboItems = null;
+            _vendorComboLoadedCount = 0;
+            _isAppendingVendorBatch = false;
+            VendorComboBox.BeginUpdate();
+            try
+            {
+                VendorComboBox.DataSource = null;
+                VendorComboBox.Items.Clear();
+                VendorComboBox.SelectedItem = null;
+                if (!string.IsNullOrWhiteSpace(preserveText))
+                {
+                    VendorComboBox.Text = preserveText;
+                }
+            }
+            finally
+            {
+                VendorComboBox.EndUpdate();
             }
         }
 
@@ -1239,32 +1409,6 @@ namespace Dzmac.Gui.Forms
             }
 
             action();
-        }
-
-        private void TryBindVendorsWhenReady()
-        {
-            if (_isVendorComboBound || !_isVendorListReady || _vendors == null)
-            {
-                return;
-            }
-
-            var currentText = VendorComboBox.Text;
-            VendorComboBox.BeginUpdate();
-            try
-            {
-                VendorComboBox.DataSource = _vendors;
-                VendorComboBox.SelectedItem = null;
-                if (!string.IsNullOrWhiteSpace(currentText))
-                {
-                    VendorComboBox.Text = currentText;
-                }
-            }
-            finally
-            {
-                VendorComboBox.EndUpdate();
-            }
-
-            _isVendorComboBound = true;
         }
 
         private void UpdateSelectionState()
