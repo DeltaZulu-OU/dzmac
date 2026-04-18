@@ -1218,7 +1218,7 @@ namespace Dzmac.Gui.Forms
             // 
             // _loadingPanel
             //
-            this._loadingPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(240)))), ((int)(((byte)(255)))));
+            this._loadingPanel.BackColor = System.Drawing.SystemColors.Control;
             this._loadingPanel.Controls.Add(this.LoadingLayoutPanel);
             this._loadingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this._loadingPanel.Location = new System.Drawing.Point(0, 0);
@@ -1232,15 +1232,12 @@ namespace Dzmac.Gui.Forms
             //
             this.LoadingLayoutPanel.ColumnCount = 1;
             this.LoadingLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.LoadingLayoutPanel.Controls.Add(this._loadingLabel, 0, 1);
-            this.LoadingLayoutPanel.Controls.Add(this._loadingProgressBar, 0, 2);
+            this.LoadingLayoutPanel.Controls.Add(this._loadingProgressBar, 0, 0);
             this.LoadingLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LoadingLayoutPanel.Location = new System.Drawing.Point(0, 0);
             this.LoadingLayoutPanel.Name = "LoadingLayoutPanel";
-            this.LoadingLayoutPanel.RowCount = 3;
-            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
-            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
+            this.LoadingLayoutPanel.RowCount = 1;
+            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.LoadingLayoutPanel.Size = new System.Drawing.Size(962, 132);
             this.LoadingLayoutPanel.TabIndex = 0;
             //
@@ -1253,15 +1250,20 @@ namespace Dzmac.Gui.Forms
             this._loadingLabel.Size = new System.Drawing.Size(156, 13);
             this._loadingLabel.TabIndex = 0;
             this._loadingLabel.Text = "Loading network adapters...";
+            this._loadingLabel.Visible = false;
             //
             // _loadingProgressBar
             //
-            this._loadingProgressBar.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this._loadingProgressBar.Location = new System.Drawing.Point(356, 75);
+            this._loadingProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this._loadingProgressBar.Location = new System.Drawing.Point(0, 0);
+            this._loadingProgressBar.Margin = new System.Windows.Forms.Padding(0);
             this._loadingProgressBar.MarqueeAnimationSpeed = 20;
+            this._loadingProgressBar.Maximum = 100;
+            this._loadingProgressBar.Minimum = 0;
             this._loadingProgressBar.Name = "_loadingProgressBar";
-            this._loadingProgressBar.Size = new System.Drawing.Size(250, 18);
-            this._loadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this._loadingProgressBar.Size = new System.Drawing.Size(962, 6);
+            this._loadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this._loadingProgressBar.TabIndex = 1;
             //
             // MainStatusBar

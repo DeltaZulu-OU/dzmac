@@ -37,6 +37,7 @@ namespace Dzmac.Gui.Forms
         private readonly VendorManager _vm;
         private readonly IAdapterAdminService _adminService;
         private readonly object _performanceBufferSync = new object();
+        private readonly System.Windows.Forms.Timer _loadingProgressTimer;
         private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
         private readonly PerformanceSample[] _sentSamples = new PerformanceSample[performanceSampleCapacity];
         private int _sampleCount;
@@ -67,6 +68,10 @@ namespace Dzmac.Gui.Forms
             InitializeComponent();
             ConfigureV1Surface();
             _loadingPanel.BringToFront();
+            _loadingPanel.Visible = true;
+            _loadingProgressTimer = new System.Windows.Forms.Timer { Interval = 60 };
+            _loadingProgressTimer.Tick += LoadingProgressTimer_Tick;
+            _loadingProgressTimer.Start();
 
             InfoTabs.SelectedIndexChanged += InfoTabs_SelectedIndexChanged;
             Shown += MainForm_ShownAsync;
@@ -293,6 +298,8 @@ namespace Dzmac.Gui.Forms
             _vendorRefreshCancellation?.Dispose();
             _performanceLoopCancellation?.Cancel();
             _performanceLoopCancellation?.Dispose();
+            _loadingProgressTimer?.Stop();
+            _loadingProgressTimer?.Dispose();
             _selected?.Dispose();
             DisposeConnections(NetworkConnections);
             _connectionDetailsTooltip?.Dispose();
@@ -363,6 +370,17 @@ namespace Dzmac.Gui.Forms
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
+
+        private void LoadingProgressTimer_Tick(object sender, EventArgs e)
+        {
+            if (_loadingProgressBar == null || IsDisposed)
+            {
+                return;
+            }
+
+            var nextValue = _loadingProgressBar.Value + 3;
+            _loadingProgressBar.Value = nextValue > _loadingProgressBar.Maximum ? _loadingProgressBar.Minimum : nextValue;
+        }
 
         private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
 
@@ -1005,10 +1023,6 @@ namespace Dzmac.Gui.Forms
                         if (!IsDisposed)
                         {
                             SetLoadingState(false, false);
-                            if (MainStatusBar.Text == "Loading network adapters...")
-                            {
-                                MainStatusBar.Text = "Ready";
-                            }
                         }
                     });
                 }
@@ -1020,12 +1034,14 @@ namespace Dzmac.Gui.Forms
             _isRefreshing = isLoading;
             RefreshItem.Enabled = !isLoading;
             ConnectionsGrid.Enabled = !isLoading;
-
             if (isLoading)
             {
-                MainStatusBar.Text = "Loading network adapters...";
-                _loadingLabel.Text = "Loading network adapters...";
                 _loadingPanel.Visible = true;
+                _loadingProgressBar.Value = _loadingProgressBar.Minimum;
+                if (_loadingProgressTimer != null && !_loadingProgressTimer.Enabled)
+                {
+                    _loadingProgressTimer.Start();
+                }
 
                 if (clearListWhileLoading)
                 {
@@ -1038,6 +1054,11 @@ namespace Dzmac.Gui.Forms
             else
             {
                 _loadingPanel.Visible = false;
+                if (_loadingProgressTimer != null && _loadingProgressTimer.Enabled)
+                {
+                    _loadingProgressTimer.Stop();
+                }
+                _loadingProgressBar.Value = _loadingProgressBar.Minimum;
                 ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
             }
 
