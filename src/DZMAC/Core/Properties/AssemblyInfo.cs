@@ -8,10 +8,10 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Dzmac.Gui.Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Dzmac.Gui.Core")]
-[assembly: AssemblyCopyright("Copyright ©  2023")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("DeltaZulu OÜ")]
+[assembly: AssemblyProduct("DZMAC")]
+[assembly: AssemblyCopyright("Copyright © 2024")]
+[assembly: AssemblyTrademark("MIT License")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
