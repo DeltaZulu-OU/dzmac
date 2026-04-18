@@ -91,7 +91,31 @@ namespace Dzmac.Gui.Core
                 var stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    var result = await Task.Run(command.Execute, timeoutCts.Token).ConfigureAwait(false);
+                    var operationTask = Task.Run(command.Execute, CancellationToken.None);
+                    var completedTask = await Task.WhenAny(
+                        operationTask,
+                        Task.Delay(Timeout.InfiniteTimeSpan, timeoutCts.Token)).ConfigureAwait(false);
+
+                    if (!ReferenceEquals(completedTask, operationTask))
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return AdapterAdminResult.Failed(
+                                AdapterAdminResultCode.Timeout,
+                                "Operation cancelled.",
+                                ("operation", command.Name),
+                                ("adapter", command.AdapterName));
+                        }
+
+                        return AdapterAdminResult.Failed(
+                            AdapterAdminResultCode.Timeout,
+                            "Operation timed out.",
+                            ("operation", command.Name),
+                            ("adapter", command.AdapterName),
+                            ("timeoutSeconds", _policy.TimeoutSeconds.ToString()));
+                    }
+
+                    var result = await operationTask.ConfigureAwait(false);
                     stopwatch.Stop();
 
                     Diagnostics.Info("admin_operation_completed",
