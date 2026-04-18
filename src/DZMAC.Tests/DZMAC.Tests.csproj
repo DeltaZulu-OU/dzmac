@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AdapterTests.cs" />
     <Compile Include="AdapterAdminCommandExecutorTests.cs" />
+    <Compile Include="AdapterAdminPolicyTests.cs" />
     <Compile Include="CacheTests.cs" />
     <Compile Include="DownloaderTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
