@@ -228,11 +228,7 @@ namespace Dzmac.Gui.Forms
                 inProgressText: "Releasing the IP for",
                 successText: "Released the IP for",
                 failureText: "Failed to release the IP for",
-                action: () =>
-                {
-                    var result = _adminService.ReleaseDhcpLease(selectedDetail.Adapter);
-                    return (result.IsSuccess, result.Message);
-                });
+                action: () => _adminService.ReleaseDhcpLease(selectedDetail.Adapter));
         }
 
         private async void DhcpRenewIpItem_Click(object sender, EventArgs e)
@@ -249,11 +245,7 @@ namespace Dzmac.Gui.Forms
                 inProgressText: "Renewing the IP for",
                 successText: "Renewed the IP for",
                 failureText: "Failed to renew the IP for",
-                action: () =>
-                {
-                    var result = _adminService.RenewDhcpLease(selectedDetail.Adapter);
-                    return (result.IsSuccess, result.Message);
-                });
+                action: () => _adminService.RenewDhcpLease(selectedDetail.Adapter));
         }
 
         private void ExitItem_Click(object sender, EventArgs e) => Close();
@@ -322,14 +314,15 @@ namespace Dzmac.Gui.Forms
             }
         }
 
-        private async Task RunDhcpActionAsync(NetworkConnectionDetail selectedDetail, string actionName, string inProgressText, string successText, string failureText, Func<(bool isSuccess, string operationMessage)> action)
+        private async Task RunDhcpActionAsync(NetworkConnectionDetail selectedDetail, string actionName, string inProgressText, string successText, string failureText, Func<AdapterAdminResult> action)
         {
             var selectedAdapterName = selectedDetail.Name;
             MainStatusBar.Text = $"{inProgressText} {selectedAdapterName}...";
 
-            var (isSuccess, operationMessage) = await Task.Run(() => action());
+            var operationResult = await Task.Run(() => action());
+            var operationMessage = operationResult.Message;
 
-            if (isSuccess)
+            if (operationResult.IsSuccess)
             {
                 MainStatusBar.Text = $"{successText} {selectedAdapterName}.";
                 MessageBox.Show(operationMessage, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -337,8 +330,9 @@ namespace Dzmac.Gui.Forms
             }
 
             MainStatusBar.Text = $"{failureText} {selectedAdapterName}.";
-            MessageBox.Show(operationMessage, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            Diagnostics.Warning($"Could not {actionName} for '{selectedAdapterName}'. {operationMessage}");
+            var failureDetail = $"{operationMessage} (Code: {operationResult.Code})";
+            MessageBox.Show(failureDetail, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Diagnostics.Warning("dhcp_action_failed", $"Could not {actionName} for '{selectedAdapterName}'. {operationMessage}", ("operationCode", operationResult.Code.ToString()));
         }
 
         private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
