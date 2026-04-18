@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterAdminService.cs" />
+    <Compile Include="AdapterAdminCommands.cs" />
     <Compile Include="AdapterCollaborators.cs" />
     <Compile Include="AppSettings.cs" />
     <Compile Include="GlobalSuppressions.cs" />
