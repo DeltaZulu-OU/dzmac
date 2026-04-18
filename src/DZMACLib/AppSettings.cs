@@ -19,6 +19,7 @@ namespace DZMACLib
         public const string VerboseDiagnostics = "Dzmac.VerboseDiagnostics";
         public const string OuiCachePath = "Dzmac.OuiCachePath";
         public const string OuiEndpoint = "Dzmac.OuiEndpoint";
+        public const string OuiIntegrityManifestEndpoint = "Dzmac.OuiIntegrityManifestEndpoint";
         public const string OuiDownloadTimeoutSeconds = "Dzmac.OuiDownloadTimeoutSeconds";
         public const string OuiDownloadRetryCount = "Dzmac.OuiDownloadRetryCount";
         public const string AdminOperationTimeoutSeconds = "Dzmac.AdminOperationTimeoutSeconds";
@@ -26,6 +27,7 @@ namespace DZMACLib
         public const string LegacyVerboseDiagnostics = "DZMACLib.VerboseDiagnostics";
         public const string LegacyOuiCachePath = "DZMACLib.OuiCachePath";
         public const string LegacyOuiEndpoint = "DZMACLib.OuiEndpoint";
+        public const string LegacyOuiIntegrityManifestEndpoint = "DZMACLib.OuiIntegrityManifestEndpoint";
         public const string LegacyOuiDownloadTimeoutSeconds = "DZMACLib.OuiDownloadTimeoutSeconds";
         public const string LegacyOuiDownloadRetryCount = "DZMACLib.OuiDownloadRetryCount";
         public const string LegacyAdminOperationTimeoutSeconds = "DZMACLib.AdminOperationTimeoutSeconds";
@@ -45,6 +47,7 @@ namespace DZMACLib
                 [AppSettingKeys.VerboseDiagnostics] = new SettingDefinition(AppSettingKeys.VerboseDiagnostics, "false", AppSettingKeys.LegacyVerboseDiagnostics),
                 [AppSettingKeys.OuiCachePath] = new SettingDefinition(AppSettingKeys.OuiCachePath, string.Empty, AppSettingKeys.LegacyOuiCachePath),
                 [AppSettingKeys.OuiEndpoint] = new SettingDefinition(AppSettingKeys.OuiEndpoint, "https://standards-oui.ieee.org/oui/oui.txt", AppSettingKeys.LegacyOuiEndpoint),
+                [AppSettingKeys.OuiIntegrityManifestEndpoint] = new SettingDefinition(AppSettingKeys.OuiIntegrityManifestEndpoint, string.Empty, AppSettingKeys.LegacyOuiIntegrityManifestEndpoint),
                 [AppSettingKeys.OuiDownloadTimeoutSeconds] = new SettingDefinition(AppSettingKeys.OuiDownloadTimeoutSeconds, "15", AppSettingKeys.LegacyOuiDownloadTimeoutSeconds),
                 [AppSettingKeys.OuiDownloadRetryCount] = new SettingDefinition(AppSettingKeys.OuiDownloadRetryCount, "3", AppSettingKeys.LegacyOuiDownloadRetryCount),
                 [AppSettingKeys.AdminOperationTimeoutSeconds] = new SettingDefinition(AppSettingKeys.AdminOperationTimeoutSeconds, "20", AppSettingKeys.LegacyAdminOperationTimeoutSeconds)
@@ -106,6 +109,12 @@ namespace DZMACLib
             if (!Uri.TryCreate(endpoint, UriKind.Absolute, out _))
             {
                 Diagnostics.Warning("config_invalid", "Invalid OUI endpoint; default value will be used.", ("key", AppSettingKeys.OuiEndpoint), ("value", endpoint));
+            }
+
+            var manifestEndpoint = GetString(AppSettingKeys.OuiIntegrityManifestEndpoint);
+            if (!string.IsNullOrWhiteSpace(manifestEndpoint) && !Uri.TryCreate(manifestEndpoint, UriKind.Absolute, out _))
+            {
+                Diagnostics.Warning("config_invalid", "Invalid OUI integrity manifest endpoint; integrity verification is disabled for this run.", ("key", AppSettingKeys.OuiIntegrityManifestEndpoint), ("value", manifestEndpoint));
             }
         }
 

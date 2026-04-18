@@ -81,6 +81,40 @@ namespace DZMACLib
             UpdateCount();
         }
 
+        public void ReplaceAll(IEnumerable<Vendor> vendors)
+        {
+            Debug.WriteLine("Replacing database content...");
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            using (var transaction = _connection.BeginTransaction())
+            {
+                using var deleteCommand = _connection.CreateCommand();
+                deleteCommand.CommandText = "DELETE FROM vendors;";
+                deleteCommand.ExecuteNonQuery();
+
+                using var insertCommand = _connection.CreateCommand();
+                insertCommand.CommandText = "INSERT INTO vendors VALUES ($oui, $vendor)";
+                var ouiParameter = insertCommand.CreateParameter();
+                ouiParameter.ParameterName = "$oui";
+                insertCommand.Parameters.Add(ouiParameter);
+
+                var vendorParameter = insertCommand.CreateParameter();
+                vendorParameter.ParameterName = "$vendor";
+                insertCommand.Parameters.Add(vendorParameter);
+
+                foreach (var record in vendors)
+                {
+                    ouiParameter.Value = record.Oui;
+                    vendorParameter.Value = record.VendorName;
+                    insertCommand.ExecuteNonQuery();
+                }
+
+                transaction.Commit();
+            }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+            UpdateCount();
+        }
+
         /// <summary>
         ///     Get a vendor by OUI
         /// </summary>

@@ -44,15 +44,6 @@ namespace DZMACLib
         public IEnumerator<Vendor> GetEnumerator() => _cache.GetAll().GetEnumerator();
 
         /// <summary>
-        ///     Downloads data from IEEE and writes to DB
-        /// </summary>
-        /// <exception cref="DZMACLibException"></exception>
-        public void Refresh()
-        {
-            RefreshAsync(CancellationToken.None).GetAwaiter().GetResult();
-        }
-
-        /// <summary>
         ///     Downloads data from IEEE and writes to DB asynchronously.
         /// </summary>
         /// <exception cref="DZMACLibException"></exception>
@@ -66,11 +57,7 @@ namespace DZMACLib
             try
             {
                 var downloaded = await Downloader.GetAllAsync(cancellationToken).ConfigureAwait(false);
-                if (!_cache.IsEmpty)
-                {
-                    _cache.Clear();
-                }
-                _cache.AddRange(downloaded);
+                _cache.ReplaceAll(downloaded);
 
                 Diagnostics.Info("vendor_cache_refreshed", ("recordCount", _cache.Count));
                 Diagnostics.Info("vendor_refresh_succeeded", ("recordCount", _cache.Count));

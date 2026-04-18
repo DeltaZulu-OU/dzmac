@@ -41,5 +41,40 @@ namespace DZMACLib.Tests
                 }
             }
         }
+
+        [TestMethod]
+        public void ReplaceAllShouldReplaceExistingRecords()
+        {
+            var dbPath = Path.Combine(Path.GetTempPath(), $"dzmac-cache-replace-test-{Guid.NewGuid():N}.db");
+
+            try
+            {
+                using (var cache = new Cache(dbPath))
+                {
+                    cache.AddRange(new List<Vendor>
+                    {
+                        new Vendor("A1B2C3", "Vendor A")
+                    });
+
+                    cache.ReplaceAll(new List<Vendor>
+                    {
+                        new Vendor("D4E5F6", "Vendor B")
+                    });
+
+                    Assert.IsNull(cache.Get("A1B2C3"));
+
+                    var replacement = cache.Get("D4E5F6");
+                    Assert.IsNotNull(replacement);
+                    Assert.AreEqual("Vendor B", replacement?.VendorName);
+                }
+            }
+            finally
+            {
+                if (File.Exists(dbPath))
+                {
+                    File.Delete(dbPath);
+                }
+            }
+        }
     }
 }
