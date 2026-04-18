@@ -1,6 +1,8 @@
 ﻿#nullable enable
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DZMACLib
 {
@@ -13,6 +15,9 @@ namespace DZMACLib
     {
         private readonly object _sync = new object();
         private VendorList? _vendors;
+        private readonly object _refreshSync = new object();
+        private CancellationTokenSource? _refreshCancellation;
+        private Task? _refreshTask;
         private readonly Random _random = new Random();
         private bool disposedValue;
         internal VendorList Vendors
@@ -69,14 +74,50 @@ namespace DZMACLib
 
         public void Refresh()
         {
-            lock (_sync)
-            {
-                var replacement = new VendorList();
-                replacement.Refresh();
+            RefreshAsync(CancellationToken.None).GetAwaiter().GetResult();
+        }
 
-                var previous = _vendors;
-                _vendors = replacement;
+        public Task RefreshAsync(CancellationToken cancellationToken)
+        {
+            lock (_refreshSync)
+            {
+                _refreshCancellation?.Cancel();
+                _refreshCancellation?.Dispose();
+                _refreshCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                var refreshToken = _refreshCancellation.Token;
+                _refreshTask = RefreshCoreAsync(refreshToken);
+                return _refreshTask;
+            }
+        }
+
+        private async Task RefreshCoreAsync(CancellationToken cancellationToken)
+        {
+            Diagnostics.Info("vendor_refresh_task_started");
+            var replacement = new VendorList();
+            try
+            {
+                await replacement.RefreshAsync(cancellationToken).ConfigureAwait(false);
+                VendorList? previous;
+                lock (_sync)
+                {
+                    previous = _vendors;
+                    _vendors = replacement;
+                }
+
                 previous?.Dispose();
+                Diagnostics.Info("vendor_refresh_task_completed", ("recordCount", replacement.Count));
+            }
+            catch (OperationCanceledException)
+            {
+                replacement.Dispose();
+                Diagnostics.Warning("vendor_refresh_task_cancelled", "Vendor refresh task cancelled.");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                replacement.Dispose();
+                Diagnostics.Error("vendor_refresh_task_failed", ex, "Vendor refresh task failed.");
+                throw;
             }
         }
 
@@ -95,6 +136,13 @@ namespace DZMACLib
             {
                 if (disposing)
                 {
+                    lock (_refreshSync)
+                    {
+                        _refreshCancellation?.Cancel();
+                        _refreshCancellation?.Dispose();
+                        _refreshCancellation = null;
+                    }
+
                     lock (_sync)
                     {
                         _vendors?.Dispose();

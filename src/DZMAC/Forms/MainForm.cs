@@ -60,6 +60,7 @@ namespace Dzmac.Gui.Forms
         private bool _locallyAdministered;
         private bool _reenableOnChange;
         private CancellationTokenSource _refreshCancellation;
+        private CancellationTokenSource _vendorRefreshCancellation;
         private NetworkConnectionDetail _selected;
         private IReadOnlyDictionary<string, NetworkInterface> _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
         private List<Vendor> _vendors;
@@ -269,6 +270,8 @@ namespace Dzmac.Gui.Forms
         {
             _refreshCancellation?.Cancel();
             _refreshCancellation?.Dispose();
+            _vendorRefreshCancellation?.Cancel();
+            _vendorRefreshCancellation?.Dispose();
             _performanceLoopCancellation?.Cancel();
             _performanceLoopCancellation?.Dispose();
             _selected?.Dispose();
@@ -481,9 +484,25 @@ namespace Dzmac.Gui.Forms
             }
 
             MainStatusBar.Text = "Downloading OUI data...";
-            await Task.Factory.StartNew(_vm.Refresh);
-            _ = MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
-            MainStatusBar.Text = "Ready";
+            _vendorRefreshCancellation?.Cancel();
+            _vendorRefreshCancellation?.Dispose();
+            _vendorRefreshCancellation = new CancellationTokenSource();
+
+            try
+            {
+                await _vm.RefreshAsync(_vendorRefreshCancellation.Token);
+                _ = MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
+                MainStatusBar.Text = "Ready";
+            }
+            catch (OperationCanceledException)
+            {
+                MainStatusBar.Text = "Vendor list update canceled.";
+            }
+            catch (Exception ex)
+            {
+                MainStatusBar.Text = "Vendor list update failed.";
+                _ = MessageBox.Show(ex.Message, "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private void WikiLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

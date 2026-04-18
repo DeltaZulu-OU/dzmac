@@ -4,6 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DZMACLib
 {
@@ -47,6 +49,15 @@ namespace DZMACLib
         /// <exception cref="DZMACLibException"></exception>
         public void Refresh()
         {
+            RefreshAsync(CancellationToken.None).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        ///     Downloads data from IEEE and writes to DB asynchronously.
+        /// </summary>
+        /// <exception cref="DZMACLibException"></exception>
+        public async Task RefreshAsync(CancellationToken cancellationToken)
+        {
             // There must not be a possibility of empty cache but t is better to check
             if (_cache is null) throw new DZMACLibException("Cache object does not exist");
 
@@ -54,7 +65,7 @@ namespace DZMACLib
 
             try
             {
-                var downloaded = Downloader.GetAll();
+                var downloaded = await Downloader.GetAllAsync(cancellationToken).ConfigureAwait(false);
                 if (!_cache.IsEmpty)
                 {
                     _cache.Clear();
