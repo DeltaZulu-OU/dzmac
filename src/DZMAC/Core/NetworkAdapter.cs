@@ -164,9 +164,7 @@ namespace Dzmac.Core
 
         public bool IsIPv4Enabled { get; }
         public bool IsIPv6Enabled { get; }
-        public bool IsPhysical => IsPhysicalAdapter;
         public bool IsPhysicalAdapter { get; }
-        public bool IsLikelyPhysicalAdapter => IsPhysicalAdapter;
 
         /// <summary>
         ///     Gets the current operational state of the network connection.

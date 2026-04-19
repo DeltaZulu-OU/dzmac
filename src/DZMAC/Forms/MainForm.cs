@@ -529,7 +529,7 @@ namespace Dzmac.Forms
                 return;
             }
 
-            if (_selected.Changed == "No")
+            if (!_selected.Adapter.Changed)
             {
                 return;
             }
@@ -1259,13 +1259,13 @@ namespace Dzmac.Forms
 
             try
             {
+                var physicalOnly = !ShowAllAdaptersItem.Checked;
                 var updatedConnections = await Task.Run(() =>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
                     var adapters = NetworkAdapterFactory
-                        .GetNetworkAdapters(_vm)
-                        .Where(adapter => ShowAllAdaptersItem.Checked || adapter.IsPhysicalAdapter)
+                        .GetNetworkAdapters(_vm, physicalOnly)
                         .OrderByDescending(adapter => adapter.Enabled)
                         .ThenBy(adapter => adapter.Name, StringComparer.CurrentCultureIgnoreCase)
                         .ToList();
@@ -1288,7 +1288,7 @@ namespace Dzmac.Forms
                         return;
                     }
 
-                    var retainedDisabledConnections = GetRetainedDisabledConnections(updatedConnections);
+                    var retainedDisabledConnections = GetRetainedDisabledConnections(updatedConnections, physicalOnly);
                     if (retainedDisabledConnections.Count > 0)
                     {
                         updatedConnections.AddRange(retainedDisabledConnections);
@@ -1435,7 +1435,7 @@ namespace Dzmac.Forms
             ToggleAdapterEnabledItem.Text = !hasSelection || !(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection) || selectedConnection.Enabled ? "Disable Adapter" : "Enable Adapter";
         }
 
-        private List<NetworkConnection> GetRetainedDisabledConnections(IReadOnlyCollection<NetworkConnection> refreshedConnections)
+        private List<NetworkConnection> GetRetainedDisabledConnections(IReadOnlyCollection<NetworkConnection> refreshedConnections, bool physicalOnly)
         {
             if (NetworkConnections == null || NetworkConnections.Count == 0)
             {
@@ -1447,7 +1447,9 @@ namespace Dzmac.Forms
                 StringComparer.OrdinalIgnoreCase);
 
             var retainedConnections = NetworkConnections
-                .Where(connection => !connection.Enabled && !refreshedConfigIds.Contains(connection.Detail.ConfigId))
+                .Where(connection => !connection.Enabled
+                                  && !refreshedConfigIds.Contains(connection.Detail.ConfigId)
+                                  && (!physicalOnly || connection.Detail.Adapter.IsPhysicalAdapter))
                 .ToList();
 
             if (retainedConnections.Count > 0)

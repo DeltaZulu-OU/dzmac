@@ -28,7 +28,7 @@ namespace Dzmac.DTO
         public string LinkStatus => Detail.LinkStatus;
 
         [OLVColumn("MAC Address", DisplayIndex = 3)]
-        public string MacAddress => Changed == "Yes" ? $"{Detail.ActiveMac} (Changed)" : Detail.OriginalMac;
+        public string MacAddress => Detail.DisplayMac;
 
         [OLVColumn("Speed", DisplayIndex = 5)]
         public string Speed => Detail.Speed;

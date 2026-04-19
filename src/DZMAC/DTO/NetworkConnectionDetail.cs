@@ -15,7 +15,7 @@ namespace Dzmac.DTO
 
         public string ActiveMac { get; }
         public string ActiveVendor { get; }
-        public string Changed => IsChanged ? "Yes" : "No";
+        public string Changed => _adapter.Changed ? "Yes" : "No";
         public string ConfigId { get; }
         public string Device { get; }
         public string DeviceManufacturer { get; }
@@ -34,9 +34,7 @@ namespace Dzmac.DTO
         public IReadOnlyList<string> Ipv6Gateways { get; }
         public IReadOnlyList<string> Ipv4DnsServers { get; }
         public IReadOnlyList<string> Ipv6DnsServers { get; }
-        public string Speed => ReadableSpeed(RawSpeed);
-        internal bool IsChanged { get; }
-        private long RawSpeed { get; }
+        public string Speed => ReadableSpeed(_adapter.Speed);
         private readonly NetworkAdapter _adapter;
         private bool disposedValue;
 
@@ -57,9 +55,7 @@ namespace Dzmac.DTO
             OriginalMac = _adapter.OriginalMacAddress.ToString(MacAddress.MacDelimiter.Dash);
             OriginalVendor = _adapter.OriginalVendor;
             ActiveVendor = _adapter.ActiveVendor;
-            IsChanged = _adapter.Changed;
             ActiveMac = GetActiveMac();
-            RawSpeed = _adapter.Speed;
             Ipv4Addresses = _adapter.GetIpv4Addresses();
             Ipv6Addresses = _adapter.GetIpv6Addresses();
             Ipv4Gateways = _adapter.GetIpv4Gateways();
@@ -72,7 +68,9 @@ namespace Dzmac.DTO
 
         public MacAddress GetRandom(string oui) => MacAddress.GetNewMac(oui);
 
-        private string GetActiveMac() => IsChanged ? _adapter.ActiveMacAddress.ToString(MacAddress.MacDelimiter.Dash) : OriginalMac;
+        public string DisplayMac => _adapter.Changed ? $"{ActiveMac} (Changed)" : OriginalMac;
+
+        private string GetActiveMac() => _adapter.Changed ? _adapter.ActiveMacAddress!.ToString(MacAddress.MacDelimiter.Dash) : OriginalMac;
 
         private string GetDebuggerDisplay() => Name;
 

@@ -20,7 +20,7 @@ namespace Dzmac.Core
         /// </summary>
         /// <param name="vendorManager">Proide this parameter if there is a need to query vendor name from registry MAC value</param>
         /// <returns>Instances of <see cref="NetworkAdapter"/>.</returns>
-        public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorList? vendorManager = null)
+        public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorList? vendorManager = null, bool physicalOnly = false)
         {
             Diagnostics.Info("adapter_discovery_started", ("vendorManagerProvided", vendorManager != null));
             var networkInterfaces = GetAll();
@@ -60,11 +60,12 @@ namespace Dzmac.Core
             }
 
             Diagnostics.Info("adapter_discovery_completed", ("totalDiscovered", networkInterfaces.Length), ("usableAdapters", filtered.Count));
-            return filtered.Select(networkInterface =>
+            var result = filtered.Select(networkInterface =>
                 new NetworkAdapter(
                     networkInterface,
                     vendorManager,
                     IsLikelyPhysicalAdapter(ResolveHardwareId(networkInterface.Id, hardwareIdsByConfigId))));
+            return physicalOnly ? result.Where(a => a.IsPhysicalAdapter) : result;
         }
 
         /// <summary>
