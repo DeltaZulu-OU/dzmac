@@ -1,12 +1,10 @@
 # DZMAC
 
- In ALPHA stage.
-
 ![Sample](assets/window.png)
 
 ## Overview
 
-DZMAC is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of TMAC but does **not** aim for feature parity.
+DZMAC is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
 
 The goal is to provide a focused, predictable, and maintainable application centered on core adapter management workflows.
 
@@ -19,24 +17,6 @@ The focus is on stabilizing core functionality before expanding scope for DZMAC.
 ## Help
 
 See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
-
-
-## Features (current scope)
-
-- Enumerate network adapters
-- Display adapter and connection details
-- Show original and active MAC addresses
-- Change MAC address via registry override
-- Restore original MAC address
-- DHCPv4 operations (enable, disable, renew, release)
-- Preserve important network configuration when disabling DHCPv4:
-  - IP address
-  - subnet mask
-  - gateways
-  - DNS servers
-- Display adapter speed (with optional KB/s view)
-- Export text report for currently displayed adapters
-- Open Windows Network Connections
 
 ## How DZMAC differs from TMAC
 
@@ -95,11 +75,7 @@ Disabling DHCPv4 preserves the current configuration instead of discarding it.
 
 Thanks to the following projects and resources:
 
-- https://github.com/sietseringers/MACAddressTool  
-  For internals and implementation ideas
-
-- https://objectlistview.sourceforge.net/cs/index.html  
-  For list-view handling
-
-- https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class  
-  For MAC address textbox implementation reference
+- [Technitium MAC Address Changer](https://technitium.com/tmac/) for everything!
+- [MACAddressTool](https://github.com/sietseringers/MACAddressTool) for internals and implementation ideas.
+- The [objectlistview](https://objectlistview.sourceforge.net/cs/index.html) project for list-view handling.
+- [MAC-Address-Text-Box-and-Class article on CodeProject](https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class) for MAC address textbox implementation reference.
