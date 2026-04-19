@@ -1,10 +1,175 @@
-﻿#nullable enable
+#nullable enable
 
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dzmac.Core
 {
+    public sealed class AdapterAdminPolicy
+    {
+        public int TimeoutSeconds { get; }
+        public int RetryCount { get; }
+
+        public AdapterAdminPolicy(int timeoutSeconds, int retryCount)
+        {
+            TimeoutSeconds = Math.Max(1, timeoutSeconds);
+            RetryCount = Math.Max(1, retryCount);
+        }
+
+        public static AdapterAdminPolicy FromConfig(IAppSettings settings)
+        {
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            return new AdapterAdminPolicy(
+                settings.GetInt(AppSettingKeys.AdminOperationTimeoutSeconds),
+                settings.GetInt(AppSettingKeys.AdminOperationRetryCount));
+        }
+    }
+
+    public sealed class AdapterAdminCommand
+    {
+        private readonly Func<(bool Success, string Message)> _operation;
+
+        public string Name { get; }
+        public string AdapterName { get; }
+
+        public AdapterAdminCommand(string name, string adapterName, Func<(bool Success, string Message)> operation)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Command name cannot be empty.", nameof(name));
+            }
+
+            Name = name;
+            AdapterName = string.IsNullOrWhiteSpace(adapterName) ? "unknown" : adapterName;
+            _operation = operation ?? throw new ArgumentNullException(nameof(operation));
+        }
+
+        public (bool Success, string Message) Execute() => _operation();
+    }
+
+    public sealed class AdapterAdminCommandExecutor
+    {
+        private readonly AdapterAdminPolicy _policy;
+
+        public AdapterAdminCommandExecutor(AdapterAdminPolicy policy)
+        {
+            _policy = policy ?? throw new ArgumentNullException(nameof(policy));
+        }
+
+        public async Task<AdapterAdminResult> ExecuteAsync(AdapterAdminCommand command, CancellationToken cancellationToken = default)
+        {
+            if (command == null)
+            {
+                return AdapterAdminResult.Failed(AdapterAdminResultCode.InvalidArgument, "Command cannot be null.");
+            }
+
+            Exception? lastException = null;
+            for (var attempt = 1; attempt <= _policy.RetryCount; attempt++)
+            {
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeoutCts.CancelAfter(TimeSpan.FromSeconds(_policy.TimeoutSeconds));
+
+                var stopwatch = Stopwatch.StartNew();
+                try
+                {
+                    var operationTask = Task.Run(command.Execute, CancellationToken.None);
+                    var completedTask = await Task.WhenAny(
+                        operationTask,
+                        Task.Delay(Timeout.InfiniteTimeSpan, timeoutCts.Token)).ConfigureAwait(false);
+
+                    if (!ReferenceEquals(completedTask, operationTask))
+                    {
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return AdapterAdminResult.Failed(
+                                AdapterAdminResultCode.Timeout,
+                                "Operation cancelled.",
+                                ("operation", command.Name),
+                                ("adapter", command.AdapterName));
+                        }
+
+                        return AdapterAdminResult.Failed(
+                            AdapterAdminResultCode.Timeout,
+                            "Operation timed out.",
+                            ("operation", command.Name),
+                            ("adapter", command.AdapterName),
+                            ("timeoutSeconds", _policy.TimeoutSeconds.ToString()));
+                    }
+
+                    var (Success, Message) = await operationTask.ConfigureAwait(false);
+                    stopwatch.Stop();
+
+                    Diagnostics.Info("admin_operation_completed",
+                        ("operation", command.Name),
+                        ("adapter", command.AdapterName),
+                        ("attempt", attempt),
+                        ("durationMs", stopwatch.ElapsedMilliseconds),
+                        ("success", Success));
+
+                    if (Success)
+                    {
+                        return AdapterAdminResult.Success(
+                            Message,
+                            ("operation", command.Name),
+                            ("adapter", command.AdapterName),
+                            ("attempt", attempt.ToString()));
+                    }
+
+                    if (attempt >= _policy.RetryCount)
+                    {
+                        return AdapterAdminResult.Failed(
+                            AdapterAdminResultCode.Failed,
+                            Message,
+                            ("operation", command.Name),
+                            ("adapter", command.AdapterName),
+                            ("attempt", attempt.ToString()));
+                    }
+
+                    Diagnostics.Warning("admin_operation_retry", Message, ("operation", command.Name), ("adapter", command.AdapterName), ("attempt", attempt));
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    return AdapterAdminResult.Failed(
+                        AdapterAdminResultCode.Timeout,
+                        "Operation cancelled.",
+                        ("operation", command.Name),
+                        ("adapter", command.AdapterName));
+                }
+                catch (OperationCanceledException)
+                {
+                    return AdapterAdminResult.Failed(
+                        AdapterAdminResultCode.Timeout,
+                        "Operation timed out.",
+                        ("operation", command.Name),
+                        ("adapter", command.AdapterName),
+                        ("timeoutSeconds", _policy.TimeoutSeconds.ToString()));
+                }
+                catch (Exception ex)
+                {
+                    stopwatch.Stop();
+                    lastException = ex;
+                    Diagnostics.Warning("admin_operation_retry", ex.Message, ("operation", command.Name), ("adapter", command.AdapterName), ("attempt", attempt));
+                    if (attempt >= _policy.RetryCount)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return AdapterAdminResult.Failed(
+                AdapterAdminResultCode.Exception,
+                lastException?.Message ?? "Operation failed.",
+                ("operation", command.Name),
+                ("adapter", command.AdapterName));
+        }
+    }
+
     public enum AdapterAdminResultCode
     {
         Success,
@@ -47,47 +212,16 @@ namespace Dzmac.Core
         }
     }
 
-    public interface IAdapterAdminService
+    public sealed class AdapterAdminService
     {
-        AdapterAdminResult SetAdapterEnabled(NetworkAdapter adapter, bool enabled);
-
-        AdapterAdminResult SetDhcpEnabled(NetworkAdapter adapter, bool enabled);
-
-        AdapterAdminResult ReleaseDhcpLease(NetworkAdapter adapter);
-
-        AdapterAdminResult RenewDhcpLease(NetworkAdapter adapter);
-
-        AdapterAdminResult SetRegistryMac(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true);
-
-        AdapterAdminResult ResetRegistryMac(NetworkAdapter adapter);
-
-        AdapterAdminResult DeleteAdapterFromRegistry(NetworkAdapter adapter);
-
-        Task<AdapterAdminResult> SetAdapterEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
-
-        Task<AdapterAdminResult> SetDhcpEnabledAsync(NetworkAdapter adapter, bool enabled, CancellationToken cancellationToken = default);
-
-        Task<AdapterAdminResult> ReleaseDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
-
-        Task<AdapterAdminResult> RenewDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
-
-        Task<AdapterAdminResult> SetRegistryMacAsync(NetworkAdapter adapter, MacAddress macAddress, bool persistOriginalRecord = true, CancellationToken cancellationToken = default);
-
-        Task<AdapterAdminResult> ResetRegistryMacAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
-
-        Task<AdapterAdminResult> DeleteAdapterFromRegistryAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default);
-    }
-
-    public sealed class AdapterAdminService : IAdapterAdminService
-    {
-        private readonly IAdapterAdminCommandExecutor _executor;
+        private readonly AdapterAdminCommandExecutor _executor;
 
         public AdapterAdminService()
             : this(new AdapterAdminCommandExecutor(AdapterAdminPolicy.FromConfig(ConfigReader.Current)))
         {
         }
 
-        internal AdapterAdminService(IAdapterAdminCommandExecutor executor)
+        internal AdapterAdminService(AdapterAdminCommandExecutor executor)
         {
             _executor = executor;
         }
@@ -135,14 +269,14 @@ namespace Dzmac.Core
         public Task<AdapterAdminResult> DeleteAdapterFromRegistryAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
             => ExecuteAsync(adapter, "registry_adapter_delete", () => adapter.TryDeleteFromRegistry(), cancellationToken);
 
-        private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, System.Func<bool> operation, CancellationToken cancellationToken)
+        private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, Func<bool> operation, CancellationToken cancellationToken)
             => ExecuteAsync(adapter, operationName, () =>
             {
                 var success = operation();
                 return (success, success ? "OK" : "Operation returned false");
             }, cancellationToken);
 
-        private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, System.Func<(bool Success, string Message)> operation, CancellationToken cancellationToken)
+        private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, Func<(bool Success, string Message)> operation, CancellationToken cancellationToken)
         {
             if (adapter == null)
             {

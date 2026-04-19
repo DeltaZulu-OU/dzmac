@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
-using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,19 +30,14 @@ namespace Dzmac.Forms
         }
 
         private const string zeroMacValue = "00-00-00-00-00-00";
-        private const int macPollingIntervalMs = 200;
-        private const int disablePollTimeoutMs = 10000;
-        private const int enablePollTimeoutMs = 10000;
-        private const int attemptWatchdogTimeoutMs = 20000;
-        private static readonly string[] laaPrefixes = { "02", "06", "0A", "0E" };
         private const int performanceSampleCapacity = 120;
         private const int performanceRefreshMs = 1000;
         private const int vendorComboBatchSize = 200;
         private const int vendorComboLoadAheadThreshold = 20;
         private readonly ToolTip _connectionDetailsTooltip;
         private readonly VendorList _vm;
-        private readonly IAdapterAdminService _adminService;
-        private readonly INetworkReportBuilder _networkReportBuilder;
+        private readonly AdapterAdminService _adminService;
+        private readonly TextNetworkReportBuilder _networkReportBuilder;
         private readonly object _performanceBufferSync = new object();
         private readonly System.Windows.Forms.Timer _loadingProgressTimer;
         private readonly PerformanceSample[] _receivedSamples = new PerformanceSample[performanceSampleCapacity];
@@ -68,7 +62,7 @@ namespace Dzmac.Forms
         private bool _reenableOnChange;
         private CancellationTokenSource _refreshCancellation;
         private CancellationTokenSource _vendorRefreshCancellation;
-        private NetworkConnectionDetail _selected;
+        private NetworkConnection _selected;
         private IReadOnlyDictionary<string, NetworkInterface> _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
         private List<Vendor> _vendorComboItems;
         private int _vendorComboLoadedCount;
@@ -138,7 +132,7 @@ namespace Dzmac.Forms
 
             try
             {
-                var updateResult = await Task.Run(() => TryRotateMacUpdate(_selected.Adapter, target, _persistOriginalMacRecord, progress));
+                var updateResult = await Task.Run(() => MacRotationService.TryRotateMac(_selected.Adapter, target, _persistOriginalMacRecord, progress));
                 if (updateResult.Success)
                 {
                     _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -174,7 +168,7 @@ namespace Dzmac.Forms
                 if (ConnectionsGrid.SelectedItem.Index != -1)
                 {
                     var row = ConnectionsGrid.SelectedItem.RowObject as NetworkConnection;
-                    _selected = row?.Detail;
+                    _selected = row;
                     BindSelection();
                 }
             }
@@ -384,7 +378,7 @@ namespace Dzmac.Forms
             }
         }
 
-        private async Task RunDhcpActionAsync(NetworkConnectionDetail selectedDetail, string actionName, string inProgressText, string successText, string failureText, Func<AdapterAdminResult> action)
+        private async Task RunDhcpActionAsync(NetworkConnection selectedDetail, string actionName, string inProgressText, string successText, string failureText, Func<AdapterAdminResult> action)
         {
             var selectedAdapterName = selectedDetail.Name;
             MainStatusBar.Text = $"{inProgressText} {selectedAdapterName}...";
@@ -568,7 +562,7 @@ namespace Dzmac.Forms
 
             foreach (var networkConnection in NetworkConnections)
             {
-                networkConnection.Detail.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
+                networkConnection.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
             }
 
             ConnectionsGrid.BeginUpdate();
@@ -672,143 +666,6 @@ namespace Dzmac.Forms
         ///     A placeholder method for events not implemented.
         /// </summary>
         private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-        private static (bool Success, string Message) TryRotateMacUpdate(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
-        {
-            progress.Report("Starting MAC update...");
-
-            try
-            {
-                progress.Report("Configuring Registry...");
-                adapter.EnsureNetworkAddressRegistryParameter();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
-            }
-            catch (SecurityException)
-            {
-                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
-            }
-
-            var suffix = target.ToString().Substring(2);
-            foreach (var prefix in laaPrefixes)
-            {
-                var attemptMac = new MacAddress(prefix + suffix);
-                var attemptResult = TryApplyMacAttempt(adapter, attemptMac, persistOriginalRecord, progress);
-                if (attemptResult.Success)
-                {
-                    return attemptResult;
-                }
-
-                if (attemptResult.Message.Contains("ERR_TIMEOUT"))
-                {
-                    RevertToFactoryState(adapter, progress);
-                    return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
-                }
-
-                if (attemptResult.Message.Contains("ERR_REG_DENIED") || attemptResult.Message.Contains("ERR_WMI_FAIL"))
-                {
-                    return attemptResult;
-                }
-            }
-
-            RevertToFactoryState(adapter, progress);
-            return (false, "This device is hardware-locked against MAC spoofing. (ERR_HW_LOCKED)");
-        }
-
-        private static (bool Success, string Message) TryApplyMacAttempt(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
-        {
-            using var watchdogCts = new CancellationTokenSource(attemptWatchdogTimeoutMs);
-            var token = watchdogCts.Token;
-
-            try
-            {
-                progress.Report("Configuring Registry...");
-                adapter.TryUpdateRegistryMacValue(target, persistOriginalRecord);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
-            }
-            catch (SecurityException)
-            {
-                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
-            }
-
-            try
-            {
-                progress.Report("Requesting adapter shutdown...");
-                if (!adapter.TryDisableAdapter())
-                {
-                    return (false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)");
-                }
-
-                var disableAttempts = 0;
-                while (adapter.IsAdapterEnabled())
-                {
-                    token.ThrowIfCancellationRequested();
-                    disableAttempts++;
-                    progress.Report($"Disconnecting... [Attempt {disableAttempts}]");
-                    Thread.Sleep(macPollingIntervalMs);
-
-                    if (disableAttempts * macPollingIntervalMs >= disablePollTimeoutMs)
-                    {
-                        return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
-                    }
-                }
-
-                progress.Report("Requesting adapter start...");
-                if (!adapter.TryEnableAdapter())
-                {
-                    return (false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)");
-                }
-
-                var enableAttempts = 0;
-                while (!adapter.IsAdapterEnabled())
-                {
-                    token.ThrowIfCancellationRequested();
-                    enableAttempts++;
-                    progress.Report("Initializing Hardware...");
-                    Thread.Sleep(macPollingIntervalMs);
-
-                    if (enableAttempts * macPollingIntervalMs >= enablePollTimeoutMs)
-                    {
-                        return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
-            }
-
-            progress.Report("Verifying MAC change...");
-            var liveMac = adapter.GetLiveLinkAddress();
-            if (liveMac != null && liveMac.Equals(target))
-            {
-                return (true, "OK");
-            }
-
-            return (false, "Verification failed.");
-        }
-
-        private static void RevertToFactoryState(NetworkAdapter adapter, IProgress<string> progress)
-        {
-            try
-            {
-                adapter.TryUpdateRegistryMacValue(null, false);
-                _ = adapter.TryDisableAdapter();
-                Thread.Sleep(macPollingIntervalMs);
-                _ = adapter.TryEnableAdapter();
-            }
-            catch
-            {
-                // no-op
-            }
-
-            progress.Report("Change failed. Reverted to factory settings.");
-        }
 
         private static void OpenNetworkConnections()
         {
@@ -941,21 +798,21 @@ namespace Dzmac.Forms
 
         private string BuildTextReport()
         {
-            var entries = NetworkConnections.Select(connection => ToReportEntry(connection.Detail)).ToList();
+            var entries = NetworkConnections.Select(connection => ToReportEntry(connection)).ToList();
             return _networkReportBuilder.BuildReport(entries, DateTime.Now, Application.ProductVersion);
         }
 
-        private static NetworkReportEntry ToReportEntry(NetworkConnectionDetail detail)
+        private static NetworkReportEntry ToReportEntry(NetworkConnection connection)
         {
-            if (detail == null)
+            if (connection == null)
             {
-                throw new ArgumentNullException(nameof(detail));
+                throw new ArgumentNullException(nameof(connection));
             }
 
             var ipv4Addresses = new List<NetworkReportIpv4Address>();
-            if (detail.Ipv4Addresses != null)
+            if (connection.Ipv4Addresses != null)
             {
-                foreach (var address in detail.Ipv4Addresses)
+                foreach (var address in connection.Ipv4Addresses)
                 {
                     ipv4Addresses.Add(new NetworkReportIpv4Address
                     {
@@ -967,21 +824,21 @@ namespace Dzmac.Forms
 
             return new NetworkReportEntry
             {
-                Name = detail.Name,
-                Device = detail.Device,
-                DeviceManufacturer = detail.DeviceManufacturer,
-                HardwareId = detail.HardwareId,
-                ConfigId = detail.ConfigId,
-                ActiveMac = detail.ActiveMac,
-                ActiveVendor = detail.ActiveVendor,
-                Speed = detail.Speed,
-                Enabled = detail.Enabled,
-                IPv4Status = detail.IPv4Status,
-                IPv6Status = detail.IPv6Status,
-                IsDhcpEnabled = detail.IsDhcpEnabled,
+                Name = connection.Name,
+                Device = connection.Device,
+                DeviceManufacturer = connection.DeviceManufacturer,
+                HardwareId = connection.HardwareId,
+                ConfigId = connection.ConfigId,
+                ActiveMac = connection.ActiveMac,
+                ActiveVendor = connection.ActiveVendor,
+                Speed = connection.Speed,
+                Enabled = connection.Enabled,
+                IPv4Status = connection.IPv4Status,
+                IPv6Status = connection.IPv6Status,
+                IsDhcpEnabled = connection.IsDhcpEnabled,
                 Ipv4Addresses = ipv4Addresses,
-                Ipv4Gateways = detail.Ipv4Gateways ?? Array.Empty<string>(),
-                Ipv4DnsServers = detail.Ipv4DnsServers ?? Array.Empty<string>()
+                Ipv4Gateways = connection.Ipv4Gateways ?? Array.Empty<string>(),
+                Ipv4DnsServers = connection.Ipv4DnsServers ?? Array.Empty<string>()
             };
         }
 
@@ -1078,13 +935,10 @@ namespace Dzmac.Forms
 
             try
             {
-                if (_vendorComboItems == null)
-                {
-                    _vendorComboItems = await Task.Run(() => _vm
+                _vendorComboItems ??= await Task.Run(() => _vm
                         .OrderBy(v => v.Oui, StringComparer.OrdinalIgnoreCase)
                         .ThenBy(v => v.VendorName, StringComparer.Ordinal)
                         .ToList());
-                }
 
                 if (IsDisposed)
                 {
@@ -1294,7 +1148,7 @@ namespace Dzmac.Forms
                         updatedConnections.AddRange(retainedDisabledConnections);
                         updatedConnections = updatedConnections
                             .OrderByDescending(connection => connection.Enabled)
-                            .ThenBy(connection => connection.Detail.Name, StringComparer.CurrentCultureIgnoreCase)
+                            .ThenBy(connection => connection.Name, StringComparer.CurrentCultureIgnoreCase)
                             .ToList();
                     }
 
@@ -1380,7 +1234,7 @@ namespace Dzmac.Forms
             if (string.IsNullOrWhiteSpace(selectedConfigId) || NetworkConnections == null || NetworkConnections.Count == 0)
             {
                 ConnectionsGrid.SelectedItem = ConnectionsGrid.GetItem(0);
-                _selected = ConnectionsGrid.SelectedItem?.RowObject is NetworkConnection first ? first.Detail : null;
+                _selected = ConnectionsGrid.SelectedItem?.RowObject as NetworkConnection;
                 return;
             }
 
@@ -1391,16 +1245,16 @@ namespace Dzmac.Forms
                     continue;
                 }
 
-                if (string.Equals(row.Detail.ConfigId, selectedConfigId, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(row.ConfigId, selectedConfigId, StringComparison.OrdinalIgnoreCase))
                 {
                     ConnectionsGrid.SelectedItem = item;
-                    _selected = row.Detail;
+                    _selected = row;
                     return;
                 }
             }
 
             ConnectionsGrid.SelectedItem = ConnectionsGrid.GetItem(0);
-            _selected = ConnectionsGrid.SelectedItem?.RowObject is NetworkConnection fallback ? fallback.Detail : null;
+            _selected = ConnectionsGrid.SelectedItem?.RowObject as NetworkConnection;
         }
 
         private void RunOnUiThread(Action action)
@@ -1443,13 +1297,13 @@ namespace Dzmac.Forms
             }
 
             var refreshedConfigIds = new HashSet<string>(
-                refreshedConnections.Select(connection => connection.Detail.ConfigId),
+                refreshedConnections.Select(connection => connection.ConfigId),
                 StringComparer.OrdinalIgnoreCase);
 
             var retainedConnections = NetworkConnections
                 .Where(connection => !connection.Enabled
-                                  && !refreshedConfigIds.Contains(connection.Detail.ConfigId)
-                                  && (!physicalOnly || connection.Detail.Adapter.IsPhysicalAdapter))
+                                  && !refreshedConfigIds.Contains(connection.ConfigId)
+                                  && (!physicalOnly || connection.Adapter.IsPhysicalAdapter))
                 .ToList();
 
             if (retainedConnections.Count > 0)
@@ -1457,7 +1311,7 @@ namespace Dzmac.Forms
                 Diagnostics.Info(
                     "adapter_discovery_retained_disabled",
                     ("retainedCount", retainedConnections.Count),
-                    ("retainedAdapters", string.Join(", ", retainedConnections.Select(connection => $"{connection.Detail.Name}[{connection.Detail.ConfigId}]"))));
+                    ("retainedAdapters", string.Join(", ", retainedConnections.Select(connection => $"{connection.Name}[{connection.ConfigId}]"))));
             }
 
             return retainedConnections;
@@ -1465,13 +1319,13 @@ namespace Dzmac.Forms
 
         private async Task ToggleAdapterEnabledAsync(NetworkConnection connection)
         {
-            if (_isRefreshing || connection?.Detail == null)
+            if (_isRefreshing || connection == null)
             {
                 return;
             }
 
             var shouldEnable = !connection.Enabled;
-            var selectedAdapterName = connection.Detail.Name;
+            var selectedAdapterName = connection.Name;
             var targetState = shouldEnable ? "enable" : "disable";
             Diagnostics.Info("adapter_toggle_requested", ("adapter", selectedAdapterName), ("targetState", targetState));
 
@@ -1495,7 +1349,7 @@ namespace Dzmac.Forms
             {
                 MainStatusBar.Text = $"{(shouldEnable ? "Enabled" : "Disabled")} {selectedAdapterName}.";
                 Diagnostics.Info("adapter_toggle_succeeded", ("adapter", selectedAdapterName), ("targetState", targetState));
-                _selected = connection.Detail;
+                _selected = connection;
                 UpdateSelectionState();
                 ConnectionsGrid.RefreshObject(connection);
                 _ = RefreshConnectionsBackground();

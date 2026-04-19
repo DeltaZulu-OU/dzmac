@@ -7,8 +7,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using Microsoft.Win32;
-
 #nullable enable
 
 namespace Dzmac.Core
@@ -496,73 +494,35 @@ namespace Dzmac.Core
 
         public IReadOnlyList<string> GetIpv6DnsServers() => GetDnsServers(AddressFamily.InterNetworkV6);
 
-        /// <summary>
-        ///     Tries to disable the network adapter.
-        /// </summary>
-        /// <returns>
-        ///     <c>true</c> if the operation succeeds.
-        ///     <c>false</c> if the operation fails.
-        /// </returns>
-        public bool TryDisableAdapter()
+        public bool TryDisableAdapter() => TrySetAdapterEnabled(false);
+
+        public bool TryEnableAdapter() => TrySetAdapterEnabled(true);
+
+        private bool TrySetAdapterEnabled(bool enable)
         {
+            var action = enable ? "enable" : "disable";
             EnsureWmiObjects();
             if (_adapter == null)
             {
-                Diagnostics.Warning("adapter_disable_skipped", "Adapter WMI object is unavailable.", ("adapter", Name));
+                Diagnostics.Warning($"adapter_{action}_skipped", "Adapter WMI object is unavailable.", ("adapter", Name));
                 return false;
             }
 
-            var result = _adapter.InvokeMethod("Disable", null);
+            var result = _adapter.InvokeMethod(enable ? "Enable" : "Disable", null);
             if (result == null)
             {
-                Diagnostics.Warning("adapter_disable_failed", "Disable command returned null.", ("adapter", Name));
+                Diagnostics.Warning($"adapter_{action}_failed", $"{(enable ? "Enable" : "Disable")} command returned null.", ("adapter", Name));
                 return false;
             }
 
             var success = SafeConvertToInt(result) == 0;
             if (success)
             {
-                Diagnostics.Info("adapter_disable_succeeded", ("adapter", Name));
+                Diagnostics.Info($"adapter_{action}_succeeded", ("adapter", Name));
             }
             else
             {
-                Diagnostics.Warning("adapter_disable_failed", "Disable command returned non-zero.", ("adapter", Name));
-            }
-
-            return success;
-        }
-
-        /// <summary>
-        ///     Tries to enable the network adapter.
-        /// </summary>
-        /// <returns>
-        ///     <c>true</c> if the operation succeeds.
-        ///     <c>false</c> if the operation fails.
-        /// </returns>
-        public bool TryEnableAdapter()
-        {
-            EnsureWmiObjects();
-            if (_adapter == null)
-            {
-                Diagnostics.Warning("adapter_enable_skipped", "Adapter WMI object is unavailable.", ("adapter", Name));
-                return false;
-            }
-
-            var result = _adapter.InvokeMethod("Enable", null);
-            if (result == null)
-            {
-                Diagnostics.Warning("adapter_enable_failed", "Enable command returned null.", ("adapter", Name));
-                return false;
-            }
-
-            var success = SafeConvertToInt(result) == 0;
-            if (success)
-            {
-                Diagnostics.Info("adapter_enable_succeeded", ("adapter", Name));
-            }
-            else
-            {
-                Diagnostics.Warning("adapter_enable_failed", "Enable command returned non-zero.", ("adapter", Name));
+                Diagnostics.Warning($"adapter_{action}_failed", $"{(enable ? "Enable" : "Disable")} command returned non-zero.", ("adapter", Name));
             }
 
             return success;
@@ -616,15 +576,7 @@ namespace Dzmac.Core
         public void EnsureNetworkAddressRegistryParameter()
         {
             var registryKey = GetRegistryKey();
-            using var adapterKey = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the adapter registry key.");
-            using var ndiKey = adapterKey.CreateSubKey("Ndi");
-            using var paramsKey = ndiKey?.CreateSubKey("params");
-            using var networkAddressKey = paramsKey?.CreateSubKey(RegistryMacOverrideValueName) ?? throw new DZMACException("Failed to create NetworkAddress registry parameter key.");
-
-            networkAddressKey.SetValue("ParamDesc", "Network Address", RegistryValueKind.String);
-            networkAddressKey.SetValue("type", "edit", RegistryValueKind.String);
-            networkAddressKey.SetValue("LimitText", "12", RegistryValueKind.String);
-            networkAddressKey.SetValue("UpperCase", "1", RegistryValueKind.String);
+            _registryClient.EnsureNetworkAddressParameter(registryKey);
         }
 
         /// <summary>
@@ -1147,28 +1099,7 @@ namespace Dzmac.Core
             // re-enable it in the finally block
             shouldReenable = true;
 
-            // If we're here everything is OK; update or clear the registry value
-            if (newMac.Length > 0)
-            {
-                // rollback value (TMAC compatibility marker)
-                if (persistOriginalRecord)
-                {
-                    _registryClient.SetStringValue(registryKey, TmacOriginalMacValueName, OriginalMacAddress.ToString());
-                }
-                else
-                {
-                    _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
-                }
-
-                // active value
-                _registryClient.SetStringValue(registryKey, RegistryMacOverrideValueName, newMac);
-            }
-            else
-            {
-                _registryClient.DeleteValue(registryKey, RegistryMacOverrideValueName);
-                _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
-            }
-
+            ApplyRegistryMacValues(registryKey, newMac, persistOriginalRecord);
             return true;
         }
 
@@ -1187,11 +1118,17 @@ namespace Dzmac.Core
                 throw new DZMACException(targetMac + " is not a valid mac address");
             }
 
+            ApplyRegistryMacValues(registryKey, targetMac, persistOriginalRecord);
+            return true;
+        }
+
+        private void ApplyRegistryMacValues(string registryKey, string targetMac, bool persistOriginalRecord)
+        {
             if (targetMac.Length == 0)
             {
                 _registryClient.DeleteValue(registryKey, RegistryMacOverrideValueName);
                 _registryClient.DeleteValue(registryKey, TmacOriginalMacValueName);
-                return true;
+                return;
             }
 
             if (persistOriginalRecord)
@@ -1204,7 +1141,6 @@ namespace Dzmac.Core
             }
 
             _registryClient.SetStringValue(registryKey, RegistryMacOverrideValueName, targetMac);
-            return true;
         }
 
         #region Dispose

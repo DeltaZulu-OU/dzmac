@@ -25,8 +25,6 @@ namespace Dzmac.Core
         /// </summary>
         private static readonly Regex _macAddressPattern = new Regex("^[0-9A-F]{12}$", RegexOptions.Compiled);
 
-        private readonly MacFormatter formatter = new MacFormatter();
-
         /// <summary>
         ///     Internally we keep the address with no puncuation marks.
         /// </summary>
@@ -184,11 +182,13 @@ namespace Dzmac.Core
         /// </summary>
         public string ToString(MacDelimiter delimiter) => delimiter switch
         {
-            MacDelimiter.None => _macAddress,
-            MacDelimiter.Dash => SafeStringFormat(formatter, "{0:D}", _macAddress),
-            MacDelimiter.Colon => SafeStringFormat(formatter, "{0:C}", _macAddress),
-            _ => _macAddress
+            MacDelimiter.Dash  => FormatMac('-'),
+            MacDelimiter.Colon => FormatMac(':'),
+            _                  => _macAddress
         };
+
+        private string FormatMac(char sep) =>
+            $"{_macAddress.Substring(0, 2)}{sep}{_macAddress.Substring(2, 2)}{sep}{_macAddress.Substring(4, 2)}{sep}{_macAddress.Substring(6, 2)}{sep}{_macAddress.Substring(8, 2)}{sep}{_macAddress.Substring(10, 2)}";
 
         /// <summary>
         ///     Gets a string comprised of hexadecimal values, and converts it into a byte array
@@ -200,7 +200,7 @@ namespace Dzmac.Core
         {
             if (hexString.Length % 2 != 0)
             {
-                throw new ArgumentException(SafeStringFormat(CultureInfo.InvariantCulture, "The binary key cannot have an odd number of digits: {0}", hexString));
+                throw new ArgumentException($"The binary key cannot have an odd number of digits: {hexString}");
             }
 
             var data = new byte[hexString.Length / 2];
@@ -225,18 +225,6 @@ namespace Dzmac.Core
             Buffer.BlockCopy(firstArray, 0, combinedArray, 0, firstArray.Length);
             Buffer.BlockCopy(secondArray, 0, combinedArray, firstArray.Length, secondArray.Length);
             return combinedArray;
-        }
-
-        private static string SafeStringFormat(IFormatProvider formatProvider, string format, string obj)
-        {
-            try
-            {
-                return string.Format(formatProvider, format, obj);
-            }
-            catch (FormatException)
-            {
-                return obj;
-            }
         }
 
         private bool Equals(MacAddress other)

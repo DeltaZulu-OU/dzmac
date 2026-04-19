@@ -119,26 +119,7 @@ namespace Dzmac.Core
             Debug.WriteLine("Adding to vendor list...");
             var records = Records;
             var seenOui = new HashSet<string>(records.Select(v => v.Oui), StringComparer.OrdinalIgnoreCase);
-
-            foreach (var input in vendors)
-            {
-                var normalized = CreateNormalizedVendor(input.Oui, input.VendorName);
-
-                if (string.IsNullOrWhiteSpace(normalized.VendorName))
-                {
-                    Debug.WriteLine($"Skipping vendor with empty name for OUI '{normalized.Oui}' during AddRange.");
-                    continue;
-                }
-
-                if (!seenOui.Add(normalized.Oui))
-                {
-                    Debug.WriteLine($"Skipping duplicate vendor with OUI '{normalized.Oui}' during AddRange.");
-                    continue;
-                }
-
-                records.Add(normalized);
-            }
-
+            NormalizeInto(vendors, records, seenOui, "AddRange");
             Save(records);
         }
 
@@ -153,25 +134,7 @@ namespace Dzmac.Core
             Debug.WriteLine("Replacing vendor list content...");
             var newList = new List<Vendor>();
             var seenOui = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var input in vendors)
-            {
-                var normalized = CreateNormalizedVendor(input.Oui, input.VendorName);
-
-                if (string.IsNullOrWhiteSpace(normalized.VendorName))
-                {
-                    Debug.WriteLine($"Skipping vendor with empty name for OUI '{normalized.Oui}' during ReplaceAll.");
-                    continue;
-                }
-
-                if (!seenOui.Add(normalized.Oui))
-                {
-                    Debug.WriteLine($"Skipping duplicate vendor with OUI '{normalized.Oui}' during ReplaceAll.");
-                    continue;
-                }
-
-                newList.Add(normalized);
-            }
+            NormalizeInto(vendors, newList, seenOui, "ReplaceAll");
 
             lock (_sync)
             {
@@ -243,6 +206,28 @@ namespace Dzmac.Core
                    && pattern.Length == 6
                    && candidate[0] == pattern[0]
                    && string.Equals(candidate.Substring(2), pattern.Substring(2), StringComparison.Ordinal);
+
+        private static void NormalizeInto(IEnumerable<Vendor> vendors, List<Vendor> target, HashSet<string> seenOui, string context)
+        {
+            foreach (var input in vendors)
+            {
+                var normalized = CreateNormalizedVendor(input.Oui, input.VendorName);
+
+                if (string.IsNullOrWhiteSpace(normalized.VendorName))
+                {
+                    Debug.WriteLine($"Skipping vendor with empty name for OUI '{normalized.Oui}' during {context}.");
+                    continue;
+                }
+
+                if (!seenOui.Add(normalized.Oui))
+                {
+                    Debug.WriteLine($"Skipping duplicate vendor with OUI '{normalized.Oui}' during {context}.");
+                    continue;
+                }
+
+                target.Add(normalized);
+            }
+        }
 
         private static Vendor CreateNormalizedVendor(string oui, string vendor)
             => new Vendor(NormalizeOui(oui), NormalizeVendorName(vendor));

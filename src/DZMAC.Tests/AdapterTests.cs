@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Dzmac.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Dzmac.Core;
 
 namespace Dzmac.Tests
 {
@@ -12,9 +9,6 @@ namespace Dzmac.Tests
 
         [TestInitialize]
         public void Initialize() => _adapters = NetworkAdapterFactory.GetNetworkAdapters();
-
-        [TestMethod]
-        public void AdapterListShouldNotBeNull() => Assert.IsNotNull(_adapters);
 
         [TestMethod]
         public void AdapterListEnumerationShouldBeStable() => Assert.IsNotNull(_adapters.ToList());

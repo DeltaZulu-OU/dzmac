@@ -317,6 +317,7 @@ namespace Dzmac.Tests
 
             var vendor = vendorList[temp?.Oui];
             Assert.IsNotNull(vendor);
+            Assert.IsNotNull(temp);
             Assert.AreNotEqual(default(Vendor), vendor);
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor?.Oui));
             Assert.AreEqual(temp?.Oui, vendor?.Oui);

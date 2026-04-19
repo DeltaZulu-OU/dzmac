@@ -77,9 +77,6 @@ OPTIONS:
         -help
             Displays this help text for reference.";
 
-        public static string Text
-        {
-            get { return HelpText; }
-        }
+        public static string Text => HelpText;
     }
 }

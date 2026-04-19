@@ -25,15 +25,9 @@ namespace Dzmac.Tests
         }
 
         [TestMethod]
-        public void Command_ShouldThrow_WhenNameIsWhitespace()
-        {
-            Assert.ThrowsException<ArgumentException>(() => new AdapterAdminCommand("  ", "adapter", () => (true, "ok")));
-        }
+        public void Command_ShouldThrow_WhenNameIsWhitespace() => Assert.ThrowsException<ArgumentException>(() => new AdapterAdminCommand("  ", "adapter", () => (true, "ok")));
 
         [TestMethod]
-        public void FromConfig_ShouldThrow_WhenSettingsIsNull()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => AdapterAdminPolicy.FromConfig(null));
-        }
+        public void FromConfig_ShouldThrow_WhenSettingsIsNull() => Assert.ThrowsException<ArgumentNullException>(() => AdapterAdminPolicy.FromConfig(null));
     }
 }

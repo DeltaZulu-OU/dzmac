@@ -25,6 +25,8 @@ namespace Dzmac.Core
         void DeleteValue(string registryKey, string valueName);
 
         void DeleteKeyTree(string registryKey);
+
+        void EnsureNetworkAddressParameter(string registryKey);
     }
 
     public sealed class AdapterWmiClient : IAdapterWmiClient
@@ -132,6 +134,18 @@ namespace Dzmac.Core
 
             using var parentKey = Registry.LocalMachine.OpenSubKey(parentPath, true) ?? throw new DZMACException("Failed to open the parent registry key");
             parentKey.DeleteSubKeyTree(subKeyName, false);
+        }
+
+        public void EnsureNetworkAddressParameter(string registryKey)
+        {
+            using var adapterKey = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the adapter registry key.");
+            using var ndiKey = adapterKey.CreateSubKey("Ndi");
+            using var paramsKey = ndiKey?.CreateSubKey("params");
+            using var networkAddressKey = paramsKey?.CreateSubKey("NetworkAddress") ?? throw new DZMACException("Failed to create NetworkAddress registry parameter key.");
+            networkAddressKey.SetValue("ParamDesc", "Network Address", RegistryValueKind.String);
+            networkAddressKey.SetValue("type", "edit", RegistryValueKind.String);
+            networkAddressKey.SetValue("LimitText", "12", RegistryValueKind.String);
+            networkAddressKey.SetValue("UpperCase", "1", RegistryValueKind.String);
         }
     }
 }
