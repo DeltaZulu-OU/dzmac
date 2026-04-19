@@ -2,295 +2,317 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Dzmac.Gui.Core
 {
-    internal class Cache : IDisposable
+    internal sealed class Cache : IDisposable
     {
-        private readonly string _databaseFile;
-        private SQLiteConnection? _connection;
-        private bool _disposedValue;
-        private readonly Regex _pattern = new Regex("^[0-9A-F]{6}$");
+        private static readonly Regex OuiPattern = new Regex("^[0-9A-F]{6}$");
 
-        public int Count { get; private set; }
+        private readonly string _cacheFile;
+        private readonly Lazy<List<Vendor>> _records;
+
+        public int Count => Records.Count;
 
         public Vendor? this[int index] => GetByIndex(index);
 
-        public Cache(string databaseFile)
+        public Cache(string cacheFile)
         {
-            _databaseFile = databaseFile;
-            _connection = CreateConnection();
-            CreateTableIfNotExists();
-            UpdateCount();
+            _cacheFile = cacheFile ?? throw new ArgumentNullException(nameof(cacheFile));
+            _records = new Lazy<List<Vendor>>(() => Load(_cacheFile), true);
         }
 
         public Vendor? this[string oui] => Get(oui);
 
-        /// <summary>
-        ///     Add an instance of Vendors to the database
-        /// </summary>
-        /// <param name="oui">The OUI for vendor</param>
-        /// <param name="vendor">Vendor name</param>
         public void Add(string oui, string vendor)
         {
-            Debug.WriteLine($"Updating database (OUI: {oui}, Vendor: {vendor})...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "INSERT INTO vendors (oui, vendor) VALUES($oui, $vendor);";
-            command.Parameters.AddWithValue("$oui", oui);
-            command.Parameters.AddWithValue("$vendor", vendor);
-            command.ExecuteNonQuery();
-
-            UpdateCount();
+            Debug.WriteLine($"Updating cache (OUI: {oui}, Vendor: {vendor})...");
+            Records.Add(CreateNormalizedVendor(oui, vendor));
+            Save();
         }
 
-        /// <summary>
-        ///     Add a collection of Vendors to the database
-        /// </summary>
-        /// <param name="vendors">A collection of Vendor instances</param>
         public void AddRange(IEnumerable<Vendor> vendors)
         {
-            Debug.WriteLine("Populating database...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using (var transaction = _connection.BeginTransaction())
+            if (vendors == null)
             {
-                using var command = _connection.CreateCommand();
-                command.CommandText = "INSERT INTO vendors VALUES ($oui, $vendor)";
-                var ouiParameter = command.CreateParameter();
-                ouiParameter.ParameterName = "$oui";
-                command.Parameters.Add(ouiParameter);
-
-                var vendorParameter = command.CreateParameter();
-                vendorParameter.ParameterName = "$vendor";
-                command.Parameters.Add(vendorParameter);
-
-                foreach (var record in vendors)
-                {
-                    ouiParameter.Value = record.Oui;
-                    vendorParameter.Value = record.VendorName;
-                    command.ExecuteNonQuery();
-                }
-                transaction.Commit();
+                throw new ArgumentNullException(nameof(vendors));
             }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            UpdateCount();
+            Debug.WriteLine("Populating cache...");
+            Records.AddRange(vendors.Select(v => CreateNormalizedVendor(v.Oui, v.VendorName)));
+            Save();
         }
 
         public void ReplaceAll(IEnumerable<Vendor> vendors)
         {
-            Debug.WriteLine("Replacing database content...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using (var transaction = _connection.BeginTransaction())
+            if (vendors == null)
             {
-                using var deleteCommand = _connection.CreateCommand();
-                deleteCommand.CommandText = "DELETE FROM vendors;";
-                deleteCommand.ExecuteNonQuery();
-
-                using var insertCommand = _connection.CreateCommand();
-                insertCommand.CommandText = "INSERT INTO vendors VALUES ($oui, $vendor)";
-                var ouiParameter = insertCommand.CreateParameter();
-                ouiParameter.ParameterName = "$oui";
-                insertCommand.Parameters.Add(ouiParameter);
-
-                var vendorParameter = insertCommand.CreateParameter();
-                vendorParameter.ParameterName = "$vendor";
-                insertCommand.Parameters.Add(vendorParameter);
-
-                foreach (var record in vendors)
-                {
-                    ouiParameter.Value = record.Oui;
-                    vendorParameter.Value = record.VendorName;
-                    insertCommand.ExecuteNonQuery();
-                }
-
-                transaction.Commit();
+                throw new ArgumentNullException(nameof(vendors));
             }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            UpdateCount();
+            Debug.WriteLine("Replacing cache content...");
+            Records.Clear();
+            Records.AddRange(vendors.Select(v => CreateNormalizedVendor(v.Oui, v.VendorName)));
+
+            Save();
         }
 
-        /// <summary>
-        ///     Get a vendor by OUI
-        /// </summary>
-        /// <param name="oui">IEEE assigned OUI</param>
-        /// <returns>List of vendors matching the OUI</returns>
-        /// <exception cref="ArgumentException">OUI should be 6 hexadecimal characters. If not, an exception is thrown.</exception>
-        public Vendor? Get(string oui, bool useWildcard = false)
+        public Vendor Get(string oui, bool useWildcard = false)
         {
-            if (!_pattern.IsMatch(oui))
-            {
-                throw new ArgumentException(nameof(oui));
-            }
+            var normalizedOui = NormalizeOui(oui);
+            Debug.WriteLine($"Querying cache (OUI: {normalizedOui})...");
 
-            Debug.WriteLine($"Querying database (OUI: {oui})...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "SELECT oui,vendor FROM vendors WHERE oui LIKE $oui LIMIT 1";
-
-            if (useWildcard)
-            {
-                var charArray = oui.ToCharArray();
-                charArray[1] = '%';
-                oui = new string(charArray);
-            }
-            command.Parameters.AddWithValue("$oui", oui);
-            using var reader = command.ExecuteReader();
-
-            if (!reader.Read())
-            {
-                return null;
-            }
-
-            var vendorOui = reader.GetString(0).Replace("\r", "");
-            var vendorName = reader.GetString(1).Replace("\r", "");
-            return new Vendor(vendorOui, vendorName);
+            return useWildcard
+                ? Records.FirstOrDefault(v => MatchesWildcard(v.Oui, normalizedOui))
+                : Records.FirstOrDefault(v => v.Oui == normalizedOui);
+            
         }
 
-        /// <summary>
-        ///     Queries the cache for all vendor records and converts into a collection of Vendor instances.
-        /// </summary>
-        /// <returns>A collection of Vendor instances</returns>
         public IEnumerable<Vendor> GetAll()
         {
-            Debug.WriteLine("Querying database (ALL)...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "SELECT oui,vendor FROM vendors";
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                yield return new Vendor(reader.GetString(0).Replace("\r", ""), reader.GetString(1).Replace("\r", ""));
-            }
+            Debug.WriteLine("Querying cache (ALL)...");
+            return Records;
         }
 
         public void Clear()
         {
-            Debug.WriteLine("Clearing database...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using (var transaction = _connection.BeginTransaction())
-            {
-                using var command = _connection.CreateCommand();
-                command.CommandText = "DELETE FROM vendors;";
-                command.ExecuteNonQuery();
-                transaction.Commit();
-            }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-            UpdateCount();
+            Debug.WriteLine("Clearing cache...");
+            Records.Clear();
+            Save();
         }
 
-        /// <summary>
-        ///     Checks if the cache is empty.
-        /// </summary>
-        /// <returns>True if cache has no vendor records.</returns>
         public bool IsEmpty
         {
             get
             {
-                Debug.WriteLine("Querying database if empty...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                command.CommandText = "SELECT COUNT(*) FROM vendors";
-                using var reader = command.ExecuteReader();
-                reader.Read();
-                return reader.GetInt32(0) == 0;
+                Debug.WriteLine("Querying cache if empty...");
+                return Records.Count == 0;
             }
         }
 
-        private SQLiteConnection CreateConnection()
-        {
-            Debug.WriteLine($"Creating database connection to local db: {_databaseFile}...");
-            var conn = new SQLiteConnection($"Data Source={_databaseFile}; Version = 3; New = True; Compress = True;");
-            conn.Open();
-            return conn;
-        }
-
-        private void CreateTableIfNotExists()
-        {
-            Debug.WriteLine("Creating vendor table (if not exists)...");
-            const string newTableCommand = "CREATE TABLE IF NOT EXISTS vendors (oui VARCHAR(6), vendor VARCHAR(128))";
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = newTableCommand;
-            command.ExecuteNonQuery();
-        }
-
-        /// <summary>
-        ///     Get the item from database by an index
-        /// </summary>
-        /// <param name="index">Index to the item</param>
-        /// <exception cref="IndexOutOfRangeException"></exception>
         private Vendor? GetByIndex(int index)
         {
-            Debug.WriteLine($"Querying database (index: {index})...");
+            Debug.WriteLine($"Querying cache (index: {index})...");
 
             if (index < 0 || index >= Count)
             {
                 throw new IndexOutOfRangeException();
             }
 
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "SELECT * FROM vendors LIMIT 1 OFFSET $offset";
-            command.Parameters.AddWithValue("$offset", index);
-            using var reader = command.ExecuteReader();
-            if (!reader.Read())
+            return Records[index];
+        }
+
+        private List<Vendor> Records => _records.Value;
+
+        private static bool MatchesWildcard(string candidate, string pattern)
+        {
+            return candidate.Length == 6
+                   && pattern.Length == 6
+                   && candidate[0] == pattern[0]
+                   && string.Equals(candidate.Substring(2), pattern.Substring(2), StringComparison.Ordinal);
+        }
+
+        private static Vendor CreateNormalizedVendor(string oui, string vendor)
+        {
+            return new Vendor(NormalizeOui(oui), NormalizeVendorName(vendor));
+        }
+
+        private static string NormalizeOui(string oui)
+        {
+            if (oui == null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(oui));
             }
 
-            var oui = reader.GetString(0).Replace("\r", "");
-            var vendorName = reader.GetString(1).Replace("\r", "");
-            return new Vendor(oui, vendorName);
-        }
-
-        private void UpdateCount()
-        {
-            Debug.WriteLine("Querying database for record count...");
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using var command = _connection.CreateCommand();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            command.CommandText = "SELECT COUNT(*) FROM vendors";
-            using var reader = command.ExecuteReader();
-            reader.Read();
-            Count = reader.GetInt32(0);
-        }
-
-        #region Dispose
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
+            var normalized = oui.Trim().TrimStart('\uFEFF').ToUpperInvariant();
+            if (!OuiPattern.IsMatch(normalized))
             {
-                if (disposing)
+                throw new ArgumentException(nameof(oui));
+            }
+
+            return normalized;
+        }
+
+        private static string NormalizeVendorName(string vendor)
+        {
+            if (vendor == null)
+            {
+                return string.Empty;
+            }
+
+            var sanitized = vendor.Replace("\r", string.Empty).Replace("\n", " ").Trim();
+            sanitized = new string(sanitized
+                .Where(c => !char.IsControl(c) || c == '\t')
+                .Where(c => c != '\uFFFD')
+                .ToArray());
+            return sanitized;
+        }
+
+        private void Save()
+        {
+            var directory = Path.GetDirectoryName(_cacheFile);
+            if (!string.IsNullOrWhiteSpace(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            using var writer = new StreamWriter(_cacheFile, false, Encoding.UTF8);
+            foreach (var record in Records)
+            {
+                writer.Write(Escape(record.Oui));
+                writer.Write(',');
+                writer.Write(Escape(NormalizeVendorName(record.VendorName)));
+                writer.WriteLine();
+            }
+        }
+
+        private static List<Vendor> Load(string cacheFile)
+        {
+            if (!File.Exists(cacheFile))
+            {
+                return new List<Vendor>();
+            }
+
+            var records = new List<Vendor>();
+            foreach (var line in ReadLinesWithEncodingFallback(cacheFile))
+            {
+                if (string.IsNullOrWhiteSpace(line))
                 {
-                    _connection?.Close();
-                    _connection?.Dispose();
+                    continue;
                 }
 
-                _connection = null;
-                _disposedValue = true;
+                var fields = ParseRow(line);
+                if (fields.Count < 2)
+                {
+                    continue;
+                }
+
+                if (!TryParseVendorRow(fields, out var vendor))
+                {
+                    continue;
+                }
+
+                records.Add(vendor);
             }
+
+            return records;
+        }
+
+        private static bool TryParseVendorRow(IReadOnlyList<string> fields, out Vendor vendor)
+        {
+            vendor = default;
+            if (fields == null || fields.Count < 2)
+            {
+                return false;
+            }
+
+            if (TryExtractOui(fields[0], out var oui))
+            {
+                var vendorName = fields.Count == 2 ? fields[1] : string.Join(",", fields.Skip(1));
+                vendor = new Vendor(oui, NormalizeVendorName(vendorName));
+                return true;
+            }
+
+            // IEEE CSV format: Registry,Assignment,Organization Name,...
+            if (fields.Count >= 3 && TryExtractOui(fields[1], out oui))
+            {
+                vendor = new Vendor(oui, NormalizeVendorName(fields[2]));
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryExtractOui(string raw, out string oui)
+        {
+            oui = string.Empty;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return false;
+            }
+
+            var compact = new string(raw.Trim().TrimStart('﻿').Where(Uri.IsHexDigit).ToArray()).ToUpperInvariant();
+            if (compact.Length != 6 || !OuiPattern.IsMatch(compact))
+            {
+                return false;
+            }
+
+            oui = compact;
+            return true;
+        }
+
+        private static IEnumerable<string> ReadLinesWithEncodingFallback(string cacheFile)
+        {
+            try
+            {
+                var lines = new List<string>();
+                using var reader = new StreamReader(cacheFile, new UTF8Encoding(false, true));
+                string? line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    lines.Add(line);
+                }
+
+                return lines;
+            }
+            catch (DecoderFallbackException)
+            {
+                return File.ReadAllLines(cacheFile, Encoding.Default);
+            }
+        }
+
+        private static string Escape(string value)
+        {
+            value = value ?? string.Empty;
+            return $"\"{value.Replace("\"", "\"\"").Replace("\r", string.Empty)}\"";
+        }
+
+        private static List<string> ParseRow(string line)
+        {
+            var values = new List<string>();
+            var current = new StringBuilder();
+            var inQuotes = false;
+
+            for (var index = 0; index < line.Length; index++)
+            {
+                var item = line[index];
+                if (item == '"')
+                {
+                    if (inQuotes && index + 1 < line.Length && line[index + 1] == '"')
+                    {
+                        current.Append('"');
+                        index++;
+                    }
+                    else
+                    {
+                        inQuotes = !inQuotes;
+                    }
+
+                    continue;
+                }
+
+                if (item == ',' && !inQuotes)
+                {
+                    values.Add(current.ToString());
+                    current.Clear();
+                    continue;
+                }
+
+                current.Append(item);
+            }
+
+            values.Add(current.ToString());
+            return values;
         }
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
-        #endregion Dispose
     }
 }

@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace Dzmac.Gui.Core
 {
     /// <summary>
-    ///     A persistent readonly key-value store for vendors.
+    ///     A persistent readonly key-value store for vendor.
     ///     The data is downloaded from IEEE OUI list.
     /// </summary>
     public class VendorList : IDisposable, IReadOnlyList<Vendor>
     {
-        private const string DatabaseFileName = "oui.db";
+        private const string DatabaseFileName = "oui.csv";
 
         public int Count => _cache.Count;
 
@@ -38,7 +38,7 @@ namespace Dzmac.Gui.Core
 
         Vendor IReadOnlyList<Vendor>.this[int index] => _cache[index] ?? default;
 
-        public Vendor? Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
+        public Vendor Get(string oui, bool useWildcard = false) => _cache.Get(oui, useWildcard);
 
         ///  <inheritdoc/>
         public IEnumerator<Vendor> GetEnumerator() => _cache.GetAll().GetEnumerator();
@@ -71,16 +71,16 @@ namespace Dzmac.Gui.Core
 
         /// <summary>
         ///     Checks if a vendor with the provided OUI exists.
-        ///     There may be more than one vendors as OUIs are not unique.
+        ///     There may be more than one vendor as OUIs are not unique.
         ///     Hence, it returns an enumerable.
         /// </summary>
         /// <param name="oui">IEEE assigned OUI</param>
-        /// <param name="vendors">Matched vendors from IEEE records</param>
+        /// <param name="vendor">Matched vendor from IEEE records</param>
         /// <returns>If OUI exists in the IEEE database</returns>
-        public bool TryGetValue(string oui, out Vendor? vendors, bool useWildcard = false)
+        public bool TryGetValue(string oui, out Vendor vendor, bool useWildcard = false)
         {
-            vendors = Get(oui, useWildcard);
-            return vendors != null;
+            vendor = Get(oui, useWildcard);
+            return !vendor.Equals(default);
         }
 
         private static string ResolveDatabasePath()
