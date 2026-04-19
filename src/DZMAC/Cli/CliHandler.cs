@@ -42,7 +42,7 @@ namespace Dzmac.Gui
                 }
 
                 using (adapter)
-                using (var vendorManager = new VendorManager())
+                using (var vendorManager = new VendorList())
                 {
                     if (options.RestoreOriginalRecord && !adapter.TrySetRegistryMac(null))
                     {
@@ -124,7 +124,7 @@ namespace Dzmac.Gui
 
         private static bool HasFlag(IEnumerable<string> args, string flag) => args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
 
-        private static MacAddress ResolveMac(MacOperation macOperation, VendorManager manager)
+        private static MacAddress ResolveMac(MacOperation macOperation, VendorList manager)
         {
             if (macOperation.IsRestore)
             {

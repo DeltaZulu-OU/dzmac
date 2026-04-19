@@ -20,7 +20,7 @@ namespace Dzmac.Gui.Core
         /// </summary>
         /// <param name="vendorManager">Proide this parameter if there is a need to query vendor name from registry MAC value</param>
         /// <returns>Instances of <see cref="NetworkAdapter"/>.</returns>
-        public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorManager? vendorManager = null)
+        public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorList? vendorManager = null)
         {
             Diagnostics.Info("adapter_discovery_started", ("vendorManagerProvided", vendorManager != null));
             var networkInterfaces = GetAll();

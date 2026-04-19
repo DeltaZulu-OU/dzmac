@@ -54,7 +54,7 @@ namespace Dzmac.Gui.Core
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
 
-        private readonly VendorManager? _manager;
+        private readonly VendorList? _manager;
         private readonly NetworkInterface _networkInterface;
         private readonly IAdapterWmiClient _wmiClient;
         private readonly IAdapterRegistryClient _registryClient;
@@ -193,7 +193,7 @@ namespace Dzmac.Gui.Core
         /// </summary>
         public long Speed => _networkInterface.Speed;
 
-        public NetworkAdapter(NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
+        public NetworkAdapter(NetworkInterface networkInterface, VendorList? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
         {
             _networkInterface = networkInterface;
             _manager = vendorManager;
@@ -211,7 +211,7 @@ namespace Dzmac.Gui.Core
             ActiveMacAddress = GetActiveMac();
         }
 
-        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorManager? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
+        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorList? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
             : this(networkInterface, vendorManager, isPhysicalAdapter, wmiClient, registryClient)
         {
             _adapter = adapterObject;

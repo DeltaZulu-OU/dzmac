@@ -41,7 +41,7 @@ namespace Dzmac.Gui.Forms
         private const int vendorComboBatchSize = 200;
         private const int vendorComboLoadAheadThreshold = 20;
         private readonly ToolTip _connectionDetailsTooltip;
-        private readonly VendorManager _vm;
+        private readonly VendorList _vm;
         private readonly IAdapterAdminService _adminService;
         private readonly INetworkReportBuilder _networkReportBuilder;
         private readonly object _performanceBufferSync = new object();
@@ -75,7 +75,7 @@ namespace Dzmac.Gui.Forms
 
         public MainForm()
         {
-            _vm = new VendorManager();
+            _vm = new VendorList();
             _adminService = new AdapterAdminService();
             _networkReportBuilder = new TextNetworkReportBuilder();
             _connectionDetailsTooltip = new ToolTip();
@@ -1019,7 +1019,7 @@ namespace Dzmac.Gui.Forms
             {
                 await Task.Run(() =>
                 {
-                    _ = _vm.GetVendorList().Count;
+                    _ = _vm.Count;
                 });
                 if (IsDisposed)
                 {
@@ -1081,7 +1081,6 @@ namespace Dzmac.Gui.Forms
                 if (_vendorComboItems == null)
                 {
                     _vendorComboItems = await Task.Run(() => _vm
-                        .GetVendorList()
                         .OrderBy(v => v.Oui, StringComparer.OrdinalIgnoreCase)
                         .ThenBy(v => v.VendorName, StringComparer.Ordinal)
                         .ToList());

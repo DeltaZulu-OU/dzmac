@@ -93,7 +93,6 @@
     <Compile Include="Core\AdapterAdminService.cs" />
     <Compile Include="Core\AdapterCollaborators.cs" />
     <Compile Include="Core\AppSettings.cs" />
-    <Compile Include="Core\Cache.cs" />
     <Compile Include="Core\Diagnostics.cs" />
     <Compile Include="Core\DiagnosticsEventCatalog.cs" />
     <Compile Include="Core\Downloader.cs" />
@@ -110,7 +109,6 @@
     <Compile Include="Core\Reporting\TextNetworkReportBuilder.cs" />
     <Compile Include="Core\Vendor.cs" />
     <Compile Include="Core\VendorList.cs" />
-    <Compile Include="Core\VendorManager.cs" />
     <Compile Include="Core\Properties\AssemblyInfo.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Program.cs" />
