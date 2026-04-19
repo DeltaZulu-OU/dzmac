@@ -1,4 +1,4 @@
-﻿namespace Dzmac.Gui.Forms
+﻿namespace Dzmac.Forms
 {
     partial class AboutBox
     {

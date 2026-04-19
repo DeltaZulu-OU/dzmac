@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using BrightIdeasSoftware;
-using Dzmac.Gui.Core;
+using Dzmac.Core;
 
-namespace Dzmac.Gui.DTO
+namespace Dzmac.DTO
 {
     /// <summary>
     ///     A DTO for DZMAC datagrid which includes basic information

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     public static class Diagnostics
     {
@@ -233,7 +233,7 @@ namespace Dzmac.Gui.Core
 
         private static bool ResolveVerboseEnabled()
         {
-            var env = Environment.GetEnvironmentVariable("Dzmac.Gui.Core_VERBOSE_DIAGNOSTICS");
+            var env = Environment.GetEnvironmentVariable("Dzmac.Core_VERBOSE_DIAGNOSTICS");
             if (bool.TryParse(env, out var envEnabled))
             {
                 return envEnabled;

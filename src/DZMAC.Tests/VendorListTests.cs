@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using Dzmac.Gui.Core;
+using Dzmac.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests

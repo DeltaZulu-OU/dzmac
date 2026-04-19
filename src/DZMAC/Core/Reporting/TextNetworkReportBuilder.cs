@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Dzmac.Gui.Core.Reporting
+namespace Dzmac.Core.Reporting
 {
     public class TextNetworkReportBuilder : INetworkReportBuilder
     {

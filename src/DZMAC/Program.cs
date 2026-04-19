@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Dzmac.Gui.Core;
-using Dzmac.Gui.Forms;
+using Dzmac.Core;
+using Dzmac.Forms;
 
-namespace Dzmac.Gui
+namespace Dzmac
 {
     internal static class Program
     {

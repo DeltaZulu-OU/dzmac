@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Dzmac.Gui.Properties
+namespace Dzmac.Properties
 {
 
 

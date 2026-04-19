@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Dzmac.Gui.Controls
+namespace Dzmac.Controls
 {
     /// <summary>
     ///     Reference: https://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class

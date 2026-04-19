@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     /// <summary>
     ///     Library-specific exceptions

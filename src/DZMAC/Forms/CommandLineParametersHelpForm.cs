@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
-using Dzmac.Gui.Cli;
+using Dzmac.Cli;
 
-namespace Dzmac.Gui.Forms
+namespace Dzmac.Forms
 {
     internal partial class CommandLineParametersHelpForm : Form
     {

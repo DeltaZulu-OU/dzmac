@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using BrightIdeasSoftware;
 
-namespace Dzmac.Gui.Forms
+namespace Dzmac.Forms
 {
     partial class MainForm
     {
@@ -70,7 +70,7 @@ namespace Dzmac.Gui.Forms
             this.AutoStartCheckBox = new System.Windows.Forms.CheckBox();
             this.VendorComboBox = new System.Windows.Forms.ComboBox();
             this.RandomMacButton = new System.Windows.Forms.Button();
-            this.macTextBox = new Dzmac.Gui.Controls.MacTextBox();
+            this.macTextBox = new Dzmac.Controls.MacTextBox();
             this.IPAddressPage = new System.Windows.Forms.TabPage();
             this.IpAddressLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.Ipv4ColumnLayoutPanel = new System.Windows.Forms.TableLayoutPanel();

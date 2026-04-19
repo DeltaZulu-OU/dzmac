@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     internal sealed class DiagnosticsEventDefinition
     {

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     /// <summary>
     ///     A class to wrap MAC address with formatting and validation logic.

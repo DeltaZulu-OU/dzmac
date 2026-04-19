@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dzmac.Gui.Core;
+using Dzmac.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests

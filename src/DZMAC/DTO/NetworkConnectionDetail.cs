@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Dzmac.Gui.Core;
+using Dzmac.Core;
 
-namespace Dzmac.Gui.DTO
+namespace Dzmac.DTO
 {
     /// <summary>
     ///     A DTO for DZMAC detailed information

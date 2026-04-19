@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     /// <summary>
     ///     A persistent key-value store for vendor data downloaded from the IEEE OUI list.
@@ -457,7 +457,7 @@ namespace Dzmac.Gui.Core
 
         private static string ResolveDatabasePath()
         {
-            var envPath = Environment.GetEnvironmentVariable("Dzmac.Gui.Core_OUI_CACHE_PATH");
+            var envPath = Environment.GetEnvironmentVariable("Dzmac.Core_OUI_CACHE_PATH");
             var configuredPath = ConfigReader.Current.GetString(AppSettingKeys.OuiCachePath);
             var path = FirstNonEmpty(envPath, configuredPath);
 
@@ -465,7 +465,7 @@ namespace Dzmac.Gui.Core
             {
                 var basePath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Dzmac.Gui.Core");
+                    "Dzmac.Core");
                 path = Path.Combine(basePath, DatabaseFileName);
             }
 

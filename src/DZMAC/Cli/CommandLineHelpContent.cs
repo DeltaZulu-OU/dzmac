@@ -1,4 +1,4 @@
-﻿namespace Dzmac.Gui.Cli
+﻿namespace Dzmac.Cli
 {
     public static class CommandLineHelpContent
     {

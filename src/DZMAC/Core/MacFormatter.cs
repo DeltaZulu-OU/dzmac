@@ -3,7 +3,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     internal class MacFormatter : IFormatProvider, ICustomFormatter
     {

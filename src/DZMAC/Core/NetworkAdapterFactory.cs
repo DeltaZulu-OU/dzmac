@@ -6,7 +6,7 @@ using System.Linq;
 using System.Management;
 using System.Net.NetworkInformation;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     /// <summary>
     ///     Adapter data collection class

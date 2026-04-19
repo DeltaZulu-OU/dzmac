@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Dzmac.Gui.Core.Reporting
+namespace Dzmac.Core.Reporting
 {
     public interface INetworkReportBuilder
     {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     public interface IAppSettings
     {

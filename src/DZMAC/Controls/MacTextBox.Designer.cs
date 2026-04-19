@@ -1,4 +1,4 @@
-﻿namespace Dzmac.Gui.Controls
+﻿namespace Dzmac.Controls
 {
     partial class MacTextBox
     {

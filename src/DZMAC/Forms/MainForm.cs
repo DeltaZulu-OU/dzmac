@@ -11,12 +11,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using Dzmac.Gui.Core;
-using Dzmac.Gui.Core.Reporting;
-using Dzmac.Gui.DTO;
-using Dzmac.Gui.Properties;
+using Dzmac.Core;
+using Dzmac.Core.Reporting;
+using Dzmac.DTO;
+using Dzmac.Properties;
 
-namespace Dzmac.Gui.Forms
+namespace Dzmac.Forms
 {
     public partial class MainForm : Form
     {

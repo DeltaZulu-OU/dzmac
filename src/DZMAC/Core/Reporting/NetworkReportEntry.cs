@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Dzmac.Gui.Core.Reporting
+namespace Dzmac.Core.Reporting
 {
     public class NetworkReportEntry
     {

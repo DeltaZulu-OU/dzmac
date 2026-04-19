@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     /// <summary>
     ///     A DTO to carry an OUI-Vendor name pair

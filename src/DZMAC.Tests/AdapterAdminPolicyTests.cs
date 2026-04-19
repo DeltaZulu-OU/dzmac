@@ -1,5 +1,5 @@
 using System;
-using Dzmac.Gui.Core;
+using Dzmac.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests

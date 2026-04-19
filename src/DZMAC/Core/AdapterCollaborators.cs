@@ -5,7 +5,7 @@ using System.Linq;
 using System.Management;
 using Microsoft.Win32;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     public interface IAdapterWmiClient
     {

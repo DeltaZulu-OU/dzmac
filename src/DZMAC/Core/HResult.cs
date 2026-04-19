@@ -1,4 +1,4 @@
-﻿namespace Dzmac.Gui.Core
+﻿namespace Dzmac.Core
 {
     internal static class HResult
     {

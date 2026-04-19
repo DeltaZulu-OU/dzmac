@@ -3,7 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     public enum AdapterAdminResultCode
     {

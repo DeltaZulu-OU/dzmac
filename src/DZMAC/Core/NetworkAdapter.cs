@@ -11,7 +11,7 @@ using Microsoft.Win32;
 
 #nullable enable
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     public sealed class AdapterIpv4Address
     {
@@ -231,7 +231,7 @@ namespace Dzmac.Gui.Core
         ///     <c>true</c> if the operation succeeds.
         ///     <c>false</c> if the operation fails.
         /// </returns>
-        /// <exception cref="Dzmac.Gui.CoreException"></exception>
+        /// <exception cref="Dzmac.CoreException"></exception>
         public bool TryDhcpDisable()
         {
             EnsureWmiObjects();
@@ -294,7 +294,7 @@ namespace Dzmac.Gui.Core
         ///     <c>true</c> if the operation succeeds.
         ///     <c>false</c> if the operation fails.
         /// </returns>
-        /// <exception cref="Dzmac.Gui.CoreException"></exception>
+        /// <exception cref="Dzmac.CoreException"></exception>
         public bool TryDhcpEnable()
         {
             EnsureWmiObjects();
@@ -640,7 +640,7 @@ namespace Dzmac.Gui.Core
         ///     <c>true</c> if the operation succeeds.
         ///     <c>false</c> if the operation fails.
         /// </returns>
-        /// <exception cref="Dzmac.Gui.CoreException"> </exception>
+        /// <exception cref="Dzmac.CoreException"> </exception>
         public bool TrySetRegistryMac(MacAddress? mac, bool persistOriginalRecord = true)
         {
             var shouldReenable = false;
@@ -1120,7 +1120,7 @@ namespace Dzmac.Gui.Core
         /// <param name="newMac">New mac address without delimiters or empty string to reset.</param>
         /// <param name="description">Network adapter description to find the adapter.</param>
         /// <param name="shouldReenable">A bool value to trigger Disable/Enable commands</param>
-        /// <exception cref="Dzmac.Gui.CoreException"></exception>
+        /// <exception cref="Dzmac.CoreException"></exception>
         /// <exception cref="System.Security.SecurityException"></exception>
         /// <exception cref="System.IO.IOException"></exception>
         /// <exception cref="UnauthorizedAccessException"></exception>

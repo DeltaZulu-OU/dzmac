@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     internal static class Downloader
     {

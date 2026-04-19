@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Dzmac.Gui.Cli;
-using Dzmac.Gui.Core;
+using Dzmac.Cli;
+using Dzmac.Core;
 
-namespace Dzmac.Gui
+namespace Dzmac
 {
     internal static class CliHandler
     {

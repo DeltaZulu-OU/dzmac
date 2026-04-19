@@ -1,4 +1,4 @@
-﻿namespace Dzmac.Gui.Core
+﻿namespace Dzmac.Core
 {
     public partial class MacAddress
     {

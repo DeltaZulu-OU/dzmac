@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Dzmac.Gui.Core
+namespace Dzmac.Core
 {
     public static class IpAddressValidator
     {
