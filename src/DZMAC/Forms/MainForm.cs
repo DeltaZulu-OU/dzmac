@@ -1094,7 +1094,16 @@ namespace Dzmac.Gui.Forms
 
                 if (VendorComboBox.Items.Count == 0)
                 {
-                    await AppendNextVendorBatchAsync();
+                    VendorComboBox.BeginUpdate();
+                    try
+                    {
+                        VendorComboBox.Items.Clear();
+                        VendorComboBox.Items.AddRange(_vendorComboItems.Cast<object>().ToArray());
+                    }
+                    finally
+                    {
+                        VendorComboBox.EndUpdate();
+                    }
                 }
             }
             catch (Exception ex)

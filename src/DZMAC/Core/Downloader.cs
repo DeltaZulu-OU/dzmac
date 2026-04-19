@@ -16,8 +16,6 @@ namespace Dzmac.Gui.Core
     {
         private const string DefaultOuiAddress = "https://standards-oui.ieee.org/oui/oui.txt";
 
-        public static List<Vendor> GetAll() => GetAllAsync(CancellationToken.None).GetAwaiter().GetResult();
-
         public static async Task<List<Vendor>> GetAllAsync(CancellationToken cancellationToken)
         {
             var responseText = await DownloadAsync(cancellationToken).ConfigureAwait(false);
