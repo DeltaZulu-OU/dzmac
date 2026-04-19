@@ -4,13 +4,12 @@ using System.Globalization;
 using System.Linq;
 using Dzmac.Cli;
 using Dzmac.Core;
+using Dzmac.Properties;
 
 namespace Dzmac
 {
     internal static class CliHandler
     {
-        private const string UnsupportedOptionMessage = "Option is intentionally unsupported in this reimplementation (see README product decisions).";
-
         public static int Run(string[] args)
         {
             try
@@ -28,12 +27,12 @@ namespace Dzmac
 
                 if (options.UnsupportedOptions.Count > 0)
                 {
-                    return ExitWithError(string.Join(Environment.NewLine, options.UnsupportedOptions.Select(o => $"{o}: {UnsupportedOptionMessage}")));
+                    return ExitWithError(string.Join(Environment.NewLine, options.UnsupportedOptions.Select(o => $"{o}: {Resources.CliUnsupportedOption}")));
                 }
 
                 if (string.IsNullOrWhiteSpace(options.ConnectionName))
                 {
-                    return ExitWithError("Missing required option: -n network_connection_name");
+                    return ExitWithError(Resources.CliMissingConnectionName);
                 }
 
                 if (!TryGetAdapter(options.ConnectionName, out var adapter))
@@ -46,7 +45,7 @@ namespace Dzmac
                 {
                     if (options.RestoreOriginalRecord && !adapter.TrySetRegistryMac(null))
                     {
-                        return ExitWithError("Failed to restore original MAC address record.");
+                        return ExitWithError(Resources.CliRestoreOriginalFailed);
                     }
 
                     if (options.MacOperation != null)
@@ -54,28 +53,28 @@ namespace Dzmac
                         var mac = ResolveMac(options.MacOperation, vendorManager);
                         if (!adapter.TrySetRegistryMac(mac))
                         {
-                            return ExitWithError("Failed to update MAC address.");
+                            return ExitWithError(Resources.CliUpdateMacFailed);
                         }
                     }
 
                     if (options.EnableDhcpV4 && !adapter.TryDhcpEnable())
                     {
-                        return ExitWithError("Failed to enable DHCPv4.");
+                        return ExitWithError(Resources.CliEnableDhcpFailed);
                     }
 
                     if (options.Ipv4Addresses.Count > 0 && !adapter.TrySetIPv4Addresses(options.Ipv4Addresses.Select(x => x.Address).ToArray(), options.Ipv4Addresses.Select(x => x.SubnetMask).ToArray()))
                     {
-                        return ExitWithError("Failed to set IPv4 addresses.");
+                        return ExitWithError(Resources.CliSetIpv4Failed);
                     }
 
                     if (options.Ipv4Gateways.Count > 0 && !adapter.TrySetIPv4Gateways(options.Ipv4Gateways.Select(x => x.Address).ToArray(), options.Ipv4Gateways.Select(x => x.Metric).ToArray()))
                     {
-                        return ExitWithError("Failed to set IPv4 gateways.");
+                        return ExitWithError(Resources.CliSetGatewayFailed);
                     }
 
                     if (options.Ipv4DnsServers.Count > 0 && !adapter.TrySetIPv4DnsServers(options.Ipv4DnsServers.ToArray()))
                     {
-                        return ExitWithError("Failed to set IPv4 DNS servers.");
+                        return ExitWithError(Resources.CliSetDnsFailed);
                     }
 
                     if (options.ReleaseDhcpV4 && !adapter.TryDhcpRelease(out var releaseMessage))
@@ -90,19 +89,19 @@ namespace Dzmac
 
                     if (options.DisableAdapter && !adapter.TryDisableAdapter())
                     {
-                        return ExitWithError("Failed to disable network connection.");
+                        return ExitWithError(Resources.CliDisableAdapterFailed);
                     }
 
                     if (options.EnableAdapter && !adapter.TryEnableAdapter())
                     {
-                        return ExitWithError("Failed to enable network connection.");
+                        return ExitWithError(Resources.CliEnableAdapterFailed);
                     }
 
                     if (options.ResetAdapter)
                     {
                         if (!adapter.TryDisableAdapter() || !adapter.TryEnableAdapter())
                         {
-                            return ExitWithError("Failed to reset network connection.");
+                            return ExitWithError(Resources.CliResetAdapterFailed);
                         }
                     }
                 }
@@ -202,7 +201,7 @@ namespace Dzmac
                     case "-nr":
                         if (macOptionSeen)
                         {
-                            error = "Only one MAC address option can be specified at a time.";
+                            error = Resources.CliDuplicateMacOption;
                             return false;
                         }
 
@@ -214,7 +213,7 @@ namespace Dzmac
                     case "-nr02":
                         if (macOptionSeen)
                         {
-                            error = "Only one MAC address option can be specified at a time.";
+                            error = Resources.CliDuplicateMacOption;
                             return false;
                         }
 
@@ -259,7 +258,7 @@ namespace Dzmac
                         var dnsServers = dns.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
                         if (dnsServers.Count == 0)
                         {
-                            error = "Invalid -d value. Expected at least one DNS server.";
+                            error = Resources.CliInvalidDnsValue;
                             return false;
                         }
 
@@ -441,7 +440,7 @@ namespace Dzmac
             error = string.Empty;
             if (macOptionSeen)
             {
-                error = "Only one MAC address option can be specified at a time.";
+                error = Resources.CliDuplicateMacOption;
                 return false;
             }
 

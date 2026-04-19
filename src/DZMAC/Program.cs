@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Dzmac.Core;
 using Dzmac.Forms;
+using Dzmac.Properties;
 
 namespace Dzmac
 {
@@ -62,7 +63,7 @@ namespace Dzmac
                 return;
             }
 
-            _ = MessageBox.Show($"Unhandled exception caught : {exception.Message}", "Unhandled exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _ = MessageBox.Show($"Unhandled exception caught : {exception.Message}", Resources.UnhandledException_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]

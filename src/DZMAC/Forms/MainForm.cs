@@ -83,7 +83,7 @@ namespace Dzmac.Forms
 
             InfoTabs.SelectedIndexChanged += InfoTabs_SelectedIndexChanged;
             Shown += MainForm_ShownAsync;
-            ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
+            ConnectionsGrid.EmptyListMsg = Resources.StatusNoAdaptersLoaded;
             VendorComboBox.Enabled = false;
             VendorComboBox.DropDown += VendorComboBox_DropDown;
             VendorComboBox.SelectionChangeCommitted += VendorComboBox_SelectionChangeCommitted;
@@ -121,7 +121,7 @@ namespace Dzmac.Forms
 
             if (!MacAddress.IsValidMac(targetMac))
             {
-                _ = MessageBox.Show("Please enter a valid MAC address.", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _ = MessageBox.Show(Resources.MacAddressInvalid, Resources.MacAddressChange_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -135,12 +135,12 @@ namespace Dzmac.Forms
                 var updateResult = await Task.Run(() => MacRotationService.TryRotateMac(_selected.Adapter, target, _persistOriginalMacRecord, progress));
                 if (updateResult.Success)
                 {
-                    _ = MessageBox.Show("Successfully updated MAC address", "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    _ = MessageBox.Show(Resources.MacAddressUpdateSuccess, Resources.MacAddressChange_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     _ = RefreshConnectionsBackground();
                 }
                 else
                 {
-                    _ = MessageBox.Show(updateResult.Message, "MAC Address Change", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    _ = MessageBox.Show(updateResult.Message, Resources.MacAddressChange_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             finally
@@ -190,7 +190,7 @@ namespace Dzmac.Forms
             Diagnostics.Info("adapter_registry_delete_requested", ("adapter", selectedAdapterName));
             var confirmResult = MessageBox.Show(
                 $"Are you sure you want to delete '{selectedAdapterName}' from the registry?\n\nThis can make Windows reinstall the adapter after a reboot or hardware re-scan.",
-                "Confirm Registry Adapter Deletion",
+                Resources.ConfirmRegistryDelete_Title,
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
 
@@ -207,7 +207,7 @@ namespace Dzmac.Forms
             {
                 MainStatusBar.Text = $"Deleted {selectedAdapterName} from registry.";
                 Diagnostics.Info("adapter_registry_delete_succeeded", ("adapter", selectedAdapterName));
-                _ = MessageBox.Show("Successfully deleted the adapter's registry key.", "Delete Adapter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _ = MessageBox.Show(Resources.AdapterRegistryDeleteSuccess, Resources.DeleteAdapter_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _ = RefreshConnectionsBackground();
                 return;
             }
@@ -216,7 +216,7 @@ namespace Dzmac.Forms
             Diagnostics.Warning("adapter_registry_delete_failed", result.Message, ("adapter", selectedAdapterName), ("operationCode", result.Code.ToString()));
             _ = MessageBox.Show(
                 $"Failed to delete network adapter from registry.\n\n{result.Message}",
-                "Delete Adapter Failed",
+                Resources.DeleteAdapterFailed_Title,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
@@ -288,13 +288,13 @@ namespace Dzmac.Forms
         {
             if (NetworkConnections == null || NetworkConnections.Count == 0)
             {
-                _ = MessageBox.Show("No network adapter information is available to export.", "Export Text Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _ = MessageBox.Show(Resources.NoAdaptersToExport, Resources.ExportTextReport_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             using var dialog = new SaveFileDialog();
-            dialog.Title = "Export Text Report";
-            dialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+            dialog.Title = Resources.ExportTextReport_Title;
+            dialog.Filter = Resources.ExportFileFilter;
             dialog.DefaultExt = "txt";
             dialog.FileName = $"DZMAC-Text-Report-{DateTime.Now:yyyyMMdd-HHmmss}.txt";
 
@@ -311,8 +311,8 @@ namespace Dzmac.Forms
             }
             catch (Exception ex)
             {
-                MainStatusBar.Text = "Failed to export text report.";
-                _ = MessageBox.Show(ex.Message, "Export Text Report", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MainStatusBar.Text = Resources.ExportFailed;
+                _ = MessageBox.Show(ex.Message, Resources.ExportTextReport_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -372,8 +372,8 @@ namespace Dzmac.Forms
             {
                 if (!IsDisposed)
                 {
-                    MainStatusBar.Text = "Startup initialization failed.";
-                    _ = MessageBox.Show(ex.Message, "Initialization Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MainStatusBar.Text = Resources.StartupFailed;
+                    _ = MessageBox.Show(ex.Message, Resources.InitializationError_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
         }
@@ -389,13 +389,13 @@ namespace Dzmac.Forms
             if (operationResult.IsSuccess)
             {
                 MainStatusBar.Text = $"{successText} {selectedAdapterName}.";
-                MessageBox.Show(operationMessage, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(operationMessage, Resources.Success_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             MainStatusBar.Text = $"{failureText} {selectedAdapterName}.";
             var failureDetail = $"{operationMessage} (Code: {operationResult.Code})";
-            MessageBox.Show(failureDetail, "Failure", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(failureDetail, Resources.Failure_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             Diagnostics.Warning("dhcp_action_failed", $"Could not {actionName} for '{selectedAdapterName}'. {operationMessage}", ("operationCode", operationResult.Code.ToString()));
         }
 
@@ -451,7 +451,7 @@ namespace Dzmac.Forms
 
             if (!_isVendorListReady)
             {
-                _ = MessageBox.Show("Vendor list is still loading. Please try again in a moment.", "Vendor List Loading", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _ = MessageBox.Show(Resources.VendorListStillLoading, Resources.VendorListLoading_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -462,7 +462,7 @@ namespace Dzmac.Forms
             }
             catch (DZMACException ex)
             {
-                _ = MessageBox.Show(ex.Message, "Vendor List Unavailable", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _ = MessageBox.Show(ex.Message, Resources.VendorListUnavailable_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -530,7 +530,7 @@ namespace Dzmac.Forms
 
             if (_adminService.ResetRegistryMac(_selected.Adapter).IsSuccess)
             {
-                _ = MessageBox.Show("Successfully restored MAC address", "MAC Address Restore", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _ = MessageBox.Show(Resources.MacAddressRestoreSuccess, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 if (_reenableOnChange && _adminService.SetAdapterEnabled(_selected.Adapter, false).IsSuccess)
                 {
@@ -541,7 +541,7 @@ namespace Dzmac.Forms
             }
             else
             {
-                _ = MessageBox.Show("Failed to restore MAC address", "MAC Address Restore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -589,14 +589,14 @@ namespace Dzmac.Forms
 
         private async void UpdateOuiItem_ClickAsync(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("This will initiate OUI download in the background.\n\nAre you sure?", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.YesNo);
+            var result = MessageBox.Show(Resources.OuiDownloadConfirmMessage, Resources.UpdateOui_Title, MessageBoxButtons.YesNo);
 
             if (result != DialogResult.Yes)
             {
                 return;
             }
 
-            MainStatusBar.Text = "Downloading OUI data...";
+            MainStatusBar.Text = Resources.StatusDownloadingOui;
             _vendorRefreshCancellation?.Cancel();
             _vendorRefreshCancellation?.Dispose();
             _vendorRefreshCancellation = new CancellationTokenSource();
@@ -604,18 +604,18 @@ namespace Dzmac.Forms
             try
             {
                 await _vm.RefreshAsync(_vendorRefreshCancellation.Token);
-                _ = MessageBox.Show("Vendor list updated.", "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK);
+                _ = MessageBox.Show(Resources.VendorListUpdated, Resources.UpdateOui_Title, MessageBoxButtons.OK);
                 ResetVendorComboData();
-                MainStatusBar.Text = "Ready";
+                MainStatusBar.Text = Resources.StatusReady;
             }
             catch (OperationCanceledException)
             {
-                MainStatusBar.Text = "Vendor list update canceled.";
+                MainStatusBar.Text = Resources.StatusVendorListUpdateCancelled;
             }
             catch (Exception ex)
             {
-                MainStatusBar.Text = "Vendor list update failed.";
-                _ = MessageBox.Show(ex.Message, "Update Vendor List (OUI) from IEEE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MainStatusBar.Text = Resources.StatusVendorListUpdateFailed;
+                _ = MessageBox.Show(ex.Message, Resources.UpdateOui_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -665,7 +665,7 @@ namespace Dzmac.Forms
         /// <summary>
         ///     A placeholder method for events not implemented.
         /// </summary>
-        private static void NotImplemented() => _ = MessageBox.Show("Not implemented.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        private static void NotImplemented() => _ = MessageBox.Show(Resources.NotImplemented, Resources.Information_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         private static void OpenNetworkConnections()
         {
@@ -679,7 +679,7 @@ namespace Dzmac.Forms
             }
             catch (Exception ex)
             {
-                _ = MessageBox.Show($"Unable to open Network Connections.{Environment.NewLine}{Environment.NewLine}{ex.Message}", "Network Connections", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _ = MessageBox.Show($"Unable to open Network Connections.{Environment.NewLine}{Environment.NewLine}{ex.Message}", Resources.NetworkConnections_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -722,12 +722,12 @@ namespace Dzmac.Forms
             }
 
             PopulateIpv4AddressRows(_selected?.Ipv4Addresses ?? Array.Empty<AdapterIpv4Address>());
-            PopulateSingleValueRows(Ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), "No IPv4 gateway");
-            PopulateSingleValueRows(Ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), "No IPv4 DNS server");
+            PopulateSingleValueRows(Ipv4GatewayListView, _selected?.Ipv4Gateways ?? Array.Empty<string>(), Resources.FallbackNoIpv4Gateway);
+            PopulateSingleValueRows(Ipv4DnsListView, _selected?.Ipv4DnsServers ?? Array.Empty<string>(), Resources.FallbackNoIpv4DnsServer);
 
             PopulateIpv6AddressRows(_selected?.Ipv6Addresses ?? Array.Empty<AdapterIpv6Address>());
-            PopulateSingleValueRows(Ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), "No IPv6 gateway");
-            PopulateSingleValueRows(Ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), "No IPv6 DNS server");
+            PopulateSingleValueRows(Ipv6GatewayListView, _selected?.Ipv6Gateways ?? Array.Empty<string>(), Resources.FallbackNoIpv6Gateway);
+            PopulateSingleValueRows(Ipv6DnsListView, _selected?.Ipv6DnsServers ?? Array.Empty<string>(), Resources.FallbackNoIpv6DnsServer);
         }
 
         private void BindSelection()
@@ -869,7 +869,7 @@ namespace Dzmac.Forms
             _isVendorListLoading = true;
             if (!IsDisposed)
             {
-                MainStatusBar.Text = "Loading vendor list...";
+                MainStatusBar.Text = Resources.StatusLoadingVendorList;
             }
 
             try
@@ -894,9 +894,9 @@ namespace Dzmac.Forms
                     _isVendorListReady = true;
                     UpdateSelectionState();
 
-                    if (MainStatusBar.Text == "Loading vendor list...")
+                    if (MainStatusBar.Text == Resources.StatusLoadingVendorList)
                     {
-                        MainStatusBar.Text = "Ready";
+                        MainStatusBar.Text = Resources.StatusReady;
                     }
                 }));
             }
@@ -911,8 +911,8 @@ namespace Dzmac.Forms
                             return;
                         }
 
-                        MainStatusBar.Text = "Vendor list failed to load.";
-                        _ = MessageBox.Show(ex.Message, "Vendor List Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MainStatusBar.Text = Resources.StatusVendorListFailed;
+                        _ = MessageBox.Show(ex.Message, Resources.VendorListFailed_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }));
                 }
             }
@@ -931,7 +931,7 @@ namespace Dzmac.Forms
 
             _isVendorComboLoading = true;
             var existingStatus = MainStatusBar.Text;
-            MainStatusBar.Text = "Preparing vendor list...";
+            MainStatusBar.Text = Resources.StatusPreparingVendorList;
 
             try
             {
@@ -963,14 +963,14 @@ namespace Dzmac.Forms
             {
                 if (!IsDisposed)
                 {
-                    _ = MessageBox.Show(ex.Message, "Vendor List Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _ = MessageBox.Show(ex.Message, Resources.VendorListFailed_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             finally
             {
-                if (!IsDisposed && MainStatusBar.Text == "Preparing vendor list...")
+                if (!IsDisposed && MainStatusBar.Text == Resources.StatusPreparingVendorList)
                 {
-                    MainStatusBar.Text = string.IsNullOrWhiteSpace(existingStatus) ? "Ready" : existingStatus;
+                    MainStatusBar.Text = string.IsNullOrWhiteSpace(existingStatus) ? Resources.StatusReady : existingStatus;
                 }
 
                 _isVendorComboLoading = false;
@@ -1070,7 +1070,7 @@ namespace Dzmac.Forms
 
             if (Ipv4AddressListView.Items.Count == 0)
             {
-                Ipv4AddressListView.Items.Add(new ListViewItem(new[] { "No IPv4 address", string.Empty }));
+                Ipv4AddressListView.Items.Add(new ListViewItem(new[] { Resources.FallbackNoIpv4Address, string.Empty }));
             }
 
             Ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -1089,7 +1089,7 @@ namespace Dzmac.Forms
 
             if (Ipv6AddressListView.Items.Count == 0)
             {
-                Ipv6AddressListView.Items.Add(new ListViewItem(new[] { "No IPv6 address", string.Empty }));
+                Ipv6AddressListView.Items.Add(new ListViewItem(new[] { Resources.FallbackNoIpv6Address, string.Empty }));
             }
 
             Ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
@@ -1167,15 +1167,15 @@ namespace Dzmac.Forms
             {
                 if (!IsDisposed)
                 {
-                    MainStatusBar.Text = "Adapter loading cancelled.";
+                    MainStatusBar.Text = Resources.StatusAdapterLoadCancelled;
                 }
             }
             catch (Exception ex)
             {
                 if (!IsDisposed)
                 {
-                    MainStatusBar.Text = "Failed to load network adapters.";
-                    _ = MessageBox.Show(ex.Message, "Adapter Discovery Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MainStatusBar.Text = Resources.StatusFailedLoadAdapters;
+                    _ = MessageBox.Show(ex.Message, Resources.AdapterDiscoveryFailed_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             finally
@@ -1209,7 +1209,7 @@ namespace Dzmac.Forms
 
                 if (clearListWhileLoading)
                 {
-                    ConnectionsGrid.EmptyListMsg = "Loading network adapters...";
+                    ConnectionsGrid.EmptyListMsg = Resources.StatusLoadingAdapters;
                     ConnectionsGrid.DataSource = Array.Empty<NetworkConnection>();
                     _selected = null;
                     BindSelection();
@@ -1223,7 +1223,7 @@ namespace Dzmac.Forms
                     _loadingProgressTimer.Stop();
                 }
                 _loadingProgressBar.Value = _loadingProgressBar.Minimum;
-                ConnectionsGrid.EmptyListMsg = "No network adapters loaded.";
+                ConnectionsGrid.EmptyListMsg = Resources.StatusNoAdaptersLoaded;
             }
 
             UpdateSelectionState();
@@ -1286,7 +1286,7 @@ namespace Dzmac.Forms
             DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
             DeleteItem.Enabled = enableActions;
             ToggleAdapterEnabledItem.Enabled = enableActions;
-            ToggleAdapterEnabledItem.Text = !hasSelection || !(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection) || selectedConnection.Enabled ? "Disable Adapter" : "Enable Adapter";
+            ToggleAdapterEnabledItem.Text = !hasSelection || !(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection) || selectedConnection.Enabled ? Resources.ToggleDisableAdapter : Resources.ToggleEnableAdapter;
         }
 
         private List<NetworkConnection> GetRetainedDisabledConnections(IReadOnlyCollection<NetworkConnection> refreshedConnections, bool physicalOnly)
@@ -1331,7 +1331,7 @@ namespace Dzmac.Forms
 
             var approvalResult = MessageBox.Show(
                 $"Are you sure you want to {targetState} '{selectedAdapterName}'?",
-                "Confirm Adapter State Change",
+                Resources.ConfirmAdapterStateChange_Title,
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
 
@@ -1365,7 +1365,7 @@ namespace Dzmac.Forms
                 ("operationCode", operationResult.Code.ToString()));
             _ = MessageBox.Show(
                 $"{operationResult.Message} (Code: {operationResult.Code})",
-                "Adapter State Change Failed",
+                Resources.AdapterStateChangeFailed_Title,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
             ConnectionsGrid.RefreshObject(connection);
@@ -1566,10 +1566,10 @@ namespace Dzmac.Forms
 
             if (shouldResetPerformanceState)
             {
-                _performanceReceivedLabel.Text = "Received: resolving adapter...";
-                _performanceReceivedSpeedLabel.Text = "-Speed  : waiting for sample...";
-                _performanceSentLabel.Text = "Sent    : resolving adapter...";
-                _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
+                _performanceReceivedLabel.Text = Resources.PerfReceivedResolving;
+                _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedWaiting;
+                _performanceSentLabel.Text = Resources.PerfSentResolving;
+                _performanceSentSpeedLabel.Text = Resources.PerfSpeedWaiting;
                 ResetPerformanceBuffers();
                 _performanceGraphPanel.Invalidate();
             }
@@ -1585,17 +1585,17 @@ namespace Dzmac.Forms
             if (resolvedInterface == null)
             {
                 _performanceHistoryConfigId = null;
-                _performanceReceivedLabel.Text = "Received: unavailable";
-                _performanceReceivedSpeedLabel.Text = "-Speed  : unavailable";
-                _performanceSentLabel.Text = "Sent    : unavailable";
-                _performanceSentSpeedLabel.Text = "-Speed  : unavailable";
+                _performanceReceivedLabel.Text = Resources.PerfReceivedUnavailable;
+                _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedUnavailable;
+                _performanceSentLabel.Text = Resources.PerfSentUnavailable;
+                _performanceSentSpeedLabel.Text = Resources.PerfSpeedUnavailable;
                 return Task.CompletedTask;
             }
 
-            _performanceReceivedLabel.Text = "Received: waiting for sample...";
-            _performanceReceivedSpeedLabel.Text = "-Speed  : waiting for sample...";
-            _performanceSentLabel.Text = "Sent    : waiting for sample...";
-            _performanceSentSpeedLabel.Text = "-Speed  : waiting for sample...";
+            _performanceReceivedLabel.Text = Resources.PerfReceivedWaiting;
+            _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedWaiting;
+            _performanceSentLabel.Text = Resources.PerfSentWaiting;
+            _performanceSentSpeedLabel.Text = Resources.PerfSpeedWaiting;
 
             _performanceLoopCancellation = new CancellationTokenSource();
             _performanceHistoryConfigId = networkConfigId;
@@ -1615,10 +1615,10 @@ namespace Dzmac.Forms
             {
                 _performanceHistoryConfigId = null;
                 ResetPerformanceBuffers();
-                _performanceReceivedLabel.Text = "Received: 0 B";
-                _performanceReceivedSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
-                _performanceSentLabel.Text = "Sent    : 0 B";
-                _performanceSentSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
+                _performanceReceivedLabel.Text = Resources.PerfReceivedZero;
+                _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedZero;
+                _performanceSentLabel.Text = Resources.PerfSentZero;
+                _performanceSentSpeedLabel.Text = Resources.PerfSpeedZero;
                 _performanceGraphPanel.Invalidate();
             }
         }

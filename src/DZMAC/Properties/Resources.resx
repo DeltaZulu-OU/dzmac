@@ -1,17 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -114,4 +114,246 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+
+  <!-- Dialog / MessageBox messages -->
+  <data name="MacAddressInvalid" xml:space="preserve">
+    <value>Please enter a valid MAC address.</value>
+  </data>
+  <data name="MacAddressUpdateSuccess" xml:space="preserve">
+    <value>Successfully updated MAC address</value>
+  </data>
+  <data name="AdapterRegistryDeleteSuccess" xml:space="preserve">
+    <value>Successfully deleted the adapter's registry key.</value>
+  </data>
+  <data name="NoAdaptersToExport" xml:space="preserve">
+    <value>No network adapter information is available to export.</value>
+  </data>
+  <data name="StartupFailed" xml:space="preserve">
+    <value>Startup initialization failed.</value>
+  </data>
+  <data name="VendorListStillLoading" xml:space="preserve">
+    <value>Vendor list is still loading. Please try again in a moment.</value>
+  </data>
+  <data name="MacAddressRestoreSuccess" xml:space="preserve">
+    <value>Successfully restored MAC address</value>
+  </data>
+  <data name="MacAddressRestoreFailed" xml:space="preserve">
+    <value>Failed to restore MAC address</value>
+  </data>
+  <data name="NotImplemented" xml:space="preserve">
+    <value>Not implemented.</value>
+  </data>
+  <data name="OuiDownloadConfirmMessage" xml:space="preserve">
+    <value>This will initiate OUI download in the background.
+
+Are you sure?</value>
+  </data>
+  <data name="VendorListUpdated" xml:space="preserve">
+    <value>Vendor list updated.</value>
+  </data>
+  <data name="ExportFailed" xml:space="preserve">
+    <value>Failed to export text report.</value>
+  </data>
+
+  <!-- Dialog titles -->
+  <data name="MacAddressChange_Title" xml:space="preserve">
+    <value>MAC Address Change</value>
+  </data>
+  <data name="ConfirmRegistryDelete_Title" xml:space="preserve">
+    <value>Confirm Registry Adapter Deletion</value>
+  </data>
+  <data name="DeleteAdapter_Title" xml:space="preserve">
+    <value>Delete Adapter</value>
+  </data>
+  <data name="DeleteAdapterFailed_Title" xml:space="preserve">
+    <value>Delete Adapter Failed</value>
+  </data>
+  <data name="ExportTextReport_Title" xml:space="preserve">
+    <value>Export Text Report</value>
+  </data>
+  <data name="InitializationError_Title" xml:space="preserve">
+    <value>Initialization Error</value>
+  </data>
+  <data name="Success_Title" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Failure_Title" xml:space="preserve">
+    <value>Failure</value>
+  </data>
+  <data name="VendorListLoading_Title" xml:space="preserve">
+    <value>Vendor List Loading</value>
+  </data>
+  <data name="VendorListUnavailable_Title" xml:space="preserve">
+    <value>Vendor List Unavailable</value>
+  </data>
+  <data name="MacAddressRestore_Title" xml:space="preserve">
+    <value>MAC Address Restore</value>
+  </data>
+  <data name="Information_Title" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="UpdateOui_Title" xml:space="preserve">
+    <value>Update Vendor List (OUI) from IEEE</value>
+  </data>
+  <data name="NetworkConnections_Title" xml:space="preserve">
+    <value>Network Connections</value>
+  </data>
+  <data name="VendorListFailed_Title" xml:space="preserve">
+    <value>Vendor List Failed</value>
+  </data>
+  <data name="AdapterDiscoveryFailed_Title" xml:space="preserve">
+    <value>Adapter Discovery Failed</value>
+  </data>
+  <data name="AdapterStateChangeFailed_Title" xml:space="preserve">
+    <value>Adapter State Change Failed</value>
+  </data>
+  <data name="ConfirmAdapterStateChange_Title" xml:space="preserve">
+    <value>Confirm Adapter State Change</value>
+  </data>
+  <data name="UnhandledException_Title" xml:space="preserve">
+    <value>Unhandled exception</value>
+  </data>
+
+  <!-- Status bar text -->
+  <data name="StatusNoAdaptersLoaded" xml:space="preserve">
+    <value>No network adapters loaded.</value>
+  </data>
+  <data name="StatusLoadingAdapters" xml:space="preserve">
+    <value>Loading network adapters...</value>
+  </data>
+  <data name="StatusAdapterLoadCancelled" xml:space="preserve">
+    <value>Adapter loading cancelled.</value>
+  </data>
+  <data name="StatusFailedLoadAdapters" xml:space="preserve">
+    <value>Failed to load network adapters.</value>
+  </data>
+  <data name="StatusLoadingVendorList" xml:space="preserve">
+    <value>Loading vendor list...</value>
+  </data>
+  <data name="StatusPreparingVendorList" xml:space="preserve">
+    <value>Preparing vendor list...</value>
+  </data>
+  <data name="StatusVendorListFailed" xml:space="preserve">
+    <value>Vendor list failed to load.</value>
+  </data>
+  <data name="StatusVendorListUpdateCancelled" xml:space="preserve">
+    <value>Vendor list update canceled.</value>
+  </data>
+  <data name="StatusVendorListUpdateFailed" xml:space="preserve">
+    <value>Vendor list update failed.</value>
+  </data>
+  <data name="StatusDownloadingOui" xml:space="preserve">
+    <value>Downloading OUI data...</value>
+  </data>
+  <data name="StatusReady" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+
+  <!-- Fallback display text -->
+  <data name="FallbackNoIpv4Gateway" xml:space="preserve">
+    <value>No IPv4 gateway</value>
+  </data>
+  <data name="FallbackNoIpv4DnsServer" xml:space="preserve">
+    <value>No IPv4 DNS server</value>
+  </data>
+  <data name="FallbackNoIpv6Gateway" xml:space="preserve">
+    <value>No IPv6 gateway</value>
+  </data>
+  <data name="FallbackNoIpv6DnsServer" xml:space="preserve">
+    <value>No IPv6 DNS server</value>
+  </data>
+  <data name="FallbackNoIpv4Address" xml:space="preserve">
+    <value>No IPv4 address</value>
+  </data>
+  <data name="FallbackNoIpv6Address" xml:space="preserve">
+    <value>No IPv6 address</value>
+  </data>
+
+  <!-- Performance panel labels -->
+  <data name="PerfReceivedResolving" xml:space="preserve">
+    <value>Received: resolving adapter...</value>
+  </data>
+  <data name="PerfSpeedWaiting" xml:space="preserve">
+    <value>-Speed  : waiting for sample...</value>
+  </data>
+  <data name="PerfSentResolving" xml:space="preserve">
+    <value>Sent    : resolving adapter...</value>
+  </data>
+  <data name="PerfReceivedUnavailable" xml:space="preserve">
+    <value>Received: unavailable</value>
+  </data>
+  <data name="PerfSpeedUnavailable" xml:space="preserve">
+    <value>-Speed  : unavailable</value>
+  </data>
+  <data name="PerfSentUnavailable" xml:space="preserve">
+    <value>Sent    : unavailable</value>
+  </data>
+  <data name="PerfReceivedWaiting" xml:space="preserve">
+    <value>Received: waiting for sample...</value>
+  </data>
+  <data name="PerfSentWaiting" xml:space="preserve">
+    <value>Sent    : waiting for sample...</value>
+  </data>
+  <data name="PerfReceivedZero" xml:space="preserve">
+    <value>Received: 0 B</value>
+  </data>
+  <data name="PerfSpeedZero" xml:space="preserve">
+    <value>-Speed  : 0 bps (Peak 0 bps)</value>
+  </data>
+  <data name="PerfSentZero" xml:space="preserve">
+    <value>Sent    : 0 B</value>
+  </data>
+
+  <!-- Other UI text -->
+  <data name="ToggleDisableAdapter" xml:space="preserve">
+    <value>Disable Adapter</value>
+  </data>
+  <data name="ToggleEnableAdapter" xml:space="preserve">
+    <value>Enable Adapter</value>
+  </data>
+  <data name="ExportFileFilter" xml:space="preserve">
+    <value>Text Files (*.txt)|*.txt|All Files (*.*)|*.*</value>
+  </data>
+
+  <!-- CLI error messages -->
+  <data name="CliMissingConnectionName" xml:space="preserve">
+    <value>Missing required option: -n network_connection_name</value>
+  </data>
+  <data name="CliRestoreOriginalFailed" xml:space="preserve">
+    <value>Failed to restore original MAC address record.</value>
+  </data>
+  <data name="CliUpdateMacFailed" xml:space="preserve">
+    <value>Failed to update MAC address.</value>
+  </data>
+  <data name="CliEnableDhcpFailed" xml:space="preserve">
+    <value>Failed to enable DHCPv4.</value>
+  </data>
+  <data name="CliSetIpv4Failed" xml:space="preserve">
+    <value>Failed to set IPv4 addresses.</value>
+  </data>
+  <data name="CliSetGatewayFailed" xml:space="preserve">
+    <value>Failed to set IPv4 gateways.</value>
+  </data>
+  <data name="CliSetDnsFailed" xml:space="preserve">
+    <value>Failed to set IPv4 DNS servers.</value>
+  </data>
+  <data name="CliDisableAdapterFailed" xml:space="preserve">
+    <value>Failed to disable network connection.</value>
+  </data>
+  <data name="CliEnableAdapterFailed" xml:space="preserve">
+    <value>Failed to enable network connection.</value>
+  </data>
+  <data name="CliResetAdapterFailed" xml:space="preserve">
+    <value>Failed to reset network connection.</value>
+  </data>
+  <data name="CliDuplicateMacOption" xml:space="preserve">
+    <value>Only one MAC address option can be specified at a time.</value>
+  </data>
+  <data name="CliInvalidDnsValue" xml:space="preserve">
+    <value>Invalid -d value. Expected at least one DNS server.</value>
+  </data>
+  <data name="CliUnsupportedOption" xml:space="preserve">
+    <value>Option is intentionally unsupported in this reimplementation (see README product decisions).</value>
+  </data>
+
 </root>
