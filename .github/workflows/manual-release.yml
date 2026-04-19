@@ -1,0 +1,79 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore packages
+        run: nuget restore src/DZMAC.sln
+
+      - name: Read version from code
+        id: version
+        shell: pwsh
+        run: |
+          $assemblyInfoPath = 'src/DZMAC/Properties/AssemblyInfo.cs'
+          $content = Get-Content $assemblyInfoPath -Raw
+          $match = [regex]::Match($content, 'AssemblyVersion\("([0-9]+(?:\.[0-9]+){1,3})"\)')
+
+          if (-not $match.Success) {
+            throw "Unable to read AssemblyVersion from $assemblyInfoPath"
+          }
+
+          $version = $match.Groups[1].Value
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "tag=v$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Build
+        run: msbuild src/DZMAC.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+      - name: Prepare release artifacts
+        id: artifacts
+        shell: pwsh
+        run: |
+          $buildOutputDir = 'src/DZMAC/bin/Release'
+          $expectedDmacExe = Join-Path $buildOutputDir 'DMAC.exe'
+          $dzmacExe = Join-Path $buildOutputDir 'DZMAC.exe'
+
+          if (Test-Path $expectedDmacExe) {
+            $releaseExe = $expectedDmacExe
+          }
+          elseif (Test-Path $dzmacExe) {
+            $releaseExe = $expectedDmacExe
+            Copy-Item $dzmacExe $releaseExe -Force
+          }
+          else {
+            throw 'Neither DMAC.exe nor DZMAC.exe was found in release output.'
+          }
+
+          $sha256 = (Get-FileHash -Path $releaseExe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $shaPath = "$releaseExe.sha256"
+          "${sha256} *DMAC.exe" | Set-Content -Path $shaPath -NoNewline
+
+          "exe_path=$releaseExe" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          "sha_path=$shaPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: DZMAC v${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.artifacts.outputs.exe_path }}
+            ${{ steps.artifacts.outputs.sha_path }}
