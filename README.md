@@ -25,6 +25,7 @@ product and UX choices. The list below highlights the most important current
 differences so expectations are clear.
 
 ### Physical adapters first (virtual adapters optional)
+
 By default, DZMAC focuses the adapter list on likely physical adapters for a
 cleaner day-to-day experience. Virtual/logical adapters can still be shown
 through **Options → Show All Adapters**.
@@ -34,6 +35,7 @@ what is currently shown in the adapter list. To export all adapters (including
 virtual/logical), enable **Options → Show All Adapters** first.
 
 ### Adapter enable/disable is menu-driven
+
 The **Enabled** checkbox in the adapter list is intentionally read-only and
 serves as a status indicator only.
 
@@ -41,34 +43,45 @@ Adapter state changes are performed exclusively through
 **Action → Enable Adapter** / **Action → Disable Adapter** so the flow can
 consistently enforce confirmation dialogs, status-bar feedback, and diagnostics.
 
+### Event logs
+
+The Windows event logs are used for diagnosing issues, and can be found under **Event Logs > Applications > DZMAC**. For a clearer understanding, visit [Event Log Catalog](https://github.com/zbalkan/dzmac/wiki/Event-Log-Catalog) page.
+
 ### Narrower feature scope, fewer bundled utilities
+
 The following decisions define the current user-facing scope:
 
 #### No DHCPv6
+
 Only DHCPv4 is supported. DHCPv6 is intentionally out of scope.
 
 #### No proxy management
+
 Internet Explorer / system proxy configuration is not supported.
 
 #### No auto-updater
+
 The application does not include update infrastructure.
 
 #### No system tray
+
 The application is not a background utility:
 - no system tray icon
 - no tray animation
 
 #### Preset file support is postponed
+
 Preset files (`.tpf`) are planned but not part of the current milestone.  
 As a result:
 - no startup file association checks
 - no preset import/export in current scope
 
 #### Reduced "all-in-one" behavior
-Unlike TMAC's broader utility surface, DZMAC keeps optional/auxiliary behavior
-to a minimum and emphasizes explicit, focused actions in the main UI.
+
+Unlike TMAC's broader utility surface, DZMAC keeps optional/auxiliary behavior to a minimum and emphasizes explicit, focused actions in the main UI.
 
 ### DHCP disable behavior is safe-by-default
+
 Disabling DHCPv4 preserves the current configuration instead of discarding it.
 
 ## Acknowledgements
