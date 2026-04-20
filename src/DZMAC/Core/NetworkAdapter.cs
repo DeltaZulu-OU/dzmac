@@ -49,6 +49,7 @@ namespace Dzmac.Core
         private const string RegistryClassKey = @"SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
         private const string RegistryMacOverrideValueName = "NetworkAddress";
         private const string TmacOriginalMacValueName = "OriginalNetworkAddress";
+        private static readonly MacAddress UnknownMacAddress = new MacAddress("000000000000");
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
 
@@ -610,7 +611,7 @@ namespace Dzmac.Core
             {
                 if (shouldReenable && !TryEnableAdapter())
                 {
-                    throw new DZMACException("Failed to re-enable network adapter.");
+                    Diagnostics.Error("adapter_reenable_failed", null, "Failed to re-enable network adapter.", ("adapter", Name));
                 }
             }
         }
@@ -819,7 +820,7 @@ namespace Dzmac.Core
                 var registryKey = GetRegistryKey();
                 if (string.IsNullOrWhiteSpace(registryKey))
                 {
-                    return new MacAddress(_networkInterface.GetPhysicalAddress());
+                    return TryGetPhysicalMacAddressOrUnknown();
                 }
 
                 var address = _registryClient.ReadValue(registryKey, TmacOriginalMacValueName);
@@ -832,10 +833,21 @@ namespace Dzmac.Core
             catch
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] Failed to read original MAC from registry for adapter '{Name}'. Falling back to physical address.");
-                return new MacAddress(_networkInterface.GetPhysicalAddress());
+                return TryGetPhysicalMacAddressOrUnknown();
             }
 
-            return new MacAddress(_networkInterface.GetPhysicalAddress());
+            return TryGetPhysicalMacAddressOrUnknown();
+        }
+
+        private MacAddress TryGetPhysicalMacAddressOrUnknown()
+        {
+            var physicalAddressBytes = _networkInterface.GetPhysicalAddress().GetAddressBytes();
+            if (physicalAddressBytes.Length != 6)
+            {
+                return UnknownMacAddress;
+            }
+
+            return new MacAddress(MacAddress.MacToString(physicalAddressBytes));
         }
 
         private string? GetOriginalVendor()

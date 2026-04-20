@@ -61,7 +61,7 @@ namespace Dzmac.Core
             Debug.WriteLine($"Querying vendor list (OUI: {normalized})...");
             var records = Records;
             return useWildcard
-                ? records.FirstOrDefault(v => MatchesWildcard(v.Oui, normalized))
+                ? records.FirstOrDefault(v => MatchesLocallyAdministeredNibbleWildcard(v.Oui, normalized))
                 : records.FirstOrDefault(v => v.Oui == normalized);
         }
 
@@ -94,7 +94,7 @@ namespace Dzmac.Core
             return selected.Value;
         }
 
-        public void Refresh() => RefreshAsync(CancellationToken.None).GetAwaiter().GetResult();
+        public void Refresh() => Task.Run(() => RefreshAsync(CancellationToken.None)).GetAwaiter().GetResult();
 
         public Task RefreshAsync(CancellationToken cancellationToken)
         {
@@ -117,10 +117,13 @@ namespace Dzmac.Core
             if (vendors == null) throw new ArgumentNullException(nameof(vendors));
 
             Debug.WriteLine("Adding to vendor list...");
-            var records = Records;
-            var seenOui = new HashSet<string>(records.Select(v => v.Oui), StringComparer.OrdinalIgnoreCase);
-            NormalizeInto(vendors, records, seenOui, "AddRange");
-            Save(records);
+            lock (_sync)
+            {
+                var records = _records ??= Load(_csvPath);
+                var seenOui = new HashSet<string>(records.Select(v => v.Oui), StringComparer.OrdinalIgnoreCase);
+                NormalizeInto(vendors, records, seenOui, "AddRange");
+                Save(records);
+            }
         }
 
         /// <summary>
@@ -148,13 +151,12 @@ namespace Dzmac.Core
         public void Clear()
         {
             Debug.WriteLine("Clearing vendor list...");
-            var records = Records;
             lock (_sync)
             {
+                var records = _records ??= Load(_csvPath);
                 records.Clear();
+                Save(records);
             }
-
-            Save(records);
         }
 
         // ── Private implementation ───────────────────────────────────────────────
@@ -202,7 +204,7 @@ namespace Dzmac.Core
             }
         }
 
-        private static bool MatchesWildcard(string candidate, string pattern) => candidate.Length == 6
+        private static bool MatchesLocallyAdministeredNibbleWildcard(string candidate, string pattern) => candidate.Length == 6
                    && pattern.Length == 6
                    && candidate[0] == pattern[0]
                    && string.Equals(candidate.Substring(2), pattern.Substring(2), StringComparison.Ordinal);
@@ -239,7 +241,7 @@ namespace Dzmac.Core
             var normalized = oui.Trim().TrimStart('\uFEFF').ToUpperInvariant();
             if (!OuiPattern.IsMatch(normalized))
             {
-                throw new ArgumentException(nameof(oui));
+                throw new ArgumentException($"Value '{oui}' is not a valid 6-character hex OUI.", nameof(oui));
             }
 
             return normalized;

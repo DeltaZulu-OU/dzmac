@@ -5,13 +5,13 @@ namespace Dzmac.Core
     /// <summary>
     ///     A DTO to carry an OUI-Vendor name pair
     /// </summary>
-    internal struct Vendor : IEquatable<Vendor>
+    internal readonly struct Vendor : IEquatable<Vendor>
     {
-        public string Oui { get; set; }
+        public string Oui { get; }
 
-        public string VendorName { get; set; }
+        public string VendorName { get; }
 
-        public Vendor(string oui, string vendorName) : this()
+        public Vendor(string oui, string vendorName)
         {
             Oui = oui;
             VendorName = vendorName;

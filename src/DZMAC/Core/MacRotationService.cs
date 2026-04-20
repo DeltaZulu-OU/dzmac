@@ -8,6 +8,29 @@ namespace Dzmac.Core
 {
     internal static class MacRotationService
     {
+        private enum MacApplyResultCode
+        {
+            Ok,
+            Timeout,
+            RegistryDenied,
+            WmiFailure,
+            VerificationFailed
+        }
+
+        private struct MacApplyResult
+        {
+            public MacApplyResult(bool success, string message, MacApplyResultCode code)
+            {
+                Success = success;
+                Message = message;
+                Code = code;
+            }
+
+            public bool Success { get; }
+            public string Message { get; }
+            public MacApplyResultCode Code { get; }
+        }
+
         private const int MacPollingIntervalMs = 200;
         private const int DisablePollTimeoutMs = 10000;
         private const int EnablePollTimeoutMs = 10000;
@@ -39,18 +62,18 @@ namespace Dzmac.Core
                 var attemptResult = TryApplyMacAttempt(adapter, attemptMac, persistOriginalRecord, progress);
                 if (attemptResult.Success)
                 {
-                    return attemptResult;
+                    return (true, attemptResult.Message);
                 }
 
-                if (attemptResult.Message.Contains("ERR_TIMEOUT"))
+                if (attemptResult.Code == MacApplyResultCode.Timeout)
                 {
                     RevertToFactoryState(adapter, progress);
                     return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
                 }
 
-                if (attemptResult.Message.Contains("ERR_REG_DENIED") || attemptResult.Message.Contains("ERR_WMI_FAIL"))
+                if (attemptResult.Code == MacApplyResultCode.RegistryDenied || attemptResult.Code == MacApplyResultCode.WmiFailure)
                 {
-                    return attemptResult;
+                    return (false, attemptResult.Message);
                 }
             }
 
@@ -58,7 +81,7 @@ namespace Dzmac.Core
             return (false, "This device is hardware-locked against MAC spoofing. (ERR_HW_LOCKED)");
         }
 
-        private static (bool Success, string Message) TryApplyMacAttempt(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
+        private static MacApplyResult TryApplyMacAttempt(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
         {
             using var watchdogCts = new CancellationTokenSource(AttemptWatchdogTimeoutMs);
             var token = watchdogCts.Token;
@@ -70,11 +93,11 @@ namespace Dzmac.Core
             }
             catch (UnauthorizedAccessException)
             {
-                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
+                return new MacApplyResult(false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)", MacApplyResultCode.RegistryDenied);
             }
             catch (SecurityException)
             {
-                return (false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)");
+                return new MacApplyResult(false, "Access Denied. Please run as Administrator. (ERR_REG_DENIED)", MacApplyResultCode.RegistryDenied);
             }
 
             try
@@ -82,7 +105,7 @@ namespace Dzmac.Core
                 progress.Report("Requesting adapter shutdown...");
                 if (!adapter.TryDisableAdapter())
                 {
-                    return (false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)");
+                    return new MacApplyResult(false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)", MacApplyResultCode.WmiFailure);
                 }
 
                 var disableAttempts = 0;
@@ -95,14 +118,14 @@ namespace Dzmac.Core
 
                     if (disableAttempts * MacPollingIntervalMs >= DisablePollTimeoutMs)
                     {
-                        return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+                        return new MacApplyResult(false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)", MacApplyResultCode.Timeout);
                     }
                 }
 
                 progress.Report("Requesting adapter start...");
                 if (!adapter.TryEnableAdapter())
                 {
-                    return (false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)");
+                    return new MacApplyResult(false, "System refused to toggle hardware state. Check VPN/AV. (ERR_WMI_FAIL)", MacApplyResultCode.WmiFailure);
                 }
 
                 var enableAttempts = 0;
@@ -115,23 +138,24 @@ namespace Dzmac.Core
 
                     if (enableAttempts * MacPollingIntervalMs >= EnablePollTimeoutMs)
                     {
-                        return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+                        return new MacApplyResult(false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)", MacApplyResultCode.Timeout);
                     }
                 }
             }
             catch (OperationCanceledException)
             {
-                return (false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)");
+                return new MacApplyResult(false, "Hardware initialization timeout. Check Device Manager. (ERR_TIMEOUT)", MacApplyResultCode.Timeout);
             }
 
             progress.Report("Verifying MAC change...");
             var liveMac = adapter.GetLiveLinkAddress();
             if (liveMac != null && liveMac.Equals(target))
             {
-                return (true, "OK");
+                return new MacApplyResult(true, "OK", MacApplyResultCode.Ok);
             }
 
-            return (false, "Verification failed.");
+            RevertToFactoryState(adapter, progress);
+            return new MacApplyResult(false, "Verification failed. Reverted to factory settings.", MacApplyResultCode.VerificationFailed);
         }
 
         private static void RevertToFactoryState(NetworkAdapter adapter, IProgress<string> progress)

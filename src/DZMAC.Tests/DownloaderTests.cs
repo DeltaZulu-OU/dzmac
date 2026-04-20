@@ -34,5 +34,13 @@ namespace Dzmac.Tests
 
             Assert.AreEqual("2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824", hash);
         }
+
+        [TestMethod]
+        public void ComputeSha256ForBytesShouldReturnDeterministicValue()
+        {
+            var hash = Downloader.ComputeSha256(new byte[] { 0x68, 0x65, 0x6C, 0x6C, 0x6F });
+
+            Assert.AreEqual("2CF24DBA5FB0A30E26E83B2AC5B9E29E1B161E5C1FA7425E73043362938B9824", hash);
+        }
     }
 }

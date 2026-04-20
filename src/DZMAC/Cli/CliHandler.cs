@@ -143,7 +143,7 @@ namespace Dzmac
 
             if (macOperation.Force02)
             {
-                mac.SetAsLocallyAdministered();
+                mac = mac.AsLocallyAdministered();
             }
 
             return mac;

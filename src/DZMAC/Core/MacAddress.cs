@@ -66,7 +66,13 @@ namespace Dzmac.Core
                 throw new ArgumentNullException(nameof(macAddress));
             }
 
-            _macAddress = macAddress.ToString().ToUpperInvariant().Replace("-", string.Empty);
+            var normalizedMacAddress = macAddress.ToString().ToUpperInvariant().Replace("-", string.Empty);
+            if (!IsValidMac(normalizedMacAddress))
+            {
+                throw new ArgumentException("PhysicalAddress does not represent a valid 6-byte MAC.", nameof(macAddress));
+            }
+
+            _macAddress = normalizedMacAddress;
         }
 
         /// <summary>
@@ -95,6 +101,16 @@ namespace Dzmac.Core
         /// <returns>A MAC address with the specified OUI.</returns>
         public static MacAddress GetNewMac(string oui)
         {
+            if (oui == null)
+            {
+                throw new ArgumentNullException(nameof(oui));
+            }
+
+            if (!Regex.IsMatch(oui, "^[0-9A-Fa-f]{6}$", RegexOptions.CultureInvariant))
+            {
+                throw new ArgumentException("OUI must be exactly 6 hex characters.", nameof(oui));
+            }
+
             var ouiOctet = ConvertHexStringToByteArray(oui);
 
             var r = new Random();
@@ -167,11 +183,11 @@ namespace Dzmac.Core
         ///     Mark the MAC address as locally administered.
         ///     <see href="https://github.com/zbalkan/DZMAC/wiki/Help#why-does-setting-the-first-octet-to-02-help-with-some-wi-fi-mac-changes"/>
         /// </summary>
-        public void SetAsLocallyAdministered()
+        public MacAddress AsLocallyAdministered()
         {
             var charArray = _macAddress.ToCharArray();
             charArray[1] = locallyAdministeredOctet;
-            _macAddress = new string(charArray);
+            return new MacAddress(new string(charArray));
         }
 
         /// <inheritdoc/>

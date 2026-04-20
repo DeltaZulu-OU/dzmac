@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -18,7 +19,7 @@ namespace Dzmac.Core.Reporting
             report.AppendLine($"DZMAC MAC Address Changer v{productVersion}");
             report.AppendLine("===================================================");
             report.AppendLine();
-            report.AppendLine($"Date: {generatedAt:dddd, MMMM d, yyyy  HH:mm:ss}");
+            report.AppendLine($"Date: {generatedAt.ToString("dddd, MMMM d, yyyy  HH:mm:ss", CultureInfo.InvariantCulture)}");
             report.AppendLine();
             report.AppendLine("Text Report");
             report.AppendLine("===========");

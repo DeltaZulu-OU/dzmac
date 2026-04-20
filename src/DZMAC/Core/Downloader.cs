@@ -15,6 +15,7 @@ namespace Dzmac.Core
     internal static class Downloader
     {
         private const string DefaultOuiAddress = "https://standards-oui.ieee.org/oui/oui.txt";
+        private static readonly HttpClient HttpClient = new HttpClient();
 
         public static async Task<List<Vendor>> GetAllAsync(CancellationToken cancellationToken)
         {
@@ -34,22 +35,22 @@ namespace Dzmac.Core
 
             var retryCount = Math.Max(1, ConfigReader.Current.GetInt(AppSettingKeys.OuiDownloadRetryCount));
 
-            using var httpClient = new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(timeoutSeconds)
-            };
-
             for (var attempt = 1; attempt <= retryCount; attempt++)
             {
                 try
                 {
+                    using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+                    var requestToken = linkedCts.Token;
+
                     Diagnostics.Info("oui_download_attempt", ("attempt", attempt), ("endpoint", ouiAddress));
                     using var request = new HttpRequestMessage(HttpMethod.Get, ouiAddress);
-                    using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    using var response = await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, requestToken).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
 
-                    var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    await VerifyPayloadIntegrityAsync(httpClient, payload, cancellationToken).ConfigureAwait(false);
+                    var payloadBytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                    var payload = Encoding.UTF8.GetString(payloadBytes);
+                    await VerifyPayloadIntegrityAsync(payloadBytes, requestToken).ConfigureAwait(false);
                     Diagnostics.Info("oui_download_completed", ("attempt", attempt), ("bytes", payload.Length));
                     return payload;
                 }
@@ -74,7 +75,7 @@ namespace Dzmac.Core
             throw new DZMACException("Failed to download OUI vendor list from IEEE.");
         }
 
-        private static async Task VerifyPayloadIntegrityAsync(HttpClient httpClient, string payload, CancellationToken cancellationToken)
+        private static async Task VerifyPayloadIntegrityAsync(byte[] payloadBytes, CancellationToken cancellationToken)
         {
             var manifestEndpoint = ConfigReader.Current.GetString(AppSettingKeys.OuiIntegrityManifestEndpoint);
             if (string.IsNullOrWhiteSpace(manifestEndpoint))
@@ -89,7 +90,7 @@ namespace Dzmac.Core
             }
 
             Diagnostics.Info("oui_integrity_manifest_fetch_start", ("endpoint", manifestEndpoint));
-            var manifestResponse = await httpClient.GetAsync(manifestEndpoint, cancellationToken).ConfigureAwait(false);
+            var manifestResponse = await HttpClient.GetAsync(manifestEndpoint, cancellationToken).ConfigureAwait(false);
             manifestResponse.EnsureSuccessStatusCode();
             var manifestBody = await manifestResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 
@@ -99,7 +100,7 @@ namespace Dzmac.Core
                 throw new DZMACException("Configured OUI integrity manifest does not contain a valid SHA-256 checksum.");
             }
 
-            var actualHash = ComputeSha256(payload);
+            var actualHash = ComputeSha256(payloadBytes);
             if (!actualHash.Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
             {
                 Diagnostics.Error("oui_integrity_mismatch", null, "Downloaded OUI payload checksum does not match manifest.", ("expected", expectedHash), ("actual", actualHash));
@@ -129,9 +130,14 @@ namespace Dzmac.Core
 
         internal static string ComputeSha256(string content)
         {
-            using var sha = SHA256.Create();
             var contentBytes = Encoding.UTF8.GetBytes(content);
-            var digest = sha.ComputeHash(contentBytes);
+            return ComputeSha256(contentBytes);
+        }
+
+        internal static string ComputeSha256(byte[] content)
+        {
+            using var sha = SHA256.Create();
+            var digest = sha.ComputeHash(content);
             var builder = new StringBuilder(digest.Length * 2);
             foreach (var item in digest)
             {

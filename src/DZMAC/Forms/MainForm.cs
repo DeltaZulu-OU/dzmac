@@ -475,7 +475,7 @@ namespace Dzmac.Forms
 
             if (_locallyAdministered)
             {
-                randomMac.SetAsLocallyAdministered();
+                randomMac = randomMac.AsLocallyAdministered();
             }
 
             macTextBox.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);

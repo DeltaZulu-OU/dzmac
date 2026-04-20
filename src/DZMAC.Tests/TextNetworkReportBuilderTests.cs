@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Dzmac.Core.Reporting;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -41,7 +42,7 @@ namespace Dzmac.Tests
             var report = sut.BuildReport(entries, generatedAt, "1.2.3");
 
             StringAssert.Contains(report, "DZMAC MAC Address Changer v1.2.3");
-            StringAssert.Contains(report, "Date: Saturday, April 18, 2026  09:30:15");
+            StringAssert.Contains(report, $"Date: {generatedAt.ToString("dddd, MMMM d, yyyy  HH:mm:ss", CultureInfo.InvariantCulture)}");
             StringAssert.Contains(report, "Interface #1");
             StringAssert.Contains(report, "Connection Name                         Ethernet");
             StringAssert.Contains(report, "Link Status                             Up, Operational");
