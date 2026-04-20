@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Dzmac.Core
 {
-    public static class Diagnostics
+    internal static class Diagnostics
     {
         private const string EventLogName = "Application";
         private const string EventLogSource = "DZMAC";

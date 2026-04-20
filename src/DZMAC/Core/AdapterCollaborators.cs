@@ -7,31 +7,9 @@ using Microsoft.Win32;
 
 namespace Dzmac.Core
 {
-    public interface IAdapterWmiClient
+    internal class AdapterWmiClient
     {
-        bool TryResolveByConfigId(string configId, out ManagementObject? adapter, out ManagementObject? adapterConfig);
-    }
-
-    public interface IAdapterRegistryClient
-    {
-        string? TryResolveRegistryKey(string registryClassKey, string configId);
-
-        object? ReadValue(string registryKey, string valueName);
-
-        bool TryValidateAdapterDescription(string registryKey, string description);
-
-        void SetStringValue(string registryKey, string valueName, string value);
-
-        void DeleteValue(string registryKey, string valueName);
-
-        void DeleteKeyTree(string registryKey);
-
-        void EnsureNetworkAddressParameter(string registryKey);
-    }
-
-    public sealed class AdapterWmiClient : IAdapterWmiClient
-    {
-        public bool TryResolveByConfigId(string configId, out ManagementObject? adapter, out ManagementObject? adapterConfig)
+        public virtual bool TryResolveByConfigId(string configId, out ManagementObject? adapter, out ManagementObject? adapterConfig)
         {
             adapter = null;
             adapterConfig = null;
@@ -57,9 +35,9 @@ namespace Dzmac.Core
         }
     }
 
-    public sealed class AdapterRegistryClient : IAdapterRegistryClient
+    internal class AdapterRegistryClient
     {
-        public string? TryResolveRegistryKey(string registryClassKey, string configId)
+        public virtual string? TryResolveRegistryKey(string registryClassKey, string configId)
         {
             try
             {
@@ -87,13 +65,13 @@ namespace Dzmac.Core
             return null;
         }
 
-        public object? ReadValue(string registryKey, string valueName)
+        public virtual object? ReadValue(string registryKey, string valueName)
         {
             using var key = Registry.LocalMachine.OpenSubKey(registryKey, false);
             return key?.GetValue(valueName);
         }
 
-        public bool TryValidateAdapterDescription(string registryKey, string description)
+        public virtual bool TryValidateAdapterDescription(string registryKey, string description)
         {
             using var key = Registry.LocalMachine.OpenSubKey(registryKey, false);
             if (key == null)
@@ -105,19 +83,19 @@ namespace Dzmac.Core
                    || string.Equals(key.GetValue("DriverDesc") as string, description, StringComparison.Ordinal);
         }
 
-        public void SetStringValue(string registryKey, string valueName, string value)
+        public virtual void SetStringValue(string registryKey, string valueName, string value)
         {
             using var key = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the registry key");
             key.SetValue(valueName, value, RegistryValueKind.String);
         }
 
-        public void DeleteValue(string registryKey, string valueName)
+        public virtual void DeleteValue(string registryKey, string valueName)
         {
             using var key = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the registry key");
             key.DeleteValue(valueName, false);
         }
 
-        public void DeleteKeyTree(string registryKey)
+        public virtual void DeleteKeyTree(string registryKey)
         {
             var separatorIndex = registryKey.LastIndexOf('\\');
             if (separatorIndex <= 0 || separatorIndex >= registryKey.Length - 1)
@@ -136,7 +114,7 @@ namespace Dzmac.Core
             parentKey.DeleteSubKeyTree(subKeyName, false);
         }
 
-        public void EnsureNetworkAddressParameter(string registryKey)
+        public virtual void EnsureNetworkAddressParameter(string registryKey)
         {
             using var adapterKey = Registry.LocalMachine.OpenSubKey(registryKey, true) ?? throw new DZMACException("Failed to open the adapter registry key.");
             using var ndiKey = adapterKey.CreateSubKey("Ndi");

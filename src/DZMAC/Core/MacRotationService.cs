@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Dzmac.Core
 {
-    public static class MacRotationService
+    internal static class MacRotationService
     {
         private const int MacPollingIntervalMs = 200;
         private const int DisablePollTimeoutMs = 10000;

@@ -1,6 +1,6 @@
 ﻿namespace Dzmac.Controls
 {
-    partial class MacTextBox
+    internal partial class MacTextBox
     {
         /// <summary> 
         /// Required designer variable.

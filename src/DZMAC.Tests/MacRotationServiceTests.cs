@@ -74,7 +74,7 @@ namespace Dzmac.Tests
 
         // ── Fake collaborators ───────────────────────────────────────────────────
 
-        private sealed class FakeWmiClient : IAdapterWmiClient
+        private sealed class FakeWmiClient : AdapterWmiClient
         {
             private readonly bool _resolves;
 
@@ -83,7 +83,7 @@ namespace Dzmac.Tests
                 _resolves = resolves;
             }
 
-            public bool TryResolveByConfigId(string configId, out ManagementObject adapter, out ManagementObject adapterConfig)
+            public override bool TryResolveByConfigId(string configId, out ManagementObject adapter, out ManagementObject adapterConfig)
             {
                 adapter = null;
                 adapterConfig = null;
@@ -91,7 +91,7 @@ namespace Dzmac.Tests
             }
         }
 
-        private sealed class FakeRegistryClient : IAdapterRegistryClient
+        private sealed class FakeRegistryClient : AdapterRegistryClient
         {
             private readonly Exception _throwOnEnsure;
 
@@ -100,20 +100,20 @@ namespace Dzmac.Tests
                 _throwOnEnsure = throwOnEnsure;
             }
 
-            public string TryResolveRegistryKey(string registryClassKey, string configId)
+            public override string TryResolveRegistryKey(string registryClassKey, string configId)
                 => @"SYSTEM\FakeClass\0000";
 
-            public object ReadValue(string registryKey, string valueName) => null;
+            public override object ReadValue(string registryKey, string valueName) => null;
 
-            public bool TryValidateAdapterDescription(string registryKey, string description) => true;
+            public override bool TryValidateAdapterDescription(string registryKey, string description) => true;
 
-            public void SetStringValue(string registryKey, string valueName, string value) { }
+            public override void SetStringValue(string registryKey, string valueName, string value) { }
 
-            public void DeleteValue(string registryKey, string valueName) { }
+            public override void DeleteValue(string registryKey, string valueName) { }
 
-            public void DeleteKeyTree(string registryKey) { }
+            public override void DeleteKeyTree(string registryKey) { }
 
-            public void EnsureNetworkAddressParameter(string registryKey)
+            public override void EnsureNetworkAddressParameter(string registryKey)
             {
                 if (_throwOnEnsure != null)
                 {

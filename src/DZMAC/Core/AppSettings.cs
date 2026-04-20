@@ -6,7 +6,7 @@ using System.Configuration;
 
 namespace Dzmac.Core
 {
-    public interface IAppSettings
+    internal interface IAppSettings
     {
         string GetString(string key);
 
@@ -17,7 +17,7 @@ namespace Dzmac.Core
         void ValidateAndWarn();
     }
 
-    public static class AppSettingKeys
+    internal static class AppSettingKeys
     {
         public const string VerboseDiagnostics = "Dzmac.VerboseDiagnostics";
         public const string OuiCachePath = "Dzmac.OuiCachePath";
@@ -38,7 +38,7 @@ namespace Dzmac.Core
         public const string LegacyAdminOperationRetryCount = "DZMACLib.AdminOperationRetryCount";
     }
 
-    public sealed class ConfigReader : IAppSettings
+    internal sealed class ConfigReader : IAppSettings
     {
         private static readonly ConfigReader _instance = new ConfigReader();
         private readonly Dictionary<string, SettingDefinition> _definitions;

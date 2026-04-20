@@ -7,7 +7,7 @@ using System.Net.Sockets;
 
 namespace Dzmac.Core
 {
-    public static class IpAddressValidator
+    internal static class IpAddressValidator
     {
         public static bool TryValidateIpv4Address(string value, out string normalized)
         {

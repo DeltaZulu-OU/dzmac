@@ -1,6 +1,6 @@
 ﻿namespace Dzmac.Forms
 {
-    partial class AboutBox
+    internal partial class AboutBox
     {
         /// <summary>
         /// Required designer variable.

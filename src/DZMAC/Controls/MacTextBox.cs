@@ -8,7 +8,7 @@ namespace Dzmac.Controls
     /// <summary>
     ///     Reference: https://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class
     /// </summary>
-    public partial class MacTextBox : UserControl
+    internal partial class MacTextBox : UserControl
     {
         private readonly KeyPressEventArgs KeyPressBuffer = new KeyPressEventArgs((char)0);
 

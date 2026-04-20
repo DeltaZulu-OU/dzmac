@@ -1,8 +1,8 @@
 ﻿namespace Dzmac.Core
 {
-    public partial class MacAddress
+    internal partial class MacAddress
     {
-        public enum MacDelimiter
+        internal enum MacDelimiter
         {
             None,
             Dash,

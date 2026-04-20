@@ -6,7 +6,7 @@ namespace Dzmac.Core
     /// <summary>
     ///     Library-specific exceptions
     /// </summary>
-    public sealed class DZMACException : Exception
+    internal sealed class DZMACException : Exception
     {
         /// <inheritdoc />
         public DZMACException() : base()

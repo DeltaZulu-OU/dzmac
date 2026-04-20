@@ -2,7 +2,7 @@
 
 namespace Dzmac.Core.Reporting
 {
-    public class NetworkReportEntry
+    internal class NetworkReportEntry
     {
         public string Name { get; set; }
         public string Device { get; set; }
@@ -21,7 +21,7 @@ namespace Dzmac.Core.Reporting
         public IReadOnlyList<string> Ipv4DnsServers { get; set; } = new List<string>();
     }
 
-    public class NetworkReportIpv4Address
+    internal class NetworkReportIpv4Address
     {
         public string Address { get; set; }
         public string SubnetMask { get; set; }

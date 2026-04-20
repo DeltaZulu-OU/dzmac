@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Dzmac.Core.Reporting
 {
-    public class TextNetworkReportBuilder
+    internal class TextNetworkReportBuilder
     {
         public string BuildReport(IReadOnlyList<NetworkReportEntry> entries, DateTime generatedAt, string productVersion)
         {

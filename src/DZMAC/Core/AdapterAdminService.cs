@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Dzmac.Core
 {
-    public sealed class AdapterAdminPolicy
+    internal sealed class AdapterAdminPolicy
     {
         public int TimeoutSeconds { get; }
         public int RetryCount { get; }
@@ -31,7 +31,7 @@ namespace Dzmac.Core
         }
     }
 
-    public sealed class AdapterAdminCommand
+    internal sealed class AdapterAdminCommand
     {
         private readonly Func<(bool Success, string Message)> _operation;
 
@@ -53,7 +53,7 @@ namespace Dzmac.Core
         public (bool Success, string Message) Execute() => _operation();
     }
 
-    public sealed class AdapterAdminCommandExecutor
+    internal sealed class AdapterAdminCommandExecutor
     {
         private readonly AdapterAdminPolicy _policy;
 
@@ -170,7 +170,7 @@ namespace Dzmac.Core
         }
     }
 
-    public enum AdapterAdminResultCode
+    internal enum AdapterAdminResultCode
     {
         Success,
         Failed,
@@ -179,7 +179,7 @@ namespace Dzmac.Core
         Exception
     }
 
-    public sealed class AdapterAdminResult
+    internal sealed class AdapterAdminResult
     {
         public AdapterAdminResultCode Code { get; }
         public string Message { get; }
@@ -212,7 +212,7 @@ namespace Dzmac.Core
         }
     }
 
-    public sealed class AdapterAdminService
+    internal sealed class AdapterAdminService
     {
         private readonly AdapterAdminCommandExecutor _executor;
 

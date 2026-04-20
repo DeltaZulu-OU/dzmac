@@ -17,7 +17,7 @@ namespace Dzmac.Core
     ///     A persistent key-value store for vendor data downloaded from the IEEE OUI list.
     ///     Handles CSV storage, OUI lookups, and async refresh coordination.
     /// </summary>
-    public class VendorList : IDisposable, IReadOnlyList<Vendor>
+    internal class VendorList : IDisposable, IReadOnlyList<Vendor>
     {
         private const string DatabaseFileName = "oui.csv";
 

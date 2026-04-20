@@ -11,7 +11,7 @@ namespace Dzmac.Core
     /// <summary>
     ///     Adapter data collection class
     /// </summary>
-    public static class NetworkAdapterFactory
+    internal static class NetworkAdapterFactory
     {
         private static readonly string[] PhysicalBusPrefixes = { "PCI\\", "USB\\", "ACPI\\" };
 

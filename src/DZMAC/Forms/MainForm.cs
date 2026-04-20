@@ -17,7 +17,7 @@ using Dzmac.Properties;
 
 namespace Dzmac.Forms
 {
-    public partial class MainForm : Form
+    internal partial class MainForm : Form
     {
         private readonly struct PerformanceSample
         {

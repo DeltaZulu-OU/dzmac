@@ -10,7 +10,7 @@ namespace Dzmac.Core
     ///     A class to wrap MAC address with formatting and validation logic.
     /// </summary>
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public partial class MacAddress
+    internal partial class MacAddress
     {
         /// <summary>
         ///     Use 02 as the first octet to mark the MAC address as locally administered.

@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace Dzmac.Core
 {
-    public sealed class AdapterIpv4Address
+    internal sealed class AdapterIpv4Address
     {
         public string Address { get; }
         public string SubnetMask { get; }
@@ -23,7 +23,7 @@ namespace Dzmac.Core
         }
     }
 
-    public sealed class AdapterIpv6Address
+    internal sealed class AdapterIpv6Address
     {
         public string Address { get; }
         public int PrefixLength { get; }
@@ -43,7 +43,7 @@ namespace Dzmac.Core
     ///     The <see cref="NetworkAdapter" /> implementation is adapted from <see
     ///     href="https://github.com/sietseringers/MACAddressTool" />.
     /// </remarks>
-    public class NetworkAdapter : IDisposable
+    internal class NetworkAdapter : IDisposable
     {
         private const string UnknownVendorIdentifier = "Unknown Vendor";
         private const string RegistryClassKey = @"SYSTEM\CurrentControlSet\Control\Class\{4D36E972-E325-11CE-BFC1-08002BE10318}";
@@ -54,8 +54,8 @@ namespace Dzmac.Core
 
         private readonly VendorList? _manager;
         private readonly NetworkInterface _networkInterface;
-        private readonly IAdapterWmiClient _wmiClient;
-        private readonly IAdapterRegistryClient _registryClient;
+        private readonly AdapterWmiClient _wmiClient;
+        private readonly AdapterRegistryClient _registryClient;
         private readonly object _syncRoot = new object();
 
         private ManagementObject? _adapter;
@@ -189,7 +189,7 @@ namespace Dzmac.Core
         /// </summary>
         public long Speed => _networkInterface.Speed;
 
-        public NetworkAdapter(NetworkInterface networkInterface, VendorList? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
+        public NetworkAdapter(NetworkInterface networkInterface, VendorList? vendorManager = null, bool isPhysicalAdapter = false, AdapterWmiClient? wmiClient = null, AdapterRegistryClient? registryClient = null)
         {
             _networkInterface = networkInterface;
             _manager = vendorManager;
@@ -207,7 +207,7 @@ namespace Dzmac.Core
             ActiveMacAddress = GetActiveMac();
         }
 
-        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorList? vendorManager = null, bool isPhysicalAdapter = false, IAdapterWmiClient? wmiClient = null, IAdapterRegistryClient? registryClient = null)
+        public NetworkAdapter(ManagementObject? adapterObject, ManagementObject? adapterConfig, NetworkInterface networkInterface, VendorList? vendorManager = null, bool isPhysicalAdapter = false, AdapterWmiClient? wmiClient = null, AdapterRegistryClient? registryClient = null)
             : this(networkInterface, vendorManager, isPhysicalAdapter, wmiClient, registryClient)
         {
             _adapter = adapterObject;

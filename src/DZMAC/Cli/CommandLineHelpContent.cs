@@ -1,6 +1,6 @@
 ﻿namespace Dzmac.Cli
 {
-    public static class CommandLineHelpContent
+    internal static class CommandLineHelpContent
     {
         private const string HelpText =
 @"DZMAC Command Line
