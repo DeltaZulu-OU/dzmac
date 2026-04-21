@@ -105,6 +105,9 @@
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\PresetSelectionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Core\AdapterAdminService.cs" />
     <Compile Include="Core\AdapterCollaborators.cs" />
     <Compile Include="Core\AppSettings.cs" />
@@ -116,6 +119,8 @@
     <Compile Include="Core\IpAddressValidator.cs" />
     <Compile Include="Core\MacAddress.cs" />
     <Compile Include="Core\MacRotationService.cs" />
+    <Compile Include="Core\Presets\TpfModels.cs" />
+    <Compile Include="Core\Presets\TpfSerializer.cs" />
     <Compile Include="Core\MacAddress.MacDelimiter.cs" />
     <Compile Include="Core\NetworkAdapter.cs" />
     <Compile Include="Core\NetworkAdapterFactory.cs" />
