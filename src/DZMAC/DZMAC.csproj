@@ -86,6 +86,7 @@
     <Compile Include="Controls\MacTextBox.Designer.cs">
       <DependentUpon>MacTextBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Core\AdapterKind.cs" />
     <Compile Include="DTO\NetworkConnection.cs" />
     <Compile Include="Forms\AboutBox.cs">
       <SubType>Form</SubType>
