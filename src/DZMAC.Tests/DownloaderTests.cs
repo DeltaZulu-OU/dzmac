@@ -28,6 +28,18 @@ namespace Dzmac.Tests
         }
 
         [TestMethod]
+        public void TryExtractSha256ShouldNormalizeLowercaseHash()
+        {
+            const string lower = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824";
+            var manifest = $"{lower}  oui.txt";
+
+            var result = Downloader.TryExtractSha256(manifest, out var hash);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(lower.ToUpperInvariant(), hash);
+        }
+
+        [TestMethod]
         public void ComputeSha256ShouldReturnDeterministicValue()
         {
             var hash = Downloader.ComputeSha256("hello");

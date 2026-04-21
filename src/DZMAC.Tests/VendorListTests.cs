@@ -89,10 +89,12 @@ namespace Dzmac.Tests
             Assert.AreEqual("Vendor B", replacement.VendorName);
         }
 
-        [TestMethod]
-        public void IndexerShouldThrowWhenIndexEqualsCount()
+        [DataTestMethod]
+        [DataRow(0)]
+        [DataRow(10)]
+        public void IndexerShouldThrowWhenIndexIsOutOfRange(int indexOffset)
         {
-            var dbPath = CreateTempDbPath("index-equals-count");
+            var dbPath = CreateTempDbPath("index-oob");
 
             using var vendorList = new VendorList(dbPath);
 
@@ -103,25 +105,7 @@ namespace Dzmac.Tests
 
             Assert.ThrowsException<IndexOutOfRangeException>(() =>
             {
-                _ = vendorList[vendorList.Count];
-            });
-        }
-
-        [TestMethod]
-        public void VendorListShouldFailWhenNonexistentIndexUsed()
-        {
-            var dbPath = CreateTempDbPath("index-missing");
-
-            using var vendorList = new VendorList(dbPath);
-
-            vendorList.AddRange(new List<Vendor>
-            {
-                new Vendor("A1B2C3", "Vendor A")
-            });
-
-            Assert.ThrowsException<IndexOutOfRangeException>(() =>
-            {
-                _ = vendorList[vendorList.Count + 10];
+                _ = vendorList[vendorList.Count + indexOffset];
             });
         }
 
@@ -341,8 +325,12 @@ namespace Dzmac.Tests
             Assert.IsFalse(result);
         }
 
-        [TestMethod]
-        public void VendorListShouldFailWhenIncorrectlyFormattedOuiUsed()
+        [DataTestMethod]
+        [DataRow("XXXXXX")]
+        [DataRow("ZZA1B2C3ZZ")]
+        [DataRow("A1-B2-C3")]
+        [DataRow("A1:B2:C3")]
+        public void TryGetValueShouldThrowWhenOuiFormatIsInvalid(string invalidOui)
         {
             var dbPath = CreateTempDbPath("bad-oui-format");
 
@@ -350,46 +338,7 @@ namespace Dzmac.Tests
 
             Assert.ThrowsException<ArgumentException>(() =>
             {
-                _ = vendorList.TryGetValue("XXXXXX", out _);
-            });
-        }
-
-        [TestMethod]
-        public void VendorListShouldFailWhenOuiContainsValidFragmentOnly()
-        {
-            var dbPath = CreateTempDbPath("fragment-oui");
-
-            using var vendorList = new VendorList(dbPath);
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                _ = vendorList.TryGetValue("ZZA1B2C3ZZ", out _);
-            });
-        }
-
-        [TestMethod]
-        public void VendorListShouldFailWhenOuiContainsDashes()
-        {
-            var dbPath = CreateTempDbPath("dash-oui");
-
-            using var vendorList = new VendorList(dbPath);
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                _ = vendorList.TryGetValue("A1-B2-C3", out _);
-            });
-        }
-
-        [TestMethod]
-        public void VendorListShouldFailWhenOuiContainsColons()
-        {
-            var dbPath = CreateTempDbPath("colon-oui");
-
-            using var vendorList = new VendorList(dbPath);
-
-            Assert.ThrowsException<ArgumentException>(() =>
-            {
-                _ = vendorList.TryGetValue("A1:B2:C3", out _);
+                _ = vendorList.TryGetValue(invalidOui, out _);
             });
         }
 

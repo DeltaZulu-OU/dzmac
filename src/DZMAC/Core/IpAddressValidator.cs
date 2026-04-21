@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 
 namespace Dzmac.Core
 {
@@ -12,12 +11,40 @@ namespace Dzmac.Core
         public static bool TryValidateIpv4Address(string value, out string normalized)
         {
             normalized = string.Empty;
-            if (!IPAddress.TryParse(value, out var parsed) || parsed.AddressFamily != AddressFamily.InterNetwork)
+            if (string.IsNullOrWhiteSpace(value))
             {
                 return false;
             }
 
-            normalized = parsed.ToString();
+            var parts = value.Split('.');
+            if (parts.Length != 4)
+            {
+                return false;
+            }
+
+            var normalizedParts = new string[4];
+            for (var i = 0; i < parts.Length; i++)
+            {
+                var part = parts[i];
+                if (part.Length == 0 || part.Length > 3)
+                {
+                    return false;
+                }
+
+                if (part.Length > 1 && part[0] == '0')
+                {
+                    return false;
+                }
+
+                if (!byte.TryParse(part, out var octet))
+                {
+                    return false;
+                }
+
+                normalizedParts[i] = octet.ToString();
+            }
+
+            normalized = string.Join(".", normalizedParts);
             return true;
         }
 
