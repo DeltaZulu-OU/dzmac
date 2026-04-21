@@ -108,6 +108,9 @@
     <Compile Include="Forms\PresetSelectionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\PresetEditorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Core\AdapterAdminService.cs" />
     <Compile Include="Core\AdapterCollaborators.cs" />
     <Compile Include="Core\AppSettings.cs" />

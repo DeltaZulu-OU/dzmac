@@ -974,33 +974,36 @@ namespace Dzmac.Forms
 
         private void PresetNewButton_Click(object sender, EventArgs e)
         {
-            var presetName = PromptForPresetName("Create Preset", "Preset Name:", $"Preset {_presets.Count + 1}");
-            if (string.IsNullOrWhiteSpace(presetName))
+            var draft = BuildPresetFromCurrentSelection($"Preset {_presets.Count + 1}");
+            using var dialog = new PresetEditorDialog("Create New Preset", draft);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
             {
                 return;
             }
 
-            _presets.Add(BuildPresetFromCurrentSelection(presetName));
+            _presets.Add(dialog.Preset);
             BindPresetList();
             _presetListBox.SelectedIndex = _presets.Count - 1;
         }
 
         private void PresetEditButton_Click(object sender, EventArgs e)
         {
+            var selectedIndex = _presetListBox.SelectedIndex;
             var selected = GetSelectedPreset();
             if (selected == null)
             {
                 return;
             }
 
-            var editedName = PromptForPresetName("Edit Preset", "Preset Name:", selected.Name);
-            if (string.IsNullOrWhiteSpace(editedName))
+            using var dialog = new PresetEditorDialog("Edit Preset", selected);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
             {
                 return;
             }
 
-            selected.Name = editedName.Trim();
+            _presets[selectedIndex] = dialog.Preset;
             BindPresetList();
+            _presetListBox.SelectedIndex = selectedIndex;
         }
 
         private void PresetDeleteButton_Click(object sender, EventArgs e)
@@ -1333,34 +1336,6 @@ namespace Dzmac.Forms
             {
                 MessageBox.Show(ex.Message, "Save Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-        }
-
-        private static string PromptForPresetName(string title, string label, string defaultValue)
-        {
-            using var form = new Form
-            {
-                Width = 420,
-                Height = 150,
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                Text = title,
-                StartPosition = FormStartPosition.CenterParent,
-                MinimizeBox = false,
-                MaximizeBox = false
-            };
-
-            var labelControl = new Label { Left = 12, Top = 14, Text = label, Width = 100 };
-            var textBox = new TextBox { Left = 115, Top = 10, Width = 275, Text = defaultValue };
-            var ok = new Button { Text = "OK", Left = 234, Width = 75, Top = 50, DialogResult = DialogResult.OK };
-            var cancel = new Button { Text = "Cancel", Left = 315, Width = 75, Top = 50, DialogResult = DialogResult.Cancel };
-
-            form.Controls.Add(labelControl);
-            form.Controls.Add(textBox);
-            form.Controls.Add(ok);
-            form.Controls.Add(cancel);
-            form.AcceptButton = ok;
-            form.CancelButton = cancel;
-
-            return form.ShowDialog() == DialogResult.OK ? textBox.Text : string.Empty;
         }
 
         private string BuildTextReport()
