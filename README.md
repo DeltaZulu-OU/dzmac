@@ -51,6 +51,7 @@ virtual/logical), enable **Options → Show All Adapters** first.
 - You can manage presets in the **Presets** tab and apply the selected preset to the currently selected adapter.
 - Use **File → Open Preset** to load a preset file, **Save Preset** / **Save Preset As** to persist edits, and **Import Preset** / **Export Preset** for selective transfer between files.
 - Launching `DZMAC.exe <path-to-file>.tpf` opens that preset file directly in the GUI.
+- Note that, DZMAC can read TMAC `.tpf` files, but **it is not backwards compatible**. Therefore, you cannot make updated `tpf` files to work with TMAC.
 
 ### Adapter enable/disable is menu-driven
 
