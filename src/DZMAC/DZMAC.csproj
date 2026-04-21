@@ -108,6 +108,9 @@
     <Compile Include="Forms\PresetSelectionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\TpfAssociationDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\PresetEditorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -124,6 +127,7 @@
     <Compile Include="Core\MacRotationService.cs" />
     <Compile Include="Core\Presets\TpfModels.cs" />
     <Compile Include="Core\Presets\TpfDefaults.cs" />
+    <Compile Include="Core\Presets\TpfFileAssociationService.cs" />
     <Compile Include="Core\Presets\TpfSerializer.cs" />
     <Compile Include="Core\MacAddress.MacDelimiter.cs" />
     <Compile Include="Core\NetworkAdapter.cs" />

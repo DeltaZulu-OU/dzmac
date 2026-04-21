@@ -69,6 +69,7 @@ namespace Dzmac.Forms
         private int _vendorComboLoadedCount;
         private readonly List<TpfPreset> _presets = new List<TpfPreset>();
         private string _currentPresetFilePath;
+        private readonly string _startupPresetPath;
         private ListBox _presetListBox;
         private ListView _presetPropertyListView;
         private Button _presetNewButton;
@@ -76,12 +77,13 @@ namespace Dzmac.Forms
         private Button _presetDeleteButton;
         private Button _presetApplyButton;
 
-        public MainForm()
+        public MainForm(string startupPresetPath = null)
         {
             _vm = new VendorList();
             _adminService = new AdapterAdminService();
             _networkReportBuilder = new TextNetworkReportBuilder();
             _connectionDetailsTooltip = new ToolTip();
+            _startupPresetPath = startupPresetPath;
             InitializeComponent();
             ConfigureV1Surface();
             _loadingPanel.BringToFront();
@@ -100,9 +102,11 @@ namespace Dzmac.Forms
             VendorComboBox.MouseWheel += VendorComboBox_MouseWheel;
             VendorComboBox.KeyDown += VendorComboBox_KeyDown;
             PersistentAddressCheckBox.Checked = true;
-            _currentPresetFilePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default.tpf");
+            _currentPresetFilePath = !string.IsNullOrWhiteSpace(_startupPresetPath)
+                ? _startupPresetPath
+                : System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default.tpf");
             BuildPresetSurface();
-            LoadPresetFileIfExists(_currentPresetFilePath);
+            LoadPresetFileIfExists(_currentPresetFilePath, mustExist: !string.IsNullOrWhiteSpace(_startupPresetPath));
             UpdateSelectionState();
         }
 
@@ -112,7 +116,28 @@ namespace Dzmac.Forms
 
         private void AboutItem_Click(object sender, EventArgs e) => new AboutBox().Show(this);
 
-        private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void AssociateItem_Click(object sender, EventArgs e)
+        {
+            var executablePath = Application.ExecutablePath;
+            var openCommand = TpfFileAssociationService.BuildOpenCommand(executablePath);
+            using var dialog = new TpfAssociationDialog(openCommand);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            try
+            {
+                TpfFileAssociationService.AssociateWithCurrentUser(executablePath);
+                MainStatusBar.Text = "Associated .tpf files with DZMAC for current user.";
+                _ = MessageBox.Show("Successfully associated .tpf files with DZMAC.", Resources.Success_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MainStatusBar.Text = "Failed to associate .tpf files.";
+                _ = MessageBox.Show(ex.Message, Resources.Failure_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
 
         private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => _reenableOnChange = AutoStartCheckBox.Checked;
 
@@ -906,7 +931,7 @@ namespace Dzmac.Forms
             toolStripSeparator2.Visible = true;
             ImportPresetItem.Visible = true;
             ExportPresetItem.Visible = true;
-            AssociateItem.Visible = false;
+            AssociateItem.Visible = true;
             toolStripSeparator7.Visible = false;
             CliParamsHelpItem.Visible = true;
             toolStripSeparator6.Visible = true;
