@@ -33,12 +33,12 @@ namespace Dzmac.Core
 
     internal sealed class AdapterAdminCommand
     {
-        private readonly Func<(bool Success, string Message)> _operation;
+        private readonly Func<CancellationToken, (bool Success, string Message)> _operation;
 
         public string Name { get; }
         public string AdapterName { get; }
 
-        public AdapterAdminCommand(string name, string adapterName, Func<(bool Success, string Message)> operation)
+        public AdapterAdminCommand(string name, string adapterName, Func<CancellationToken, (bool Success, string Message)> operation)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -50,7 +50,7 @@ namespace Dzmac.Core
             _operation = operation ?? throw new ArgumentNullException(nameof(operation));
         }
 
-        public (bool Success, string Message) Execute() => _operation();
+        public (bool Success, string Message) Execute(CancellationToken cancellationToken) => _operation(cancellationToken);
     }
 
     internal sealed class AdapterAdminCommandExecutor
@@ -78,30 +78,7 @@ namespace Dzmac.Core
                 var stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    var operationTask = Task.Run(command.Execute, CancellationToken.None);
-                    var completedTask = await Task.WhenAny(
-                        operationTask,
-                        Task.Delay(Timeout.InfiniteTimeSpan, timeoutCts.Token)).ConfigureAwait(false);
-
-                    if (!ReferenceEquals(completedTask, operationTask))
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            return AdapterAdminResult.Failed(
-                                AdapterAdminResultCode.Timeout,
-                                "Operation cancelled.",
-                                ("operation", command.Name),
-                                ("adapter", command.AdapterName));
-                        }
-
-                        return AdapterAdminResult.Failed(
-                            AdapterAdminResultCode.Timeout,
-                            "Operation timed out.",
-                            ("operation", command.Name),
-                            ("adapter", command.AdapterName),
-                            ("timeoutSeconds", _policy.TimeoutSeconds.ToString()));
-                    }
-
+                    var operationTask = Task.Run(() => command.Execute(timeoutCts.Token), timeoutCts.Token);
                     var (Success, Message) = await operationTask.ConfigureAwait(false);
                     stopwatch.Stop();
 
@@ -247,14 +224,14 @@ namespace Dzmac.Core
             => ExecuteAsync(adapter, enabled ? "dhcp_enable" : "dhcp_disable", () => enabled ? adapter.TryDhcpEnable() : adapter.TryDhcpDisable(), cancellationToken);
 
         public Task<AdapterAdminResult> ReleaseDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
-            => ExecuteAsync(adapter, "dhcp_release", () =>
+            => ExecuteAsync(adapter, "dhcp_release", _ =>
             {
                 var success = adapter.TryDhcpRelease(out var message);
                 return (success, message);
             }, cancellationToken);
 
         public Task<AdapterAdminResult> RenewDhcpLeaseAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
-            => ExecuteAsync(adapter, "dhcp_renew", () =>
+            => ExecuteAsync(adapter, "dhcp_renew", _ =>
             {
                 var success = adapter.TryDhcpRenew(out var message);
                 return (success, message);
@@ -267,23 +244,29 @@ namespace Dzmac.Core
             => ExecuteAsync(adapter, "registry_mac_reset", () => adapter.TrySetRegistryMac(null), cancellationToken);
 
         public Task<AdapterAdminResult> DeleteAdapterFromRegistryAsync(NetworkAdapter adapter, CancellationToken cancellationToken = default)
-            => ExecuteAsync(adapter, "registry_adapter_delete", () => adapter.TryDeleteFromRegistry(), cancellationToken);
+            => ExecuteAsync(adapter, "registry_adapter_delete", _ => adapter.TryDeleteFromRegistry(), cancellationToken);
 
         private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, Func<bool> operation, CancellationToken cancellationToken)
-            => ExecuteAsync(adapter, operationName, () =>
+            => ExecuteAsync(adapter, operationName, _ =>
             {
                 var success = operation();
                 return (success, success ? "OK" : "Operation returned false");
             }, cancellationToken);
 
-        private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, Func<(bool Success, string Message)> operation, CancellationToken cancellationToken)
+        private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, Func<CancellationToken, (bool Success, string Message)> operation, CancellationToken cancellationToken)
         {
             if (adapter == null)
             {
                 return Task.FromResult(AdapterAdminResult.Failed(AdapterAdminResultCode.InvalidArgument, "Adapter cannot be null."));
             }
 
-            var command = new AdapterAdminCommand(operationName, adapter.Name, operation);
+            var command = new AdapterAdminCommand(operationName, adapter.Name, token =>
+            {
+                token.ThrowIfCancellationRequested();
+                var result = operation(token);
+                token.ThrowIfCancellationRequested();
+                return result;
+            });
             return _executor.ExecuteAsync(command, cancellationToken);
         }
     }

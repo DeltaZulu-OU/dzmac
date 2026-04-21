@@ -19,13 +19,13 @@ namespace Dzmac.Tests
         [TestMethod]
         public void Command_ShouldUseUnknownAdapterName_WhenWhitespaceAdapterNameProvided()
         {
-            var command = new AdapterAdminCommand("test-command", "   ", () => (true, "ok"));
+            var command = new AdapterAdminCommand("test-command", "   ", _ => (true, "ok"));
 
             Assert.AreEqual("unknown", command.AdapterName);
         }
 
         [TestMethod]
-        public void Command_ShouldThrow_WhenNameIsWhitespace() => Assert.ThrowsException<ArgumentException>(() => new AdapterAdminCommand("  ", "adapter", () => (true, "ok")));
+        public void Command_ShouldThrow_WhenNameIsWhitespace() => Assert.ThrowsException<ArgumentException>(() => new AdapterAdminCommand("  ", "adapter", _ => (true, "ok")));
 
         [TestMethod]
         public void FromConfig_ShouldThrow_WhenSettingsIsNull() => Assert.ThrowsException<ArgumentNullException>(() => AdapterAdminPolicy.FromConfig(null));

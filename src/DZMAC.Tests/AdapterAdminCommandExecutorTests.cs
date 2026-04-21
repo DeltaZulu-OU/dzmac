@@ -13,7 +13,7 @@ namespace Dzmac.Tests
         public async Task ExecuteAsync_ReturnsSuccess_WhenCommandSucceeds()
         {
             var executor = new AdapterAdminCommandExecutor(new AdapterAdminPolicy(timeoutSeconds: 5, retryCount: 2));
-            var command = new AdapterAdminCommand("test", "adapter", () => (true, "OK"));
+            var command = new AdapterAdminCommand("test", "adapter", _ => (true, "OK"));
 
             var result = await executor.ExecuteAsync(command, CancellationToken.None);
 
@@ -26,7 +26,7 @@ namespace Dzmac.Tests
         {
             var attempts = 0;
             var executor = new AdapterAdminCommandExecutor(new AdapterAdminPolicy(timeoutSeconds: 5, retryCount: 3));
-            var command = new AdapterAdminCommand("test", "adapter", () =>
+            var command = new AdapterAdminCommand("test", "adapter", _ =>
             {
                 attempts++;
                 return attempts < 2 ? (false, "try again") : (true, "done");
@@ -42,15 +42,27 @@ namespace Dzmac.Tests
         public async Task ExecuteAsync_ReturnsTimeout_WhenCommandExceedsTimeout()
         {
             var executor = new AdapterAdminCommandExecutor(new AdapterAdminPolicy(timeoutSeconds: 1, retryCount: 1));
-            var command = new AdapterAdminCommand("test", "adapter", () =>
+            var observedCancellation = false;
+            var command = new AdapterAdminCommand("test", "adapter", token =>
             {
-                Thread.Sleep(1500);
+                for (var i = 0; i < 30; i++)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        observedCancellation = true;
+                        token.ThrowIfCancellationRequested();
+                    }
+
+                    Thread.Sleep(100);
+                }
+
                 return (true, "late");
             });
 
             var result = await executor.ExecuteAsync(command, CancellationToken.None);
 
             Assert.AreEqual(AdapterAdminResultCode.Timeout, result.Code);
+            Assert.IsTrue(observedCancellation);
         }
 
         [TestMethod]
@@ -68,7 +80,7 @@ namespace Dzmac.Tests
         {
             var attempts = 0;
             var executor = new AdapterAdminCommandExecutor(new AdapterAdminPolicy(timeoutSeconds: 5, retryCount: 2));
-            var command = new AdapterAdminCommand("test", "adapter", () =>
+            var command = new AdapterAdminCommand("test", "adapter", _ =>
             {
                 attempts++;
                 throw new InvalidOperationException("boom");
@@ -87,7 +99,7 @@ namespace Dzmac.Tests
             var cts = new CancellationTokenSource();
             cts.Cancel();
             var executor = new AdapterAdminCommandExecutor(new AdapterAdminPolicy(timeoutSeconds: 5, retryCount: 2));
-            var command = new AdapterAdminCommand("test", "adapter", () => (true, "OK"));
+            var command = new AdapterAdminCommand("test", "adapter", _ => (true, "OK"));
 
             var result = await executor.ExecuteAsync(command, cts.Token);
 

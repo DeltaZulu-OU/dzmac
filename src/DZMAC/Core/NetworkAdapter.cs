@@ -50,6 +50,7 @@ namespace Dzmac.Core
         private const string RegistryMacOverrideValueName = "NetworkAddress";
         private const string TmacOriginalMacValueName = "OriginalNetworkAddress";
         private static readonly MacAddress UnknownMacAddress = new MacAddress("000000000000");
+        private static readonly HashSet<int> StandardSuccessCodes = new HashSet<int> { 0, 1 };
 
         private static readonly Regex _adapterNumberPattern = new Regex("\\\"(\\d+)\\\"$");
 
@@ -246,9 +247,9 @@ namespace Dzmac.Core
                 return false;
             }
 
-            var enableStaticResult = TryInvokeAdapterConfigMethod("EnableStatic", ipAddress, out var enableStaticCode) && enableStaticCode == 0;
-            var setGatewayResult = TryInvokeAdapterConfigMethod("SetGateways", gateway, out var setGatewayCode) && setGatewayCode == 0;
-            var setDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", dnsConfig, out var setDnsCode) && setDnsCode == 0;
+            var enableStaticResult = TryInvokeAdapterConfigMethodAndCheckSuccess("EnableStatic", ipAddress, out var enableStaticCode);
+            var setGatewayResult = TryInvokeAdapterConfigMethodAndCheckSuccess("SetGateways", gateway, out var setGatewayCode);
+            var setDnsResult = TryInvokeAdapterConfigMethodAndCheckSuccess("SetDNSServerSearchOrder", dnsConfig, out var setDnsCode);
 
             var success = enableStaticResult && setGatewayResult && setDnsResult;
 
@@ -260,8 +261,8 @@ namespace Dzmac.Core
                 newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
 
                 // Run command
-                var enableDhcpResult = TryInvokeAdapterConfigMethod("EnableDHCP", null, out var enableDhcpCode) && enableDhcpCode == 0;
-                var emptyDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", newDnsConfig, out var emptyDnsCode) && emptyDnsCode == 0;
+                var enableDhcpResult = TryInvokeAdapterConfigMethodAndCheckSuccess("EnableDHCP", null, out var enableDhcpCode);
+                var emptyDnsResult = TryInvokeAdapterConfigMethodAndCheckSuccess("SetDNSServerSearchOrder", newDnsConfig, out var emptyDnsCode);
 
                 var rollbackSuccess = enableDhcpResult && emptyDnsResult;
                 if (rollbackSuccess)
@@ -315,17 +316,17 @@ namespace Dzmac.Core
             newDnsConfig["DNSServerSearchOrder"] = Array.Empty<string>();
 
             // Run command
-            var enableDhcpResult = TryInvokeAdapterConfigMethod("EnableDHCP", null, out var enableDhcpCode) && enableDhcpCode == 0;
-            var emptyDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", newDnsConfig, out var emptyDnsCode) && emptyDnsCode == 0;
+            var enableDhcpResult = TryInvokeAdapterConfigMethodAndCheckSuccess("EnableDHCP", null, out var enableDhcpCode);
+            var emptyDnsResult = TryInvokeAdapterConfigMethodAndCheckSuccess("SetDNSServerSearchOrder", newDnsConfig, out var emptyDnsCode);
 
             var success = enableDhcpResult && emptyDnsResult;
 
             // Rollback
             if (!success)
             {
-                var rollbackStaticResult = TryInvokeAdapterConfigMethod("EnableStatic", oldIpAddress, out var rollbackStaticCode) && rollbackStaticCode == 0;
-                var rollbackGatewayResult = TryInvokeAdapterConfigMethod("SetGateways", oldGateway, out var rollbackGatewayCode) && rollbackGatewayCode == 0;
-                var rollbackDnsResult = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", oldDnsConfig1, out var rollbackDnsCode) && rollbackDnsCode == 0;
+                var rollbackStaticResult = TryInvokeAdapterConfigMethodAndCheckSuccess("EnableStatic", oldIpAddress, out var rollbackStaticCode);
+                var rollbackGatewayResult = TryInvokeAdapterConfigMethodAndCheckSuccess("SetGateways", oldGateway, out var rollbackGatewayCode);
+                var rollbackDnsResult = TryInvokeAdapterConfigMethodAndCheckSuccess("SetDNSServerSearchOrder", oldDnsConfig1, out var rollbackDnsCode);
 
                 var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult && rollbackDnsResult;
                 if (rollbackSuccess)
@@ -361,8 +362,7 @@ namespace Dzmac.Core
             var parameters = _adapterConfig.GetMethodParameters("EnableStatic");
             parameters["IPAddress"] = ipAddresses;
             parameters["SubnetMask"] = subnetMasks;
-            var success = TryInvokeAdapterConfigMethod("EnableStatic", parameters, out var code);
-            return success && (code == 0 || code == 1);
+            return TryInvokeAdapterConfigMethodAndCheckSuccess("EnableStatic", parameters, out _);
         }
 
         /// <summary>
@@ -379,8 +379,7 @@ namespace Dzmac.Core
             var parameters = _adapterConfig.GetMethodParameters("SetGateways");
             parameters["DefaultIPGateway"] = gateways;
             parameters["GatewayCostMetric"] = metrics;
-            var success = TryInvokeAdapterConfigMethod("SetGateways", parameters, out var code);
-            return success && (code == 0 || code == 1);
+            return TryInvokeAdapterConfigMethodAndCheckSuccess("SetGateways", parameters, out _);
         }
 
         /// <summary>
@@ -396,8 +395,7 @@ namespace Dzmac.Core
 
             var parameters = _adapterConfig.GetMethodParameters("SetDNSServerSearchOrder");
             parameters["DNSServerSearchOrder"] = dnsServers ?? Array.Empty<string>();
-            var success = TryInvokeAdapterConfigMethod("SetDNSServerSearchOrder", parameters, out var code);
-            return success && (code == 0 || code == 1);
+            return TryInvokeAdapterConfigMethodAndCheckSuccess("SetDNSServerSearchOrder", parameters, out _);
         }
 
         /// <summary>
@@ -411,9 +409,9 @@ namespace Dzmac.Core
         public bool TryDhcpRelease(out string message)
         {
             EnsureWmiObjects();
-            var success = TryInvokeAdapterConfigMethod("ReleaseDHCPLease", null, out var code);
+            var success = TryInvokeAdapterConfigMethodAndCheckSuccess("ReleaseDHCPLease", null, out var code);
             message = HResult.TranslateErrorCode(code);
-            return success && (code == 0 || code == 1);
+            return success;
         }
 
         /// <summary>
@@ -427,9 +425,9 @@ namespace Dzmac.Core
         public bool TryDhcpRenew(out string message)
         {
             EnsureWmiObjects();
-            var success = TryInvokeAdapterConfigMethod("RenewDHCPLease", null, out var code);
+            var success = TryInvokeAdapterConfigMethodAndCheckSuccess("RenewDHCPLease", null, out var code);
             message = HResult.TranslateErrorCode(code);
-            return success && (code == 0 || code == 1);
+            return success;
         }
 
         public IReadOnlyList<AdapterIpv4Address> GetIpv4Addresses()
@@ -509,14 +507,16 @@ namespace Dzmac.Core
                 return false;
             }
 
-            var result = _adapter.InvokeMethod(enable ? "Enable" : "Disable", null);
+            var method = enable ? "Enable" : "Disable";
+            var result = _adapter.InvokeMethod(method, null);
             if (result == null)
             {
                 Diagnostics.Warning($"adapter_{action}_failed", $"{(enable ? "Enable" : "Disable")} command returned null.", ("adapter", Name));
                 return false;
             }
 
-            var success = SafeConvertToInt(result) == 0;
+            var returnCode = SafeConvertToInt(result);
+            var success = IsSuccessfulWmiReturnCode(method, returnCode);
             if (success)
             {
                 Diagnostics.Info($"adapter_{action}_succeeded", ("adapter", Name));
@@ -1003,6 +1003,45 @@ namespace Dzmac.Core
                 Diagnostics.Warning("adapter_config_method_management_exception", ex.Message, ("adapter", Name), ("method", methodName));
                 return false;
             }
+        }
+
+        private bool TryInvokeAdapterConfigMethodAndCheckSuccess(string methodName, ManagementBaseObject? inParameters, out int returnCode)
+        {
+            if (!TryInvokeAdapterConfigMethod(methodName, inParameters, out returnCode))
+            {
+                return false;
+            }
+
+            if (IsSuccessfulWmiReturnCode(methodName, returnCode))
+            {
+                return true;
+            }
+
+            Diagnostics.Warning(
+                "adapter_config_method_non_success_code",
+                "WMI method returned non-success code.",
+                ("adapter", Name),
+                ("method", methodName),
+                ("returnCode", returnCode));
+            return false;
+        }
+
+        private static bool IsSuccessfulWmiReturnCode(string methodName, int returnCode)
+        {
+            if (StandardSuccessCodes.Contains(returnCode))
+            {
+                return true;
+            }
+
+            // Some providers can report "already in requested state" during Enable/Disable.
+            if ((string.Equals(methodName, "Enable", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(methodName, "Disable", StringComparison.OrdinalIgnoreCase))
+                && returnCode == 5)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private IReadOnlyList<string> GetGateways(AddressFamily family)

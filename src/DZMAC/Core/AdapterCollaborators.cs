@@ -1,8 +1,10 @@
 ﻿#nullable enable
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Management;
+using System.Security;
 using Microsoft.Win32;
 
 namespace Dzmac.Core
@@ -13,6 +15,12 @@ namespace Dzmac.Core
         {
             adapter = null;
             adapterConfig = null;
+
+            if (string.IsNullOrWhiteSpace(configId))
+            {
+                Diagnostics.Warning("adapter_wmi_resolve_invalid_config_id", "Adapter config id is empty.");
+                return false;
+            }
 
             try
             {
@@ -26,10 +34,27 @@ namespace Dzmac.Core
                 using var configResults = configSearcher.Get();
                 var configResult = configResults.Cast<ManagementObject>().FirstOrDefault();
                 adapterConfig = NetworkAdapter.CreateBoundManagementObject(configResult);
-                return true;
+                var resolved = adapter != null || adapterConfig != null;
+                if (!resolved)
+                {
+                    Diagnostics.Warning("adapter_wmi_resolve_not_found", "No Win32 adapter objects were resolved.", ("configId", configId));
+                }
+
+                return resolved;
             }
-            catch
+            catch (ManagementException ex)
             {
+                Diagnostics.Warning("adapter_wmi_resolve_management_exception", ex.Message, ("configId", configId));
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Diagnostics.Warning("adapter_wmi_resolve_access_denied", ex.Message, ("configId", configId));
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Diagnostics.Warning("adapter_wmi_resolve_exception", ex.Message, ("configId", configId));
                 return false;
             }
         }
@@ -57,8 +82,24 @@ namespace Dzmac.Core
                     }
                 }
             }
-            catch
+            catch (SecurityException ex)
             {
+                Diagnostics.Warning("adapter_registry_resolve_security_exception", ex.Message, ("configId", configId));
+                return null;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Diagnostics.Warning("adapter_registry_resolve_access_denied", ex.Message, ("configId", configId));
+                return null;
+            }
+            catch (IOException ex)
+            {
+                Diagnostics.Warning("adapter_registry_resolve_io_exception", ex.Message, ("configId", configId));
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Diagnostics.Warning("adapter_registry_resolve_exception", ex.Message, ("configId", configId));
                 return null;
             }
 

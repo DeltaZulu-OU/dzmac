@@ -8,6 +8,114 @@ using System.Net.NetworkInformation;
 
 namespace Dzmac.Core
 {
+    internal enum AdapterClassificationSource
+    {
+        Unknown = 0,
+        MsftNetAdapter = 1,
+        Win32PhysicalAdapter = 2,
+        PnpPrefixHeuristic = 3
+    }
+
+    internal readonly struct AdapterClassification
+    {
+        public bool IsPhysical { get; }
+        public AdapterClassificationSource Source { get; }
+
+        public AdapterClassification(bool isPhysical, AdapterClassificationSource source)
+        {
+            IsPhysical = isPhysical;
+            Source = source;
+        }
+    }
+
+    internal static class AdapterClassificationResolver
+    {
+        public static IReadOnlyDictionary<string, AdapterClassification> BuildByConfigIdMap(IReadOnlyDictionary<string, string> pnpByConfigId)
+        {
+            var map = new Dictionary<string, AdapterClassification>(StringComparer.OrdinalIgnoreCase);
+            BuildFromMsftNetAdapter(map);
+            BuildFromWin32PhysicalAdapter(map);
+            BuildFromPnpPrefixes(map, pnpByConfigId);
+            return map;
+        }
+
+        private static void BuildFromMsftNetAdapter(IDictionary<string, AdapterClassification> map)
+        {
+            try
+            {
+                var scope = new ManagementScope(@"\\.\root\StandardCimv2");
+                scope.Connect();
+                using var searcher = new ManagementObjectSearcher(
+                    scope,
+                    new ObjectQuery("SELECT InterfaceGuid, HardwareInterface FROM MSFT_NetAdapter WHERE InterfaceGuid IS NOT NULL"));
+                foreach (var adapter in searcher.Get().Cast<ManagementObject>())
+                {
+                    var guid = adapter["InterfaceGuid"] as string;
+                    if (string.IsNullOrWhiteSpace(guid) || map.ContainsKey(guid))
+                    {
+                        continue;
+                    }
+
+                    var hardwareInterface = adapter["HardwareInterface"];
+                    if (hardwareInterface is bool isPhysical)
+                    {
+                        map[guid] = new AdapterClassification(isPhysical, AdapterClassificationSource.MsftNetAdapter);
+                    }
+                }
+            }
+            catch (ManagementException ex)
+            {
+                Diagnostics.Warning("adapter_discovery_msft_provider_unavailable", ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Diagnostics.Warning("adapter_discovery_msft_provider_access_denied", ex.Message);
+            }
+        }
+
+        private static void BuildFromWin32PhysicalAdapter(IDictionary<string, AdapterClassification> map)
+        {
+            try
+            {
+                using var searcher = new ManagementObjectSearcher(
+                    "SELECT GUID, PhysicalAdapter FROM Win32_NetworkAdapter WHERE GUID IS NOT NULL AND PhysicalAdapter IS NOT NULL");
+                foreach (var adapter in searcher.Get().Cast<ManagementObject>())
+                {
+                    var guid = adapter["GUID"] as string;
+                    if (string.IsNullOrWhiteSpace(guid) || map.ContainsKey(guid))
+                    {
+                        continue;
+                    }
+
+                    var physicalAdapter = adapter["PhysicalAdapter"];
+                    if (physicalAdapter is bool isPhysical)
+                    {
+                        map[guid] = new AdapterClassification(isPhysical, AdapterClassificationSource.Win32PhysicalAdapter);
+                    }
+                }
+            }
+            catch (ManagementException ex)
+            {
+                Diagnostics.Warning("adapter_discovery_win32_physical_flag_failed", ex.Message);
+            }
+        }
+
+        private static void BuildFromPnpPrefixes(IDictionary<string, AdapterClassification> map, IReadOnlyDictionary<string, string> pnpByConfigId)
+        {
+            foreach (var pair in pnpByConfigId)
+            {
+                if (map.ContainsKey(pair.Key))
+                {
+                    continue;
+                }
+
+                map[pair.Key] = new AdapterClassification(
+                    NetworkAdapterFactory.IsLikelyPhysicalAdapter(pair.Value),
+                    AdapterClassificationSource.PnpPrefixHeuristic);
+            }
+        }
+    }
+
     /// <summary>
     ///     Adapter data collection class
     /// </summary>
@@ -25,24 +133,26 @@ namespace Dzmac.Core
             Diagnostics.Info("adapter_discovery_started", ("vendorManagerProvided", vendorManager != null));
             var networkInterfaces = GetAll();
             var hardwareIdsByConfigId = GetPnpDeviceIdsByConfigId();
+            var classificationByConfigId = AdapterClassificationResolver.BuildByConfigIdMap(hardwareIdsByConfigId);
             Diagnostics.Debug("adapter_discovery_raw_count", ("totalDiscovered", networkInterfaces.Length));
             var allAdapters = networkInterfaces
                 .Select(networkInterface => new
                 {
                     Interface = networkInterface,
                     HasValidMac = MacAddress.IsValidMac(networkInterface.GetPhysicalAddress().GetAddressBytes()),
-                    HardwareId = ResolveHardwareId(networkInterface.Id, hardwareIdsByConfigId)
+                    HardwareId = ResolveHardwareId(networkInterface.Id, hardwareIdsByConfigId),
+                    Classification = ResolveClassification(networkInterface.Id, classificationByConfigId, hardwareIdsByConfigId)
                 })
                 .ToList();
 
             var filtered = allAdapters
-                .Where(adapter => adapter.HasValidMac || IsLikelyPhysicalAdapter(adapter.HardwareId))
+                .Where(adapter => adapter.HasValidMac || adapter.Classification.IsPhysical)
                 .Select(adapter => adapter.Interface)
                 .OrderByDescending(a => a.Name)
                 .ToList();
 
             var ignored = allAdapters
-                .Where(adapter => !adapter.HasValidMac && !IsLikelyPhysicalAdapter(adapter.HardwareId))
+                .Where(adapter => !adapter.HasValidMac && !adapter.Classification.IsPhysical)
                 .Select(adapter => adapter.Interface)
                 .OrderBy(a => a.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -64,7 +174,7 @@ namespace Dzmac.Core
                 new NetworkAdapter(
                     networkInterface,
                     vendorManager,
-                    IsLikelyPhysicalAdapter(ResolveHardwareId(networkInterface.Id, hardwareIdsByConfigId))));
+                    ResolveClassification(networkInterface.Id, classificationByConfigId, hardwareIdsByConfigId).IsPhysical));
             return physicalOnly ? result.Where(a => a.IsPhysicalAdapter) : result;
         }
 
@@ -134,6 +244,21 @@ namespace Dzmac.Core
             }
 
             return null;
+        }
+
+        private static AdapterClassification ResolveClassification(
+            string configId,
+            IReadOnlyDictionary<string, AdapterClassification> classificationByConfigId,
+            IReadOnlyDictionary<string, string> hardwareIdsByConfigId)
+        {
+            if (classificationByConfigId.TryGetValue(configId, out var classification))
+            {
+                return classification;
+            }
+
+            return new AdapterClassification(
+                IsLikelyPhysicalAdapter(ResolveHardwareId(configId, hardwareIdsByConfigId)),
+                AdapterClassificationSource.PnpPrefixHeuristic);
         }
     }
 }
