@@ -72,6 +72,22 @@ namespace Dzmac.Tests
             Assert.IsTrue(Message.Contains("ERR_WMI_FAIL"), $"Expected ERR_WMI_FAIL in: {Message}");
         }
 
+        [TestMethod]
+        public void TryRotateMac_ThrowsArgumentNull_WhenProgressIsNull()
+        {
+            if (_loopback == null)
+            {
+                Assert.Inconclusive("No loopback interface available.");
+            }
+
+            var wmi = new FakeWmiClient(resolves: false);
+            var registry = new FakeRegistryClient(throwOnEnsure: null);
+            var adapter = new NetworkAdapter(_loopback, null, false, wmi, registry);
+
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
+                MacRotationService.TryRotateMac(adapter, new MacAddress("020000000001"), true, progress: null));
+        }
+
         // ── Fake collaborators ───────────────────────────────────────────────────
 
         private sealed class FakeWmiClient : AdapterWmiClient

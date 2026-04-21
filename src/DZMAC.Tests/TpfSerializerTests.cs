@@ -99,6 +99,39 @@ public class TpfSerializerTests
         Assert.AreEqual("Sample Network", loaded.Presets[2].Name);
     }
 
+
+    [TestMethod]
+    public void CreateDefaultFile_ContainsThreeExpectedPresets()
+    {
+        var file = TpfDefaults.CreateDefaultFile();
+
+        Assert.AreEqual(3, file.Presets.Count);
+        Assert.AreEqual("Random MAC Address", file.Presets[0].Name);
+        Assert.AreEqual(TpfMacMode.Random, file.Presets[0].MacMode);
+        Assert.AreEqual("Original MAC Address", file.Presets[1].Name);
+        Assert.AreEqual(TpfMacMode.Original, file.Presets[1].MacMode);
+        Assert.AreEqual("Sample Network", file.Presets[2].Name);
+        Assert.AreEqual(TpfMacMode.Random, file.Presets[2].MacMode);
+        Assert.AreEqual((byte)1, file.SelectedPresetIndex);
+    }
+
+    [TestMethod]
+    public void CreateDefaultFile_SampleNetworkContainsStaticIpv4Settings()
+    {
+        var sample = TpfDefaults.CreateDefaultFile().Presets[2];
+
+        Assert.IsNotNull(sample.Ipv4);
+        Assert.IsTrue(sample.Ipv4!.Enabled);
+        Assert.IsTrue(sample.Ipv4.IsStatic);
+        Assert.AreEqual("192.168.1.2", sample.Ipv4.Address);
+        Assert.AreEqual("255.255.255.0", sample.Ipv4.SubnetMask);
+        Assert.IsTrue(sample.Ipv4.GatewayEnabled);
+        Assert.AreEqual("192.168.1.1", sample.Ipv4.DefaultGateway);
+        Assert.AreEqual(0, sample.Ipv4.GatewayMetric);
+        Assert.IsTrue(sample.Ipv4.DnsEnabled);
+        Assert.AreEqual("192.168.1.1", sample.Ipv4.PrimaryDnsServer);
+    }
+
     private static int FindUtf16Sequence(byte[] data, byte[] sequence)
     {
         for (var i = 0; i <= data.Length - sequence.Length; i++)

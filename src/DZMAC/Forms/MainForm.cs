@@ -1014,6 +1014,17 @@ namespace Dzmac.Forms
                 return;
             }
 
+            var selectedPreset = _presets[selectedIndex];
+            var confirmDelete = MessageBox.Show(
+                $"Delete preset '{selectedPreset.Name}'?",
+                "Delete Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (confirmDelete != DialogResult.Yes)
+            {
+                return;
+            }
+
             _presets.RemoveAt(selectedIndex);
             BindPresetList();
         }
@@ -1022,6 +1033,16 @@ namespace Dzmac.Forms
         {
             var selected = GetSelectedPreset();
             if (selected == null || _selected == null)
+            {
+                return;
+            }
+
+            var confirmApply = MessageBox.Show(
+                $"Apply preset '{selected.Name}' to '{_selected.Name}'?",
+                "Apply Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (confirmApply != DialogResult.Yes)
             {
                 return;
             }
@@ -1103,7 +1124,8 @@ namespace Dzmac.Forms
         private bool TryRotateMac(MacAddress targetMac, out string error)
         {
             error = string.Empty;
-            var operation = MacRotationService.TryRotateMac(_selected.Adapter, targetMac, _persistOriginalMacRecord, null);
+            var progress = new Progress<string>(status => MainStatusBar.Text = status);
+            var operation = MacRotationService.TryRotateMac(_selected.Adapter, targetMac, _persistOriginalMacRecord, progress);
             if (operation.Success)
             {
                 return true;
@@ -1291,11 +1313,27 @@ namespace Dzmac.Forms
                 if (mustExist)
                 {
                     MessageBox.Show($"Preset file not found: {path}", "Open Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _currentPresetFilePath = path;
+                    _presets.Clear();
+                    BindPresetList();
+                    return;
                 }
 
                 _currentPresetFilePath = path;
+                var defaultFile = TpfDefaults.CreateDefaultFile();
                 _presets.Clear();
+                _presets.AddRange(defaultFile.Presets.Select(ClonePreset));
                 BindPresetList();
+
+                if (_presets.Count > 0)
+                {
+                    _presetListBox.SelectedIndex = defaultFile.SelectedPresetIndex < _presets.Count
+                        ? defaultFile.SelectedPresetIndex
+                        : 0;
+                }
+
+                SavePresetsToCurrentPath();
+                MainStatusBar.Text = $"Created default preset file at {path}.";
                 return;
             }
 
