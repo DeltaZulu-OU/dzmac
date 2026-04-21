@@ -1,7 +1,5 @@
 # DZMAC
 
-![Sample](assets/window.png)
-
 ## Overview
 
 DZMAC is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
@@ -12,9 +10,22 @@ The goal is to provide a focused, predictable, and maintainable application cent
 
 This project is in **alpha**.
 
-The focus is on stabilizing core functionality before expanding scope for DZMAC.
+The focus is on stabilizing core functionality before expanding scope for DZMAC. [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/) has been around over a decade and it has been used by hundreds of thousands of people, if not millions. DZMAC is a reimplementation from scratch, trying to be as faithful as possible to the original. However, there are some design decisions made explicitly excluding some fetures.
 
-## Help
+![Sample](assets/window.png)
+
+## Usage
+
+### Adapter-type definitions
+- **Physical adapter**: an adapter reported as hardware-backed by Windows adapter metadata (preferred: `MSFT_NetAdapter`; fallback: `Win32_NetworkAdapter.PhysicalAdapter`).
+- **Virtual/logical adapter**: an adapter reported as virtual/filter/endpoint/logical by Windows metadata, or one with `PhysicalAdapter = false` on older WMI paths.
+- **Fallback classification**: if explicit adapter-type properties are unavailable, DZMAC falls back to `PNPDeviceID` prefix inference (`PCI\\`, `USB\\`, `ACPI\\`) as best effort only.
+
+### Showing physical vs virtual adapters
+- By default, DZMAC focuses on likely physical adapters for a cleaner day-to-day list.
+- Use **Options → Show All Adapters** to include virtual/logical adapters in the grid.
+- **File → Export Text Report** exports exactly what is currently visible in the adapter list.
+
 
 See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
 
