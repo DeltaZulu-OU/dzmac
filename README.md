@@ -97,9 +97,10 @@ Disabling DHCPv4 preserves the current configuration instead of discarding it.
 
 ## Acknowledgements
 
-Thanks to the following projects and resources:
+First and foremost, I'd like to thank [Shreyas Zare](https://github.com/ShreyasZare) for [Technitium MAC Address Changer](https://technitium.com/tmac/) and other amazing contributins for the community.
 
-- [Technitium MAC Address Changer](https://technitium.com/tmac/) for everything!
+Also, thanks to the following projects and resources:
+
 - [MACAddressTool](https://github.com/sietseringers/MACAddressTool) for internals and implementation ideas.
 - The [objectlistview](https://objectlistview.sourceforge.net/cs/index.html) project for list-view handling.
 - [MAC-Address-Text-Box-and-Class article on CodeProject](https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class) for MAC address textbox implementation reference.
