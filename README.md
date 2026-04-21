@@ -45,6 +45,13 @@ This also affects **File → Export Text Report**: the export contains exactly
 what is currently shown in the adapter list. To export all adapters (including
 virtual/logical), enable **Options → Show All Adapters** first.
 
+### Presets and `.tpf` workflow
+
+- On first launch, DZMAC creates a default `default.tpf` file in the application directory when one does not exist.
+- You can manage presets in the **Presets** tab and apply the selected preset to the currently selected adapter.
+- Use **File → Open Preset** to load a preset file, **Save Preset** / **Save Preset As** to persist edits, and **Import Preset** / **Export Preset** for selective transfer between files.
+- Launching `DZMAC.exe <path-to-file>.tpf` opens that preset file directly in the GUI.
+
 ### Adapter enable/disable is menu-driven
 
 The **Enabled** checkbox in the adapter list is intentionally read-only and
@@ -80,12 +87,15 @@ The application is not a background utility:
 - no system tray icon
 - no tray animation
 
-#### Preset file support is postponed
+#### Preset files (`.tpf`) are supported
 
-Preset files (`.tpf`) are planned but not part of the current milestone.  
-As a result:
-- no startup file association checks
-- no preset import/export in current scope
+DZMAC now includes preset management compatible with `.tpf` files:
+- dedicated **Presets** tab with create/edit/delete/apply actions
+- **File** menu support for open/save/save-as/import/export preset workflows
+- startup support for opening a `.tpf` file directly (including via file association)
+- optional current-user `.tpf` association through **File → Associate with Preset Files (.tpf)**
+
+The serializer focuses on the supported subset (MAC mode + IPv4 fields) and keeps parsing resilient when unsupported residual bytes are encountered.
 
 #### Reduced "all-in-one" behavior
 
