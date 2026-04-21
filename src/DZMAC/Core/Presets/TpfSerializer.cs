@@ -2,13 +2,19 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
+using Dzmac.Core;
 
 namespace Dzmac.Core.Presets
 {
     internal static class TpfSerializer
     {
         private static readonly Encoding Utf16Le = Encoding.Unicode;
+        private const int MaxTpfFileBytes = 1024 * 1024;
+        private const int MaxPresetNameChars = 128;
+        private const int MaxCustomMacChars = 32;
+        private const int MaxIpv4FieldChars = 64;
 
         public static TpfFile Load(string path)
         {
@@ -17,6 +23,7 @@ namespace Dzmac.Core.Presets
                 throw new ArgumentNullException(nameof(path));
             }
 
+            Diagnostics.Info("tpf_load_start", ("path", path));
             return Load(File.ReadAllBytes(path));
         }
 
@@ -27,8 +34,17 @@ namespace Dzmac.Core.Presets
                 throw new ArgumentNullException(nameof(bytes));
             }
 
+            Diagnostics.Info("tpf_parse_start", ("payloadLength", bytes.Length));
+
+            if (bytes.Length > MaxTpfFileBytes)
+            {
+                Diagnostics.Warning("tpf_parse_rejected", "TPF payload exceeds configured size limit.", ("payloadLength", bytes.Length), ("sizeLimit", MaxTpfFileBytes));
+                throw new InvalidDataException($"TPF file is too large. Maximum supported size is {MaxTpfFileBytes} bytes.");
+            }
+
             if (bytes.Length < 4)
             {
+                Diagnostics.Warning("tpf_parse_rejected", "TPF payload is below minimum header size.", ("payloadLength", bytes.Length));
                 throw new InvalidDataException("TPF file is too small.");
             }
 
@@ -59,6 +75,7 @@ namespace Dzmac.Core.Presets
                         if (nextOffset > offset)
                         {
                             file.ParseWarnings.Add($"Skipped unsupported preset residual bytes at 0x{offset:X}.");
+                            Diagnostics.Warning("tpf_parse_warning", "Skipped unsupported preset residual bytes.", ("offset", offset), ("nextOffset", nextOffset), ("presetIndex", i));
                         }
 
                         offset = nextOffset;
@@ -67,6 +84,7 @@ namespace Dzmac.Core.Presets
                 catch (Exception ex) when (ex is InvalidDataException || ex is EndOfStreamException)
                 {
                     file.ParseWarnings.Add($"Preset index {i} ignored: {ex.Message}");
+                    Diagnostics.Warning("tpf_preset_rejected", ex.Message, ("presetIndex", i), ("offset", presetStart));
                     offset = FindNextPresetOffset(bytes, Math.Min(presetStart + 1, bytes.Length));
                 }
             }
@@ -80,6 +98,10 @@ namespace Dzmac.Core.Presets
                 file.SelectedPresetIndex = (byte)Math.Max(0, file.Presets.Count - 1);
             }
 
+            Diagnostics.Info("tpf_parse_completed",
+                ("declaredPresetCount", declaredCount),
+                ("parsedPresetCount", file.Presets.Count),
+                ("warningCount", file.ParseWarnings.Count));
             return file;
         }
 
@@ -96,6 +118,7 @@ namespace Dzmac.Core.Presets
             }
 
             File.WriteAllBytes(path, Save(file));
+            Diagnostics.Info("tpf_save_completed", ("path", path), ("presetCount", file.Presets.Count));
         }
 
         public static byte[] Save(TpfFile file)
@@ -105,6 +128,7 @@ namespace Dzmac.Core.Presets
                 throw new ArgumentNullException(nameof(file));
             }
 
+            Diagnostics.Info("tpf_save_start", ("presetCount", file.Presets.Count));
             using var ms = new MemoryStream();
             ms.WriteByte(file.Version);
             ms.WriteByte((byte)Math.Min(255, file.Presets.Count));
@@ -162,7 +186,81 @@ namespace Dzmac.Core.Presets
                 preset.Ipv4 = ipv4;
             }
 
+            ValidatePreset(preset);
             return preset;
+        }
+
+        private static void ValidatePreset(TpfPreset preset)
+        {
+            if (preset.Name.Length > MaxPresetNameChars || HasControlCharacters(preset.Name))
+            {
+                throw new InvalidDataException("Preset name is invalid.");
+            }
+
+            if (preset.MacMode == TpfMacMode.Custom)
+            {
+                if (preset.CustomMac.Length > MaxCustomMacChars)
+                {
+                    throw new InvalidDataException("Custom MAC value is too long.");
+                }
+
+                var normalizedMac = (preset.CustomMac ?? string.Empty).Replace("-", string.Empty).Replace(":", string.Empty).Trim();
+                if (!MacAddress.IsValidMac(normalizedMac.ToUpperInvariant()))
+                {
+                    throw new InvalidDataException("Custom MAC value is not valid.");
+                }
+
+                preset.CustomMac = string.Join("-", Enumerable.Range(0, 6).Select(i => normalizedMac.Substring(i * 2, 2).ToUpperInvariant()));
+            }
+
+            if (preset.Ipv4 == null || !preset.Ipv4.Enabled)
+            {
+                return;
+            }
+
+            ValidateIpv4Field(preset.Ipv4.Address, "IPv4 address", validateSubnetMask: false, required: preset.Ipv4.IsStatic);
+            ValidateIpv4Field(preset.Ipv4.SubnetMask, "IPv4 subnet mask", validateSubnetMask: true, required: preset.Ipv4.IsStatic);
+            ValidateIpv4Field(preset.Ipv4.DefaultGateway, "IPv4 default gateway", validateSubnetMask: false, required: preset.Ipv4.GatewayEnabled);
+            ValidateIpv4Field(preset.Ipv4.PrimaryDnsServer, "IPv4 DNS server", validateSubnetMask: false, required: preset.Ipv4.DnsEnabled);
+        }
+
+        private static void ValidateIpv4Field(string value, string fieldName, bool validateSubnetMask, bool required)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                if (required)
+                {
+                    throw new InvalidDataException($"{fieldName} is required.");
+                }
+
+                return;
+            }
+
+            if (value.Length > MaxIpv4FieldChars || HasControlCharacters(value))
+            {
+                throw new InvalidDataException($"{fieldName} is invalid.");
+            }
+
+            var valid = validateSubnetMask
+                ? IpAddressValidator.TryValidateIpv4SubnetMask(value, out _)
+                : IpAddressValidator.TryValidateIpv4Address(value, out _);
+            if (!valid)
+            {
+                throw new InvalidDataException($"{fieldName} is invalid.");
+            }
+        }
+
+        private static bool HasControlCharacters(string value)
+        {
+            for (var i = 0; i < value.Length; i++)
+            {
+                if (char.IsControl(value[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void WritePreset(Stream stream, TpfPreset preset)

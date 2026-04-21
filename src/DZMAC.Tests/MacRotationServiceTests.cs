@@ -84,7 +84,7 @@ namespace Dzmac.Tests
             var registry = new FakeRegistryClient(throwOnEnsure: null);
             var adapter = new NetworkAdapter(_loopback, null, false, wmi, registry);
 
-            Assert.ThrowsExactly<ArgumentNullException>(() =>
+            Assert.ThrowsException<ArgumentNullException>(() =>
                 MacRotationService.TryRotateMac(adapter, new MacAddress("020000000001"), true, progress: null));
         }
 

@@ -1,4 +1,5 @@
 using Dzmac.Core.Presets;
+using System.IO;
 
 namespace DZMAC.Tests;
 
@@ -130,6 +131,36 @@ public class TpfSerializerTests
         Assert.AreEqual(0, sample.Ipv4.GatewayMetric);
         Assert.IsTrue(sample.Ipv4.DnsEnabled);
         Assert.AreEqual("192.168.1.1", sample.Ipv4.PrimaryDnsServer);
+    }
+
+    [TestMethod]
+    public void Load_RejectsOversizedPayload()
+    {
+        var oversized = new byte[(1024 * 1024) + 1];
+        oversized[0] = 1;
+        oversized[1] = 0;
+        oversized[2] = 0;
+        oversized[3] = 0;
+
+        Assert.ThrowsException<InvalidDataException>(() => TpfSerializer.Load(oversized));
+    }
+
+    [TestMethod]
+    public void Load_RejectsPresetWithInvalidCustomMacPayload()
+    {
+        var file = new TpfFile();
+        file.Presets.Add(new TpfPreset
+        {
+            Name = "Unsafe",
+            MacMode = TpfMacMode.Custom,
+            CustomMac = "00-11-22-33-44-55 && calc.exe"
+        });
+
+        var payload = TpfSerializer.Save(file);
+        var loaded = TpfSerializer.Load(payload);
+
+        Assert.AreEqual(0, loaded.Presets.Count);
+        Assert.AreEqual(1, loaded.ParseWarnings.Count);
     }
 
     private static int FindUtf16Sequence(byte[] data, byte[] sequence)
