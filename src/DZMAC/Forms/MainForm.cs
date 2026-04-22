@@ -683,35 +683,36 @@ namespace Dzmac.Forms
                 return;
             }
 
-            if (!_selected.Adapter.Changed)
+            var selected = _selected;
+            if (!selected.Adapter.Changed)
             {
                 return;
             }
 
             ChangeMacButton.Enabled = false;
             RestoreMacButton.Enabled = false;
-            MainStatusBar.Text = $"Restoring original MAC address for {_selected.Name}...";
+            MainStatusBar.Text = $"Restoring original MAC address for {selected.Name}...";
             await Task.Yield();
 
             try
             {
-                var resetResult = await Task.Run(() => _adminService.ResetRegistryMac(_selected.Adapter));
+                var resetResult = await Task.Run(() => _adminService.ResetRegistryMac(selected.Adapter));
                 if (resetResult.IsSuccess)
                 {
-                    MainStatusBar.Text = $"Restored original MAC address for {_selected.Name}.";
+                    MainStatusBar.Text = $"Restored original MAC address for {selected.Name}.";
                     _ = MessageBox.Show(Resources.MacAddressRestoreSuccess, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                     if (_reenableOnChange)
                     {
-                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(_selected.Adapter, false));
-                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(_selected.Adapter, true));
+                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(selected.Adapter, false));
+                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(selected.Adapter, true));
                     }
 
                     _ = RefreshConnectionsBackground();
                 }
                 else
                 {
-                    MainStatusBar.Text = $"Failed to restore original MAC address for {_selected.Name}.";
+                    MainStatusBar.Text = $"Failed to restore original MAC address for {selected.Name}.";
                     _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }

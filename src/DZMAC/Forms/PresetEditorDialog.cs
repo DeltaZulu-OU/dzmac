@@ -579,7 +579,7 @@ namespace Dzmac.Forms
                 GatewayEnabled = !useDhcp && _ipv4GatewayCheckBox.Checked,
                 DefaultGateway = GetGridValue(_ipv4GatewayGrid, 0, 0),
                 GatewayMetric = metric,
-                DnsEnabled = _ipv4DnsCheckBox.Checked,
+                DnsEnabled = !useDhcp && _ipv4DnsCheckBox.Checked,
                 PrimaryDnsServer = GetGridValue(_ipv4DnsGrid, 0, 0)
             };
         }
@@ -615,6 +615,12 @@ namespace Dzmac.Forms
                 && !IpAddressValidator.TryValidateIpv4Address(ipv4.PrimaryDnsServer, out _))
             {
                 error = "IPv4 DNS server is invalid.";
+                return false;
+            }
+
+            if (ipv4.DnsEnabled && string.IsNullOrWhiteSpace(ipv4.PrimaryDnsServer))
+            {
+                error = "IPv4 DNS server is required when DNS is enabled.";
                 return false;
             }
 

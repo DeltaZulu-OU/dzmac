@@ -346,6 +346,12 @@ namespace Dzmac.Core.Presets
             var subnetMask = ReadUtf16String(bytes, ref offset, required: false);
 
             var gatewayEnabled = ReadUInt16(bytes, ref offset);
+            if (gatewayEnabled != 0 && gatewayEnabled != 1)
+            {
+                offset = start;
+                return false;
+            }
+
             var gateway = string.Empty;
             if (gatewayEnabled == 1)
             {
@@ -354,6 +360,12 @@ namespace Dzmac.Core.Presets
 
             var metric = ReadInt32(bytes, ref offset);
             var dnsEnabled = ReadUInt16(bytes, ref offset);
+            if (dnsEnabled != 0 && dnsEnabled != 1)
+            {
+                offset = start;
+                return false;
+            }
+
             var dns = string.Empty;
             if (dnsEnabled == 1)
             {
