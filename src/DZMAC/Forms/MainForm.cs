@@ -1044,8 +1044,14 @@ namespace Dzmac.Forms
 
         private void PresetNewButton_Click(object sender, EventArgs e)
         {
-            var draft = BuildPresetFromCurrentSelection($"Preset {_presets.Count + 1}");
-            using var dialog = new PresetEditorDialog("Create New Preset", draft);
+            var draft = new TpfPreset
+            {
+                Name = string.Empty,
+                MacMode = TpfMacMode.Original,
+                CustomMac = string.Empty,
+                Ipv4 = null
+            };
+            using var dialog = new PresetEditorDialog("Create New Preset", draft, startBlank: true);
             if (dialog.ShowDialog(this) != DialogResult.OK)
             {
                 return;
@@ -1353,41 +1359,6 @@ namespace Dzmac.Forms
             }
 
             return _presets[index];
-        }
-
-        private TpfPreset BuildPresetFromCurrentSelection(string name)
-        {
-            var preset = new TpfPreset
-            {
-                Name = name.Trim(),
-                MacMode = TpfMacMode.Original
-            };
-
-            if (_selected != null)
-            {
-                var parsedMac = (_selected.ActiveMac ?? string.Empty).Replace("-", string.Empty).Replace(":", string.Empty);
-                if (MacAddress.IsValidMac(parsedMac))
-                {
-                    preset.MacMode = TpfMacMode.Custom;
-                    preset.CustomMac = _selected.ActiveMac;
-                }
-
-                var address = _selected.Ipv4Addresses?.FirstOrDefault();
-                preset.Ipv4 = new TpfIpv4Settings
-                {
-                    Enabled = _selected.IPv4Status == "Enabled",
-                    IsStatic = !_selected.IsDhcpEnabled,
-                    Address = address?.Address ?? string.Empty,
-                    SubnetMask = address?.SubnetMask ?? string.Empty,
-                    GatewayEnabled = _selected.Ipv4Gateways?.Count > 0,
-                    DefaultGateway = _selected.Ipv4Gateways?.FirstOrDefault() ?? string.Empty,
-                    GatewayMetric = 0,
-                    DnsEnabled = _selected.Ipv4DnsServers?.Count > 0,
-                    PrimaryDnsServer = _selected.Ipv4DnsServers?.FirstOrDefault() ?? string.Empty
-                };
-            }
-
-            return preset;
         }
 
         private static TpfPreset ClonePreset(TpfPreset preset)

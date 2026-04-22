@@ -36,7 +36,7 @@ namespace Dzmac.Forms
 
         public TpfPreset Preset => ClonePreset(_workingCopy);
 
-        public PresetEditorDialog(string title, TpfPreset seed)
+        public PresetEditorDialog(string title, TpfPreset seed, bool startBlank = false)
         {
             if (seed == null)
             {
@@ -244,7 +244,14 @@ namespace Dzmac.Forms
             AcceptButton = saveButton;
             CancelButton = cancelButton;
 
-            BindFromPreset(_workingCopy);
+            if (startBlank)
+            {
+                BindAsBlankPreset();
+            }
+            else
+            {
+                BindFromPreset(_workingCopy);
+            }
         }
 
         private static DataGridView CreateIpv4Grid(params (string Header, float FillWeight)[] columns)
@@ -412,6 +419,30 @@ namespace Dzmac.Forms
                 ipv4?.DefaultGateway,
                 string.IsNullOrWhiteSpace(ipv4?.DefaultGateway) ? string.Empty : (ipv4?.GatewayMetric ?? 0).ToString());
             SetSingleRow(_ipv4DnsGrid, ipv4?.PrimaryDnsServer);
+
+            RefreshMacControlState();
+            RefreshIpv4ControlState();
+        }
+
+        private void BindAsBlankPreset()
+        {
+            _presetNameTextBox.Text = string.Empty;
+            _includeMacCheckBox.Checked = false;
+            _useRandomMacRadio.Checked = false;
+            _useRandom02MacRadio.Checked = false;
+            _useOriginalMacRadio.Checked = false;
+            _useCustomMacRadio.Checked = false;
+            _customMacTextBox.Text = string.Empty;
+
+            _includeIpv4CheckBox.Checked = false;
+            _dhcpIpv4CheckBox.Checked = false;
+            _ipv4AddressCheckBox.Checked = false;
+            _ipv4GatewayCheckBox.Checked = false;
+            _ipv4DnsCheckBox.Checked = false;
+
+            _ipv4AddressGrid.Rows.Clear();
+            _ipv4GatewayGrid.Rows.Clear();
+            _ipv4DnsGrid.Rows.Clear();
 
             RefreshMacControlState();
             RefreshIpv4ControlState();
