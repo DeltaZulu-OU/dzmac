@@ -12,7 +12,9 @@ This project is in **alpha**.
 
 The focus is on stabilizing core functionality before expanding scope for DZMAC. [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/) has been around over a decade and it has been used by hundreds of thousands of people, if not millions. DZMAC is a reimplementation from scratch, trying to be as faithful as possible to the original. However, there are some design decisions made explicitly excluding some fetures.
 
-![Sample](assets/window.png)
+![Main window showing Information Details](assets/main-info.png)
+![Main window showing IP Addresses](assets/main-ip.png)
+![Main window showing Presets](assets/main-presets.png)
 
 ## Usage
 
