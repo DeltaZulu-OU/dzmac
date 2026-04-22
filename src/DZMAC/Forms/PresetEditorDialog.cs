@@ -407,7 +407,10 @@ namespace Dzmac.Forms
             _ipv4DnsCheckBox.Checked = ipv4?.DnsEnabled == true;
 
             SetSingleRow(_ipv4AddressGrid, ipv4?.Address, ipv4?.SubnetMask);
-            SetSingleRow(_ipv4GatewayGrid, ipv4?.DefaultGateway, (ipv4?.GatewayMetric ?? 0).ToString());
+            SetSingleRow(
+                _ipv4GatewayGrid,
+                ipv4?.DefaultGateway,
+                string.IsNullOrWhiteSpace(ipv4?.DefaultGateway) ? string.Empty : (ipv4?.GatewayMetric ?? 0).ToString());
             SetSingleRow(_ipv4DnsGrid, ipv4?.PrimaryDnsServer);
 
             RefreshMacControlState();
@@ -517,7 +520,14 @@ namespace Dzmac.Forms
 
             _workingCopy.Name = name;
             _workingCopy.MacMode = ResolveMacMode();
-            _workingCopy.Ipv4 = BuildIpv4Settings();
+            var ipv4Settings = BuildIpv4Settings();
+            if (!TryValidateIpv4Settings(ipv4Settings, out var ipv4Error))
+            {
+                MessageBox.Show(ipv4Error, "Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _workingCopy.Ipv4 = ipv4Settings;
 
             DialogResult = DialogResult.OK;
             Close();
@@ -556,13 +566,14 @@ namespace Dzmac.Forms
             }
 
             var useDhcp = _dhcpIpv4CheckBox.Checked;
+            var useStaticAddress = !useDhcp && _ipv4AddressCheckBox.Checked;
             var metric = 0;
             _ = int.TryParse(GetGridValue(_ipv4GatewayGrid, 0, 1), out metric);
 
             return new TpfIpv4Settings
             {
                 Enabled = true,
-                IsStatic = !useDhcp,
+                IsStatic = useStaticAddress,
                 Address = GetGridValue(_ipv4AddressGrid, 0, 0),
                 SubnetMask = GetGridValue(_ipv4AddressGrid, 0, 1),
                 GatewayEnabled = !useDhcp && _ipv4GatewayCheckBox.Checked,
@@ -571,6 +582,43 @@ namespace Dzmac.Forms
                 DnsEnabled = _ipv4DnsCheckBox.Checked,
                 PrimaryDnsServer = GetGridValue(_ipv4DnsGrid, 0, 0)
             };
+        }
+
+        private static bool TryValidateIpv4Settings(TpfIpv4Settings ipv4, out string error)
+        {
+            error = string.Empty;
+            if (ipv4 == null || !ipv4.Enabled || !ipv4.IsStatic)
+            {
+                return true;
+            }
+
+            if (!IpAddressValidator.TryValidateIpv4Address(ipv4.Address, out _))
+            {
+                error = "IPv4 address is invalid.";
+                return false;
+            }
+
+            if (!IpAddressValidator.TryValidateIpv4SubnetMask(ipv4.SubnetMask, out _))
+            {
+                error = "IPv4 subnet mask is invalid.";
+                return false;
+            }
+
+            if (ipv4.GatewayEnabled && !string.IsNullOrWhiteSpace(ipv4.DefaultGateway)
+                && !IpAddressValidator.TryValidateIpv4Address(ipv4.DefaultGateway, out _))
+            {
+                error = "IPv4 gateway is invalid.";
+                return false;
+            }
+
+            if (ipv4.DnsEnabled && !string.IsNullOrWhiteSpace(ipv4.PrimaryDnsServer)
+                && !IpAddressValidator.TryValidateIpv4Address(ipv4.PrimaryDnsServer, out _))
+            {
+                error = "IPv4 DNS server is invalid.";
+                return false;
+            }
+
+            return true;
         }
 
         private static string GetGridValue(DataGridView grid, int row, int col)

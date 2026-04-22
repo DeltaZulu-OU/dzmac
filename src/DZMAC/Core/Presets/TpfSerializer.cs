@@ -69,16 +69,23 @@ namespace Dzmac.Core.Presets
                         file.Presets.Add(preset);
                     }
 
-                    if (i < declaredCount - 1)
+                    if (i < declaredCount - 1 && offset < bytes.Length)
                     {
-                        var nextOffset = FindNextPresetOffset(bytes, offset);
-                        if (nextOffset > offset)
+                        var nextHeaderLength = ReadInt32At(bytes, offset);
+                        var looksLikeNextPreset = nextHeaderLength > 0
+                                                  && (nextHeaderLength % 2) == 0
+                                                  && offset + 4 + nextHeaderLength + 5 <= bytes.Length;
+                        if (!looksLikeNextPreset)
                         {
-                            file.ParseWarnings.Add($"Skipped unsupported preset residual bytes at 0x{offset:X}.");
-                            Diagnostics.Warning("tpf_parse_warning", "Skipped unsupported preset residual bytes.", ("offset", offset), ("nextOffset", nextOffset), ("presetIndex", i));
-                        }
+                            var nextOffset = FindNextPresetOffset(bytes, offset);
+                            if (nextOffset > offset)
+                            {
+                                file.ParseWarnings.Add($"Skipped unsupported preset residual bytes at 0x{offset:X}.");
+                                Diagnostics.Warning("tpf_parse_warning", "Skipped unsupported preset residual bytes.", ("offset", offset), ("nextOffset", nextOffset), ("presetIndex", i));
+                            }
 
-                        offset = nextOffset;
+                            offset = nextOffset;
+                        }
                     }
                 }
                 catch (Exception ex) when (ex is InvalidDataException || ex is EndOfStreamException)
@@ -141,12 +148,16 @@ namespace Dzmac.Core.Presets
 
             Diagnostics.Info("tpf_save_start", ("presetCount", file.Presets.Count));
             using var ms = new MemoryStream();
+            var serializedPresetCount = Math.Min(255, file.Presets.Count);
+            var selectedPresetIndex = serializedPresetCount == 0
+                ? 0
+                : Math.Min(file.SelectedPresetIndex, (byte)(serializedPresetCount - 1));
             ms.WriteByte(file.Version);
-            ms.WriteByte((byte)Math.Min(255, file.Presets.Count));
+            ms.WriteByte((byte)serializedPresetCount);
             ms.WriteByte(file.Reserved);
-            ms.WriteByte(file.SelectedPresetIndex);
+            ms.WriteByte((byte)selectedPresetIndex);
 
-            for (var i = 0; i < file.Presets.Count && i < 255; i++)
+            for (var i = 0; i < serializedPresetCount; i++)
             {
                 WritePreset(ms, file.Presets[i]);
             }

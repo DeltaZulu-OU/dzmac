@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
 namespace Dzmac.Core.Presets
 {
     internal static class TpfFileAssociationService
     {
+        private const uint SHCNE_ASSOCCHANGED = 0x08000000;
+        private const uint SHCNF_IDLIST = 0x0000;
         private const string ExtensionKeyPath = @"Software\Classes\.tpf";
         private const string ClassKeyPath = @"Software\Classes\DZMAC.TpfPreset";
         private const string OpenCommandKeyPath = @"Software\Classes\DZMAC.TpfPreset\shell\open\command";
@@ -27,23 +30,48 @@ namespace Dzmac.Core.Presets
 
             using (var extensionKey = Registry.CurrentUser.CreateSubKey(ExtensionKeyPath))
             {
-                extensionKey?.SetValue(string.Empty, ClassName, RegistryValueKind.String);
+                if (extensionKey == null)
+                {
+                    throw new InvalidOperationException($"Failed to create registry key '{ExtensionKeyPath}'.");
+                }
+
+                extensionKey.SetValue(string.Empty, ClassName, RegistryValueKind.String);
             }
 
             using (var classKey = Registry.CurrentUser.CreateSubKey(ClassKeyPath))
             {
-                classKey?.SetValue(string.Empty, "Preset File", RegistryValueKind.String);
+                if (classKey == null)
+                {
+                    throw new InvalidOperationException($"Failed to create registry key '{ClassKeyPath}'.");
+                }
+
+                classKey.SetValue(string.Empty, "Preset File", RegistryValueKind.String);
             }
 
             using (var openCommandKey = Registry.CurrentUser.CreateSubKey(OpenCommandKeyPath))
             {
-                openCommandKey?.SetValue(string.Empty, commandValue, RegistryValueKind.String);
+                if (openCommandKey == null)
+                {
+                    throw new InvalidOperationException($"Failed to create registry key '{OpenCommandKeyPath}'.");
+                }
+
+                openCommandKey.SetValue(string.Empty, commandValue, RegistryValueKind.String);
             }
 
             using (var defaultIconKey = Registry.CurrentUser.CreateSubKey(DefaultIconKeyPath))
             {
-                defaultIconKey?.SetValue(string.Empty, $"\"{executablePath}\",0", RegistryValueKind.String);
+                if (defaultIconKey == null)
+                {
+                    throw new InvalidOperationException($"Failed to create registry key '{DefaultIconKeyPath}'.");
+                }
+
+                defaultIconKey.SetValue(string.Empty, $"\"{executablePath}\",0", RegistryValueKind.String);
             }
+
+            SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, IntPtr.Zero, IntPtr.Zero);
         }
+
+        [DllImport("shell32.dll")]
+        private static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
     }
 }

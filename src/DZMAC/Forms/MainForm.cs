@@ -1080,6 +1080,16 @@ namespace Dzmac.Forms
                 return;
             }
 
+            if (IsDuplicatePresetName(dialog.Preset.Name, selectedIndex))
+            {
+                MessageBox.Show(
+                    $"A preset named '{dialog.Preset.Name}' already exists. Please choose a different name.",
+                    "Edit Preset",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
             _presets[selectedIndex] = dialog.Preset;
             BindPresetList();
             _presetListBox.SelectedIndex = selectedIndex;
@@ -1110,14 +1120,15 @@ namespace Dzmac.Forms
 
         private async void PresetApplyButton_Click(object sender, EventArgs e)
         {
-            var selected = GetSelectedPreset();
-            if (selected == null || _selected == null)
+            var selectedPreset = GetSelectedPreset();
+            var selectedConnection = _selected;
+            if (selectedPreset == null || selectedConnection == null)
             {
                 return;
             }
 
             var confirmApply = MessageBox.Show(
-                $"Apply preset '{selected.Name}' to '{_selected.Name}'?",
+                $"Apply preset '{selectedPreset.Name}' to '{selectedConnection.Name}'?",
                 "Apply Preset",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
@@ -1126,47 +1137,48 @@ namespace Dzmac.Forms
                 return;
             }
 
-            MainStatusBar.Text = $"Applying preset '{selected.Name}' to '{_selected.Name}'...";
+            var progress = new Progress<string>(status => MainStatusBar.Text = status);
+            MainStatusBar.Text = $"Applying preset '{selectedPreset.Name}' to '{selectedConnection.Name}'...";
             await Task.Yield();
 
             var (macApplied, macError) = await Task.Run(() =>
             {
-                var success = TryApplyPresetMac(selected, out var error);
+                var success = TryApplyPresetMac(selectedPreset, selectedConnection, progress, out var error);
                 return (success, error);
             });
 
             if (!macApplied)
             {
                 MessageBox.Show(macError, "Apply Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                MainStatusBar.Text = $"Failed to apply preset '{selected.Name}' to '{_selected.Name}'.";
+                MainStatusBar.Text = $"Failed to apply preset '{selectedPreset.Name}' to '{selectedConnection.Name}'.";
                 return;
             }
 
             var (ipv4Applied, ipv4Error) = await Task.Run(() =>
             {
-                var success = TryApplyPresetIpv4(selected.Ipv4, out var error);
+                var success = TryApplyPresetIpv4(selectedPreset.Ipv4, selectedConnection, out var error);
                 return (success, error);
             });
 
             if (!ipv4Applied)
             {
                 MessageBox.Show(ipv4Error, "Apply Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                MainStatusBar.Text = $"Failed to apply preset '{selected.Name}' to '{_selected.Name}'.";
+                MainStatusBar.Text = $"Failed to apply preset '{selectedPreset.Name}' to '{selectedConnection.Name}'.";
                 return;
             }
 
-            MainStatusBar.Text = $"Applied preset '{selected.Name}' successfully.";
+            MainStatusBar.Text = $"Applied preset '{selectedPreset.Name}' successfully.";
             _ = RefreshConnectionsBackground();
         }
 
-        private bool TryApplyPresetMac(TpfPreset preset, out string error)
+        private bool TryApplyPresetMac(TpfPreset preset, NetworkConnection selectedConnection, IProgress<string> progress, out string error)
         {
             error = string.Empty;
 
             switch (preset.MacMode)
             {
                 case TpfMacMode.Original:
-                    var resetResult = _adminService.ResetRegistryMac(_selected.Adapter);
+                    var resetResult = _adminService.ResetRegistryMac(selectedConnection.Adapter);
                     if (!resetResult.IsSuccess)
                     {
                         error = $"Failed to restore original MAC address: {resetResult.Message}";
@@ -1182,18 +1194,18 @@ namespace Dzmac.Forms
                         return false;
                     }
 
-                    return TryRotateMac(new MacAddress(normalized), out error);
+                    return TryRotateMac(selectedConnection, new MacAddress(normalized), progress, out error);
                 case TpfMacMode.Random:
-                    return TryApplyRandomMac(useLocallyAdministeredFirstOctet: false, out error);
+                    return TryApplyRandomMac(selectedConnection, useLocallyAdministeredFirstOctet: false, progress, out error);
                 case TpfMacMode.RandomWith02:
-                    return TryApplyRandomMac(useLocallyAdministeredFirstOctet: true, out error);
+                    return TryApplyRandomMac(selectedConnection, useLocallyAdministeredFirstOctet: true, progress, out error);
                 default:
                     error = $"Unsupported MAC mode: 0x{(byte)preset.MacMode:X2}";
                     return false;
             }
         }
 
-        private bool TryApplyRandomMac(bool useLocallyAdministeredFirstOctet, out string error)
+        private bool TryApplyRandomMac(NetworkConnection selectedConnection, bool useLocallyAdministeredFirstOctet, IProgress<string> progress, out string error)
         {
             error = string.Empty;
 
@@ -1208,20 +1220,19 @@ namespace Dzmac.Forms
                 return false;
             }
 
-            var randomMac = _selected.GetRandom(randomVendor.Oui);
+            var randomMac = selectedConnection.GetRandom(randomVendor.Oui);
             if (useLocallyAdministeredFirstOctet)
             {
                 randomMac = randomMac.AsLocallyAdministered();
             }
 
-            return TryRotateMac(randomMac, out error);
+            return TryRotateMac(selectedConnection, randomMac, progress, out error);
         }
 
-        private bool TryRotateMac(MacAddress targetMac, out string error)
+        private bool TryRotateMac(NetworkConnection selectedConnection, MacAddress targetMac, IProgress<string> progress, out string error)
         {
             error = string.Empty;
-            var progress = new Progress<string>(status => MainStatusBar.Text = status);
-            var operation = MacRotationService.TryRotateMac(_selected.Adapter, targetMac, _persistOriginalMacRecord, progress);
+            var operation = MacRotationService.TryRotateMac(selectedConnection.Adapter, targetMac, _persistOriginalMacRecord, progress);
             if (operation.Success)
             {
                 return true;
@@ -1231,7 +1242,7 @@ namespace Dzmac.Forms
             return false;
         }
 
-        private bool TryApplyPresetIpv4(TpfIpv4Settings ipv4, out string error)
+        private bool TryApplyPresetIpv4(TpfIpv4Settings ipv4, NetworkConnection selectedConnection, out string error)
         {
             error = string.Empty;
             if (ipv4 == null || !ipv4.Enabled)
@@ -1241,7 +1252,7 @@ namespace Dzmac.Forms
 
             if (!ipv4.IsStatic)
             {
-                var dhcpEnableResult = _adminService.SetDhcpEnabled(_selected.Adapter, true);
+                var dhcpEnableResult = _adminService.SetDhcpEnabled(selectedConnection.Adapter, true);
                 if (!dhcpEnableResult.IsSuccess)
                 {
                     error = $"Failed to enable DHCPv4: {dhcpEnableResult.Message}";
@@ -1263,7 +1274,7 @@ namespace Dzmac.Forms
                 return false;
             }
 
-            if (!_selected.Adapter.TrySetIPv4Addresses(new[] { normalizedAddress }, new[] { normalizedSubnet }))
+            if (!selectedConnection.Adapter.TrySetIPv4Addresses(new[] { normalizedAddress }, new[] { normalizedSubnet }))
             {
                 error = "Failed to set static IPv4 address.";
                 return false;
@@ -1277,7 +1288,7 @@ namespace Dzmac.Forms
                     return false;
                 }
 
-                if (!_selected.Adapter.TrySetIPv4Gateways(new[] { normalizedGateway }, new[] { ipv4.GatewayMetric }))
+                if (!selectedConnection.Adapter.TrySetIPv4Gateways(new[] { normalizedGateway }, new[] { ipv4.GatewayMetric }))
                 {
                     error = "Failed to set IPv4 default gateway.";
                     return false;
@@ -1292,7 +1303,7 @@ namespace Dzmac.Forms
                     return false;
                 }
 
-                if (!_selected.Adapter.TrySetIPv4DnsServers(new[] { normalizedDns }))
+                if (!selectedConnection.Adapter.TrySetIPv4DnsServers(new[] { normalizedDns }))
                 {
                     error = "Failed to set IPv4 DNS server.";
                     return false;
@@ -1402,10 +1413,23 @@ namespace Dzmac.Forms
             };
         }
 
-        private bool IsDuplicatePresetName(string presetName)
+        private bool IsDuplicatePresetName(string presetName, int excludeIndex = -1)
         {
             var normalizedName = (presetName ?? string.Empty).Trim();
-            return _presets.Any(p => string.Equals((p.Name ?? string.Empty).Trim(), normalizedName, StringComparison.OrdinalIgnoreCase));
+            for (var i = 0; i < _presets.Count; i++)
+            {
+                if (i == excludeIndex)
+                {
+                    continue;
+                }
+
+                if (string.Equals((_presets[i].Name ?? string.Empty).Trim(), normalizedName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void LoadPresetFileIfExists(string path, bool mustExist = false)
