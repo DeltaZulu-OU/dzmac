@@ -119,9 +119,13 @@ namespace Dzmac.Forms
         private void AssociateItem_Click(object sender, EventArgs e)
         {
             var executablePath = Application.ExecutablePath;
-            var openCommand = TpfFileAssociationService.BuildOpenCommand(executablePath);
-            using var dialog = new TpfAssociationDialog(openCommand);
-            if (dialog.ShowDialog(this) != DialogResult.OK)
+            var approvalResult = MessageBox.Show(
+                this,
+                Resources.TpfAssociationApprovalMessage,
+                Resources.TpfAssociationApproval_Title,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (approvalResult != DialogResult.Yes)
             {
                 return;
             }

@@ -118,6 +118,10 @@ namespace Dzmac.Properties
             get { return ResourceManager.GetString("ExportFailed", resourceCulture); }
         }
 
+        internal static string TpfAssociationApprovalMessage {
+            get { return ResourceManager.GetString("TpfAssociationApprovalMessage", resourceCulture); }
+        }
+
         // Dialog titles
 
         internal static string MacAddressChange_Title {
@@ -150,6 +154,10 @@ namespace Dzmac.Properties
 
         internal static string Failure_Title {
             get { return ResourceManager.GetString("Failure_Title", resourceCulture); }
+        }
+
+        internal static string TpfAssociationApproval_Title {
+            get { return ResourceManager.GetString("TpfAssociationApproval_Title", resourceCulture); }
         }
 
         internal static string VendorListLoading_Title {

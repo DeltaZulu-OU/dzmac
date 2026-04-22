@@ -154,6 +154,11 @@ Are you sure?</value>
   <data name="ExportFailed" xml:space="preserve">
     <value>Failed to export text report.</value>
   </data>
+  <data name="TpfAssociationApprovalMessage" xml:space="preserve">
+    <value>Associate .tpf preset files with DZMAC for the current Windows user.
+
+After association, double-clicking a .tpf file will open it in DZMAC.</value>
+  </data>
 
   <!-- Dialog titles -->
   <data name="MacAddressChange_Title" xml:space="preserve">
@@ -179,6 +184,9 @@ Are you sure?</value>
   </data>
   <data name="Failure_Title" xml:space="preserve">
     <value>Failure</value>
+  </data>
+  <data name="TpfAssociationApproval_Title" xml:space="preserve">
+    <value>Associate .tpf Files</value>
   </data>
   <data name="VendorListLoading_Title" xml:space="preserve">
     <value>Vendor List Loading</value>
