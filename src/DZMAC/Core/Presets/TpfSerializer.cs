@@ -84,8 +84,19 @@ namespace Dzmac.Core.Presets
                 catch (Exception ex) when (ex is InvalidDataException || ex is EndOfStreamException)
                 {
                     file.ParseWarnings.Add($"Preset index {i} ignored: {ex.Message}");
-                    Diagnostics.Warning("tpf_preset_rejected", ex.Message, ("presetIndex", i), ("offset", presetStart));
-                    offset = FindNextPresetOffset(bytes, Math.Min(presetStart + 1, bytes.Length));
+                    Diagnostics.Warning("tpf_preset_rejected", ex.Message,
+                        ("presetIndex", i),
+                        ("presetStart", presetStart),
+                        ("failureOffset", offset),
+                        ("exceptionType", ex.GetType().Name));
+
+                    var searchStart = Math.Min(Math.Max(offset, presetStart + 1), bytes.Length);
+                    var nextOffset = FindNextPresetOffset(bytes, searchStart);
+                    Diagnostics.Warning("tpf_parse_warning", "Preset recovery scan executed.",
+                        ("presetIndex", i),
+                        ("searchStart", searchStart),
+                        ("nextOffset", nextOffset));
+                    offset = nextOffset;
                 }
             }
 
