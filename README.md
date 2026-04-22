@@ -68,6 +68,10 @@ consistently enforce confirmation dialogs, status-bar feedback, and diagnostics.
 
 The Windows event logs are used for diagnosing issues, and can be found under **Event Logs > Applications > DZMAC**. For a clearer understanding, visit [Event Log Catalog](https://github.com/zbalkan/dzmac/wiki/Event-Log-Catalog) page.
 
+### Portable
+
+There's no installer. It's a single-file executable relying on .NET Framework 4.8.1, installed on all Windiws 10 & 11 endpoints by default. It also helps the size of the application to be as small as possible.
+
 ### Narrower feature scope, fewer bundled utilities
 
 The following decisions define the current user-facing scope:
@@ -99,14 +103,6 @@ DZMAC now includes preset management compatible with `.tpf` files:
 - optional current-user `.tpf` association through **File → Associate with Preset Files (.tpf)**
 
 The serializer focuses on the supported subset (MAC mode + IPv4 fields) and keeps parsing resilient when unsupported residual bytes are encountered.
-
-#### Reduced "all-in-one" behavior
-
-Unlike TMAC's broader utility surface, DZMAC keeps optional/auxiliary behavior to a minimum and emphasizes explicit, focused actions in the main UI.
-
-### DHCP disable behavior is safe-by-default
-
-Disabling DHCPv4 preserves the current configuration instead of discarding it.
 
 ## Acknowledgements
 
