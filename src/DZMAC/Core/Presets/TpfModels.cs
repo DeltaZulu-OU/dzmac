@@ -71,7 +71,7 @@ namespace Dzmac.Core.Presets
         {
             if (preset == null)
             {
-                yield break;
+                throw new ArgumentNullException(nameof(preset));
             }
 
             yield return new KeyValuePair<string, string>("MAC Address", ToMacDisplay(preset));

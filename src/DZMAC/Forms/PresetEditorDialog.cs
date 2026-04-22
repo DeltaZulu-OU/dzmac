@@ -579,7 +579,7 @@ namespace Dzmac.Forms
                 GatewayEnabled = !useDhcp && _ipv4GatewayCheckBox.Checked,
                 DefaultGateway = GetGridValue(_ipv4GatewayGrid, 0, 0),
                 GatewayMetric = metric,
-                DnsEnabled = !useDhcp && _ipv4DnsCheckBox.Checked,
+                DnsEnabled = _ipv4DnsCheckBox.Checked,
                 PrimaryDnsServer = GetGridValue(_ipv4DnsGrid, 0, 0)
             };
         }
@@ -587,24 +587,24 @@ namespace Dzmac.Forms
         private static bool TryValidateIpv4Settings(TpfIpv4Settings ipv4, out string error)
         {
             error = string.Empty;
-            if (ipv4 == null || !ipv4.Enabled || !ipv4.IsStatic)
+            if (ipv4 == null || !ipv4.Enabled)
             {
                 return true;
             }
 
-            if (!IpAddressValidator.TryValidateIpv4Address(ipv4.Address, out _))
+            if (ipv4.IsStatic && !IpAddressValidator.TryValidateIpv4Address(ipv4.Address, out _))
             {
                 error = "IPv4 address is invalid.";
                 return false;
             }
 
-            if (!IpAddressValidator.TryValidateIpv4SubnetMask(ipv4.SubnetMask, out _))
+            if (ipv4.IsStatic && !IpAddressValidator.TryValidateIpv4SubnetMask(ipv4.SubnetMask, out _))
             {
                 error = "IPv4 subnet mask is invalid.";
                 return false;
             }
 
-            if (ipv4.GatewayEnabled && !string.IsNullOrWhiteSpace(ipv4.DefaultGateway)
+            if (ipv4.IsStatic && ipv4.GatewayEnabled && !string.IsNullOrWhiteSpace(ipv4.DefaultGateway)
                 && !IpAddressValidator.TryValidateIpv4Address(ipv4.DefaultGateway, out _))
             {
                 error = "IPv4 gateway is invalid.";
