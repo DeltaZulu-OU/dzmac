@@ -428,13 +428,39 @@ namespace Dzmac.Forms
                 return;
             }
 
+            var importedCount = 0;
+            var duplicatePresetNames = new List<string>();
             foreach (var selectedIndex in picker.SelectedIndices)
             {
-                _presets.Add(ClonePreset(imported.Presets[selectedIndex]));
+                var importedPreset = imported.Presets[selectedIndex];
+                if (IsDuplicatePresetName(importedPreset.Name))
+                {
+                    duplicatePresetNames.Add(importedPreset.Name);
+                    continue;
+                }
+
+                _presets.Add(ClonePreset(importedPreset));
+                importedCount++;
+            }
+
+            if (duplicatePresetNames.Count > 0)
+            {
+                var duplicateList = string.Join(Environment.NewLine, duplicatePresetNames.Distinct(StringComparer.OrdinalIgnoreCase).Select(name => $"- {name}"));
+                MessageBox.Show(
+                    $"Cannot import presets with duplicate names:{Environment.NewLine}{duplicateList}",
+                    "Import Preset",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+
+            if (importedCount == 0)
+            {
+                MainStatusBar.Text = "No presets were imported due to duplicate names.";
+                return;
             }
 
             BindPresetList();
-            MainStatusBar.Text = $"Imported {picker.SelectedIndices.Count} preset(s) from {openDialog.FileName}.";
+            MainStatusBar.Text = $"Imported {importedCount} preset(s) from {openDialog.FileName}.";
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -1006,6 +1032,16 @@ namespace Dzmac.Forms
                 return;
             }
 
+            if (IsDuplicatePresetName(dialog.Preset.Name))
+            {
+                MessageBox.Show(
+                    $"A preset named '{dialog.Preset.Name}' already exists. Please choose a different name.",
+                    "Create New Preset",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
             _presets.Add(dialog.Preset);
             BindPresetList();
             _presetListBox.SelectedIndex = _presets.Count - 1;
@@ -1329,6 +1365,12 @@ namespace Dzmac.Forms
                         PrimaryDnsServer = preset.Ipv4.PrimaryDnsServer
                     }
             };
+        }
+
+        private bool IsDuplicatePresetName(string presetName)
+        {
+            var normalizedName = (presetName ?? string.Empty).Trim();
+            return _presets.Any(p => string.Equals((p.Name ?? string.Empty).Trim(), normalizedName, StringComparison.OrdinalIgnoreCase));
         }
 
         private void LoadPresetFileIfExists(string path, bool mustExist = false)
