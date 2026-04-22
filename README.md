@@ -117,3 +117,11 @@ Also, thanks to the following projects and resources:
 - [MACAddressTool](https://github.com/sietseringers/MACAddressTool) for internals and implementation ideas.
 - The [objectlistview](https://objectlistview.sourceforge.net/cs/index.html) project for list-view handling.
 - [MAC-Address-Text-Box-and-Class article on CodeProject](https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class) for MAC address textbox implementation reference.
+
+
+
+## License
+
+This project is licensed under MIT License.
+
+Te ObjectListView component is licensed under GPL3. The changes including migrating from .NET 2.0 to 4.8.1 can be fund under project directory.
