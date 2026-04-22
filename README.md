@@ -2,7 +2,7 @@
 
 ## Overview
 
-DZMAC is a Windows desktop application for viewing network adapters and managing MAC address–related settings with a deliberately constrained scope. It is a reimplementation of [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
+DZMAC is a Windows desktop application to spoof MAC address. It is a reimplementation of [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
 
 The goal is to provide a focused, predictable, and maintainable application centered on core adapter management workflows.
 
