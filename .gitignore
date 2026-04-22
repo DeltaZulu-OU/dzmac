@@ -360,3 +360,4 @@ launchsettings.json
 *.InstallLog
 
 .sarif
+/.patch
