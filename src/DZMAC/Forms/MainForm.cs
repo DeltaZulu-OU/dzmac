@@ -70,12 +70,6 @@ namespace Dzmac.Forms
         private readonly List<TpfPreset> _presets = new List<TpfPreset>();
         private string _currentPresetFilePath;
         private readonly string _startupPresetPath;
-        private ListBox _presetListBox;
-        private ListView _presetPropertyListView;
-        private Button _presetNewButton;
-        private Button _presetEditButton;
-        private Button _presetDeleteButton;
-        private Button _presetApplyButton;
 
         public MainForm(string startupPresetPath = null)
         {
@@ -105,7 +99,11 @@ namespace Dzmac.Forms
             _currentPresetFilePath = !string.IsNullOrWhiteSpace(_startupPresetPath)
                 ? _startupPresetPath
                 : System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default.tpf");
-            BuildPresetSurface();
+            _presetListBox.SelectedIndexChanged += (_, __) => BindSelectedPresetDetails();
+            _presetNewButton.Click += PresetNewButton_Click;
+            _presetEditButton.Click += PresetEditButton_Click;
+            _presetDeleteButton.Click += PresetDeleteButton_Click;
+            _presetApplyButton.Click += PresetApplyButton_Click;
             LoadPresetFileIfExists(_currentPresetFilePath, mustExist: !string.IsNullOrWhiteSpace(_startupPresetPath));
             UpdateSelectionState();
         }
@@ -987,63 +985,6 @@ namespace Dzmac.Forms
             CheckUpdateItem.Visible = false;
 
             PersistentAddressCheckBox.Visible = true;
-        }
-
-        private void BuildPresetSurface()
-        {
-            var root = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 2
-            };
-            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F));
-            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-
-            _presetListBox = new ListBox { Dock = DockStyle.Fill };
-            _presetListBox.SelectedIndexChanged += (_, __) => BindSelectedPresetDetails();
-            root.Controls.Add(_presetListBox, 0, 0);
-
-            _presetPropertyListView = new ListView
-            {
-                Dock = DockStyle.Fill,
-                View = View.Details,
-                FullRowSelect = true,
-                GridLines = true,
-                HeaderStyle = ColumnHeaderStyle.Nonclickable
-            };
-            _presetPropertyListView.Columns.Add("Property", 180);
-            _presetPropertyListView.Columns.Add("Value", 420);
-            root.Controls.Add(_presetPropertyListView, 1, 0);
-
-            var buttonFlow = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.LeftToRight
-            };
-
-            _presetNewButton = new Button { Text = "New", Width = 70 };
-            _presetNewButton.Click += PresetNewButton_Click;
-            buttonFlow.Controls.Add(_presetNewButton);
-
-            _presetEditButton = new Button { Text = "Edit", Width = 70 };
-            _presetEditButton.Click += PresetEditButton_Click;
-            buttonFlow.Controls.Add(_presetEditButton);
-
-            _presetDeleteButton = new Button { Text = "Delete", Width = 70 };
-            _presetDeleteButton.Click += PresetDeleteButton_Click;
-            buttonFlow.Controls.Add(_presetDeleteButton);
-
-            _presetApplyButton = new Button { Text = "Apply", Width = 70 };
-            _presetApplyButton.Click += PresetApplyButton_Click;
-            buttonFlow.Controls.Add(_presetApplyButton);
-
-            root.Controls.Add(buttonFlow, 0, 1);
-            root.SetColumnSpan(buttonFlow, 2);
-
-            PresetsPage.Controls.Add(root);
         }
 
         private void PresetNewButton_Click(object sender, EventArgs e)

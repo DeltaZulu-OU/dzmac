@@ -99,6 +99,16 @@ namespace Dzmac.Forms
             this.Ipv6DnsListView = new System.Windows.Forms.ListView();
             this.Ipv6DnsColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.PresetsPage = new System.Windows.Forms.TabPage();
+            this.PresetRootLayout = new System.Windows.Forms.TableLayoutPanel();
+            this._presetListBox = new System.Windows.Forms.ListBox();
+            this._presetPropertyListView = new System.Windows.Forms.ListView();
+            this.PresetPropertyColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.PresetValueColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.PresetButtonFlowPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this._presetNewButton = new System.Windows.Forms.Button();
+            this._presetEditButton = new System.Windows.Forms.Button();
+            this._presetDeleteButton = new System.Windows.Forms.Button();
+            this._presetApplyButton = new System.Windows.Forms.Button();
             this.ConnectionsGrid = new BrightIdeasSoftware.DataListView();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.Toolbar = new System.Windows.Forms.MenuStrip();
@@ -160,6 +170,9 @@ namespace Dzmac.Forms
             this.Ipv6AddressGroupBox.SuspendLayout();
             this.Ipv6GatewayGroupBox.SuspendLayout();
             this.Ipv6DnsGroupBox.SuspendLayout();
+            this.PresetsPage.SuspendLayout();
+            this.PresetRootLayout.SuspendLayout();
+            this.PresetButtonFlowPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).BeginInit();
             this.Toolbar.SuspendLayout();
             this.SuspendLayout();
@@ -928,6 +941,7 @@ namespace Dzmac.Forms
             // 
             // PresetsPage
             // 
+            this.PresetsPage.Controls.Add(this.PresetRootLayout);
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
@@ -936,6 +950,109 @@ namespace Dzmac.Forms
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
             // 
+            // PresetRootLayout
+            //
+            this.PresetRootLayout.ColumnCount = 2;
+            this.PresetRootLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 260F));
+            this.PresetRootLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.PresetRootLayout.Controls.Add(this._presetListBox, 0, 0);
+            this.PresetRootLayout.Controls.Add(this._presetPropertyListView, 1, 0);
+            this.PresetRootLayout.Controls.Add(this.PresetButtonFlowPanel, 0, 1);
+            this.PresetRootLayout.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PresetRootLayout.Location = new System.Drawing.Point(3, 3);
+            this.PresetRootLayout.Name = "PresetRootLayout";
+            this.PresetRootLayout.RowCount = 2;
+            this.PresetRootLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.PresetRootLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.PresetRootLayout.Size = new System.Drawing.Size(942, 358);
+            this.PresetRootLayout.TabIndex = 0;
+            //
+            // _presetListBox
+            //
+            this._presetListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._presetListBox.FormattingEnabled = true;
+            this._presetListBox.Location = new System.Drawing.Point(3, 3);
+            this._presetListBox.Name = "_presetListBox";
+            this._presetListBox.Size = new System.Drawing.Size(254, 312);
+            this._presetListBox.TabIndex = 0;
+            //
+            // _presetPropertyListView
+            //
+            this._presetPropertyListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.PresetPropertyColumnHeader,
+            this.PresetValueColumnHeader});
+            this._presetPropertyListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._presetPropertyListView.FullRowSelect = true;
+            this._presetPropertyListView.GridLines = true;
+            this._presetPropertyListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this._presetPropertyListView.HideSelection = false;
+            this._presetPropertyListView.Location = new System.Drawing.Point(263, 3);
+            this._presetPropertyListView.Name = "_presetPropertyListView";
+            this._presetPropertyListView.Size = new System.Drawing.Size(676, 312);
+            this._presetPropertyListView.TabIndex = 1;
+            this._presetPropertyListView.UseCompatibleStateImageBehavior = false;
+            this._presetPropertyListView.View = System.Windows.Forms.View.Details;
+            //
+            // PresetPropertyColumnHeader
+            //
+            this.PresetPropertyColumnHeader.Text = "Property";
+            this.PresetPropertyColumnHeader.Width = 180;
+            //
+            // PresetValueColumnHeader
+            //
+            this.PresetValueColumnHeader.Text = "Value";
+            this.PresetValueColumnHeader.Width = 420;
+            //
+            // PresetButtonFlowPanel
+            //
+            this.PresetRootLayout.SetColumnSpan(this.PresetButtonFlowPanel, 2);
+            this.PresetButtonFlowPanel.Controls.Add(this._presetNewButton);
+            this.PresetButtonFlowPanel.Controls.Add(this._presetEditButton);
+            this.PresetButtonFlowPanel.Controls.Add(this._presetDeleteButton);
+            this.PresetButtonFlowPanel.Controls.Add(this._presetApplyButton);
+            this.PresetButtonFlowPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.PresetButtonFlowPanel.FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight;
+            this.PresetButtonFlowPanel.Location = new System.Drawing.Point(3, 321);
+            this.PresetButtonFlowPanel.Name = "PresetButtonFlowPanel";
+            this.PresetButtonFlowPanel.Size = new System.Drawing.Size(936, 34);
+            this.PresetButtonFlowPanel.TabIndex = 2;
+            //
+            // _presetNewButton
+            //
+            this._presetNewButton.Location = new System.Drawing.Point(3, 3);
+            this._presetNewButton.Name = "_presetNewButton";
+            this._presetNewButton.Size = new System.Drawing.Size(70, 23);
+            this._presetNewButton.TabIndex = 0;
+            this._presetNewButton.Text = "New";
+            this._presetNewButton.UseVisualStyleBackColor = true;
+            //
+            // _presetEditButton
+            //
+            this._presetEditButton.Location = new System.Drawing.Point(79, 3);
+            this._presetEditButton.Name = "_presetEditButton";
+            this._presetEditButton.Size = new System.Drawing.Size(70, 23);
+            this._presetEditButton.TabIndex = 1;
+            this._presetEditButton.Text = "Edit";
+            this._presetEditButton.UseVisualStyleBackColor = true;
+            //
+            // _presetDeleteButton
+            //
+            this._presetDeleteButton.Location = new System.Drawing.Point(155, 3);
+            this._presetDeleteButton.Name = "_presetDeleteButton";
+            this._presetDeleteButton.Size = new System.Drawing.Size(70, 23);
+            this._presetDeleteButton.TabIndex = 2;
+            this._presetDeleteButton.Text = "Delete";
+            this._presetDeleteButton.UseVisualStyleBackColor = true;
+            //
+            // _presetApplyButton
+            //
+            this._presetApplyButton.Location = new System.Drawing.Point(231, 3);
+            this._presetApplyButton.Name = "_presetApplyButton";
+            this._presetApplyButton.Size = new System.Drawing.Size(70, 23);
+            this._presetApplyButton.TabIndex = 3;
+            this._presetApplyButton.Text = "Apply";
+            this._presetApplyButton.UseVisualStyleBackColor = true;
+            //
             // ConnectionsGrid
             // 
             this.ConnectionsGrid.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
@@ -1318,6 +1435,9 @@ namespace Dzmac.Forms
             this.Ipv6AddressGroupBox.ResumeLayout(false);
             this.Ipv6GatewayGroupBox.ResumeLayout(false);
             this.Ipv6DnsGroupBox.ResumeLayout(false);
+            this.PresetsPage.ResumeLayout(false);
+            this.PresetRootLayout.ResumeLayout(false);
+            this.PresetButtonFlowPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ConnectionsGrid)).EndInit();
             this.Toolbar.ResumeLayout(false);
             this.Toolbar.PerformLayout();
@@ -1437,5 +1557,15 @@ namespace Dzmac.Forms
         private Label _loadingLabel;
         private ProgressBar _loadingProgressBar;
         private ToolStripSeparator toolStripSeparator9;
+        private TableLayoutPanel PresetRootLayout;
+        private ListBox _presetListBox;
+        private ListView _presetPropertyListView;
+        private ColumnHeader PresetPropertyColumnHeader;
+        private ColumnHeader PresetValueColumnHeader;
+        private FlowLayoutPanel PresetButtonFlowPanel;
+        private Button _presetNewButton;
+        private Button _presetEditButton;
+        private Button _presetDeleteButton;
+        private Button _presetApplyButton;
     }
 }

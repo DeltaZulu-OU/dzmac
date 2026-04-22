@@ -1,37 +1,14 @@
 #nullable enable
 
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 using Dzmac.Core;
 using Dzmac.Core.Presets;
 
 namespace Dzmac.Forms
 {
-    internal sealed class PresetEditorDialog : Form
+    internal sealed partial class PresetEditorDialog : Form
     {
-        private readonly TextBox _presetNameTextBox;
-        private readonly CheckBox _includeMacCheckBox;
-        private readonly RadioButton _useRandomMacRadio;
-        private readonly RadioButton _useRandom02MacRadio;
-        private readonly RadioButton _useOriginalMacRadio;
-        private readonly RadioButton _useCustomMacRadio;
-        private readonly TextBox _customMacTextBox;
-
-        private readonly CheckBox _includeIpv4CheckBox;
-        private readonly CheckBox _dhcpIpv4CheckBox;
-        private readonly CheckBox _ipv4AddressCheckBox;
-        private readonly CheckBox _ipv4GatewayCheckBox;
-        private readonly CheckBox _ipv4DnsCheckBox;
-
-        private readonly GroupBox _ipv4RightGroup;
-        private readonly GroupBox _ipv4AddressGroup;
-        private readonly GroupBox _ipv4GatewayGroup;
-        private readonly GroupBox _ipv4DnsGroup;
-        private readonly DataGridView _ipv4AddressGrid;
-        private readonly DataGridView _ipv4GatewayGrid;
-        private readonly DataGridView _ipv4DnsGrid;
-
         private readonly TpfPreset _workingCopy;
 
         public TpfPreset Preset => ClonePreset(_workingCopy);
@@ -45,204 +22,27 @@ namespace Dzmac.Forms
 
             _workingCopy = ClonePreset(seed);
 
+            InitializeComponent();
             Text = title;
-            StartPosition = FormStartPosition.CenterParent;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            ShowInTaskbar = false;
-            ClientSize = new Size(760, 470);
 
-            var main = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 2,
-                Padding = new Padding(8)
-            };
-            main.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            main.RowStyles.Add(new RowStyle(SizeType.Absolute, 44F));
-            Controls.Add(main);
+            SaveButton.Click += SaveButton_Click;
 
-            var tabs = new TabControl { Dock = DockStyle.Fill };
-            main.Controls.Add(tabs, 0, 0);
-
-            var macTab = new TabPage("MAC Address && HTTP Proxy");
-            tabs.TabPages.Add(macTab);
-            var ipv4Tab = new TabPage("Internet Protocol v4");
-            tabs.TabPages.Add(ipv4Tab);
-            var ipv6Tab = new TabPage("Internet Protocol v6");
-            tabs.TabPages.Add(ipv6Tab);
-
-            var macLayout = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 3,
-                Padding = new Padding(6)
-            };
-            macLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
-            macLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 132F));
-            macLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            macTab.Controls.Add(macLayout);
-
-            var presetNameGroup = new GroupBox { Text = "Preset Name", Dock = DockStyle.Fill };
-            _presetNameTextBox = new TextBox { Width = 280, Anchor = AnchorStyles.Left };
-            var presetNameLabel = new Label { Text = "Preset Name:", AutoSize = true, Anchor = AnchorStyles.Left };
-            var presetNamePanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.LeftToRight,
-                Padding = new Padding(8, 18, 8, 8)
-            };
-            presetNamePanel.Controls.Add(presetNameLabel);
-            presetNamePanel.Controls.Add(_presetNameTextBox);
-            presetNameGroup.Controls.Add(presetNamePanel);
-            macLayout.Controls.Add(presetNameGroup, 0, 0);
-
-            var macGroup = new GroupBox { Text = "MAC Address", Dock = DockStyle.Fill };
-            var macInner = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 5,
-                Padding = new Padding(8, 8, 8, 8)
-            };
-            macInner.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            macInner.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            macInner.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            macInner.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            macInner.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            macGroup.Controls.Add(macInner);
-            macLayout.Controls.Add(macGroup, 0, 1);
-
-            _includeMacCheckBox = new CheckBox { Text = "Include MAC Address", AutoSize = true };
             _includeMacCheckBox.CheckedChanged += (_, __) => RefreshMacControlState();
-            macInner.Controls.Add(_includeMacCheckBox, 0, 0);
-
-            _useRandomMacRadio = new RadioButton { Text = "Use Random MAC Address", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
-            _useRandom02MacRadio = new RadioButton { Text = "Use Random MAC Address (0x02 first octet)", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
-            _useOriginalMacRadio = new RadioButton { Text = "Use Original MAC Address", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
-            _useCustomMacRadio = new RadioButton { Text = "Use Custom", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
             _useCustomMacRadio.CheckedChanged += (_, __) => RefreshMacControlState();
 
-            macInner.Controls.Add(_useRandomMacRadio, 0, 1);
-            macInner.Controls.Add(_useRandom02MacRadio, 0, 2);
-            macInner.Controls.Add(_useOriginalMacRadio, 0, 3);
-
-            var customPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight };
-            _customMacTextBox = new TextBox { Width = 220 };
-            customPanel.Controls.Add(_useCustomMacRadio);
-            customPanel.Controls.Add(_customMacTextBox);
-            macInner.Controls.Add(customPanel, 0, 4);
-
-            var proxyGroup = new GroupBox { Text = "Internet Explorer HTTP Proxy", Dock = DockStyle.Fill };
-            var proxyPlaceholder = new Label
-            {
-                Text = "Proxy settings are not supported in this release.",
-                AutoSize = true,
-                ForeColor = SystemColors.GrayText,
-                Location = new Point(14, 28)
-            };
-            proxyGroup.Controls.Add(proxyPlaceholder);
-            macLayout.Controls.Add(proxyGroup, 0, 2);
-
-            var ipv4Layout = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                Padding = new Padding(8)
-            };
-            ipv4Layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 230F));
-            ipv4Layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            ipv4Tab.Controls.Add(ipv4Layout);
-
-            var ipv4LeftGroup = new GroupBox { Text = "Internet Protocol v4 Parameters", Dock = DockStyle.Fill };
-            var ipv4Left = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 5, ColumnCount = 1, Padding = new Padding(8) };
-            ipv4Left.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            ipv4Left.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            ipv4Left.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            ipv4Left.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            ipv4Left.RowStyles.Add(new RowStyle(SizeType.Absolute, 24F));
-            ipv4LeftGroup.Controls.Add(ipv4Left);
-            ipv4Layout.Controls.Add(ipv4LeftGroup, 0, 0);
-
-            _includeIpv4CheckBox = new CheckBox { Text = "Include Internet Protocol v4", AutoSize = true };
             _includeIpv4CheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _dhcpIpv4CheckBox = new CheckBox { Text = "DHCPv4", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
             _dhcpIpv4CheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _ipv4AddressCheckBox = new CheckBox { Text = "IPv4 Address", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
             _ipv4AddressCheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _ipv4GatewayCheckBox = new CheckBox { Text = "IPv4 Gateway", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
             _ipv4GatewayCheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _ipv4DnsCheckBox = new CheckBox { Text = "IPv4 DNS Server", AutoSize = true, Margin = new Padding(20, 2, 0, 2) };
             _ipv4DnsCheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            ipv4Left.Controls.Add(_includeIpv4CheckBox, 0, 0);
-            ipv4Left.Controls.Add(_dhcpIpv4CheckBox, 0, 1);
-            ipv4Left.Controls.Add(_ipv4AddressCheckBox, 0, 2);
-            ipv4Left.Controls.Add(_ipv4GatewayCheckBox, 0, 3);
-            ipv4Left.Controls.Add(_ipv4DnsCheckBox, 0, 4);
 
-            _ipv4RightGroup = new GroupBox { Text = "Internet Protocol v4", Dock = DockStyle.Fill };
-            var ipv4Right = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 1,
-                RowCount = 3,
-                Padding = new Padding(8)
-            };
-            ipv4Right.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3F));
-            ipv4Right.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3F));
-            ipv4Right.RowStyles.Add(new RowStyle(SizeType.Percent, 33.4F));
-            _ipv4RightGroup.Controls.Add(ipv4Right);
-            ipv4Layout.Controls.Add(_ipv4RightGroup, 1, 0);
-
-            _ipv4AddressGroup = new GroupBox { Dock = DockStyle.Fill };
-            _ipv4AddressGrid = CreateIpv4Grid(("IP Address", 0.68F), ("Subnet Mask", 0.32F));
             _ipv4AddressGrid.ContextMenuStrip = CreateGridMenu(_ipv4AddressGrid, "IP");
-            _ipv4AddressGroup.Controls.Add(_ipv4AddressGrid);
-            ipv4Right.Controls.Add(_ipv4AddressGroup, 0, 0);
-
-            _ipv4GatewayGroup = new GroupBox { Dock = DockStyle.Fill };
-            _ipv4GatewayGrid = CreateIpv4Grid(("Gateway", 0.72F), ("Metric", 0.28F));
             _ipv4GatewayGrid.ContextMenuStrip = CreateGridMenu(_ipv4GatewayGrid, "Gateway");
-            _ipv4GatewayGroup.Controls.Add(_ipv4GatewayGrid);
-            ipv4Right.Controls.Add(_ipv4GatewayGroup, 0, 1);
-
-            _ipv4DnsGroup = new GroupBox { Dock = DockStyle.Fill };
-            _ipv4DnsGrid = CreateIpv4Grid(("DNS Server", 1F));
             _ipv4DnsGrid.ContextMenuStrip = CreateGridMenu(_ipv4DnsGrid, "DNS");
-            _ipv4DnsGroup.Controls.Add(_ipv4DnsGrid);
-            ipv4Right.Controls.Add(_ipv4DnsGroup, 0, 2);
 
             HookGridEvents(_ipv4AddressGrid);
             HookGridEvents(_ipv4GatewayGrid);
             HookGridEvents(_ipv4DnsGrid);
-
-            var ipv6Placeholder = new Label
-            {
-                Dock = DockStyle.Fill,
-                Text = "IPv6 preset editing UI is included for compatibility and will be enabled in a future update.",
-                TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = SystemColors.GrayText
-            };
-            ipv6Tab.Controls.Add(ipv6Placeholder);
-
-            var buttonPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.RightToLeft,
-                Padding = new Padding(0, 8, 0, 0)
-            };
-            var cancelButton = new Button { Text = "Cancel", Width = 86, DialogResult = DialogResult.Cancel };
-            var saveButton = new Button { Text = "Save", Width = 86 };
-            saveButton.Click += SaveButton_Click;
-            buttonPanel.Controls.Add(cancelButton);
-            buttonPanel.Controls.Add(saveButton);
-            main.Controls.Add(buttonPanel, 0, 1);
-
-            AcceptButton = saveButton;
-            CancelButton = cancelButton;
 
             if (startBlank)
             {
