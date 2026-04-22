@@ -166,6 +166,8 @@ namespace Dzmac.Forms
             var progress = new Progress<string>(status => MainStatusBar.Text = status);
             ChangeMacButton.Enabled = false;
             RestoreMacButton.Enabled = false;
+            MainStatusBar.Text = $"Applying MAC address for {_selected.Name}...";
+            await Task.Yield();
 
             try
             {
@@ -674,7 +676,7 @@ namespace Dzmac.Forms
 
         private async void VendorComboBox_SelectedIndexChanged(object sender, EventArgs e) => await TryLoadNextVendorBatchIfNeededAsync();
 
-        private void RestoreMacButton_Click(object sender, EventArgs e)
+        private async void RestoreMacButton_Click(object sender, EventArgs e)
         {
             if (_selected == null)
             {
@@ -686,20 +688,36 @@ namespace Dzmac.Forms
                 return;
             }
 
-            if (_adminService.ResetRegistryMac(_selected.Adapter).IsSuccess)
-            {
-                _ = MessageBox.Show(Resources.MacAddressRestoreSuccess, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ChangeMacButton.Enabled = false;
+            RestoreMacButton.Enabled = false;
+            MainStatusBar.Text = $"Restoring original MAC address for {_selected.Name}...";
+            await Task.Yield();
 
-                if (_reenableOnChange && _adminService.SetAdapterEnabled(_selected.Adapter, false).IsSuccess)
+            try
+            {
+                var resetResult = await Task.Run(() => _adminService.ResetRegistryMac(_selected.Adapter));
+                if (resetResult.IsSuccess)
                 {
-                    _ = _adminService.SetAdapterEnabled(_selected.Adapter, true);
-                }
+                    MainStatusBar.Text = $"Restored original MAC address for {_selected.Name}.";
+                    _ = MessageBox.Show(Resources.MacAddressRestoreSuccess, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                _ = RefreshConnectionsBackground();
+                    if (_reenableOnChange)
+                    {
+                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(_selected.Adapter, false));
+                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(_selected.Adapter, true));
+                    }
+
+                    _ = RefreshConnectionsBackground();
+                }
+                else
+                {
+                    MainStatusBar.Text = $"Failed to restore original MAC address for {_selected.Name}.";
+                    _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            finally
             {
-                _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                UpdateSelectionState();
             }
         }
 
@@ -1090,7 +1108,7 @@ namespace Dzmac.Forms
             BindPresetList();
         }
 
-        private void PresetApplyButton_Click(object sender, EventArgs e)
+        private async void PresetApplyButton_Click(object sender, EventArgs e)
         {
             var selected = GetSelectedPreset();
             if (selected == null || _selected == null)
@@ -1108,15 +1126,32 @@ namespace Dzmac.Forms
                 return;
             }
 
-            if (!TryApplyPresetMac(selected, out var macError))
+            MainStatusBar.Text = $"Applying preset '{selected.Name}' to '{_selected.Name}'...";
+            await Task.Yield();
+
+            var (macApplied, macError) = await Task.Run(() =>
+            {
+                var success = TryApplyPresetMac(selected, out var error);
+                return (success, error);
+            });
+
+            if (!macApplied)
             {
                 MessageBox.Show(macError, "Apply Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MainStatusBar.Text = $"Failed to apply preset '{selected.Name}' to '{_selected.Name}'.";
                 return;
             }
 
-            if (!TryApplyPresetIpv4(selected.Ipv4, out var ipv4Error))
+            var (ipv4Applied, ipv4Error) = await Task.Run(() =>
+            {
+                var success = TryApplyPresetIpv4(selected.Ipv4, out var error);
+                return (success, error);
+            });
+
+            if (!ipv4Applied)
             {
                 MessageBox.Show(ipv4Error, "Apply Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MainStatusBar.Text = $"Failed to apply preset '{selected.Name}' to '{_selected.Name}'.";
                 return;
             }
 
