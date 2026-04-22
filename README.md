@@ -118,6 +118,4 @@ Also, thanks to the following projects and resources:
 
 ## License
 
-This project is licensed under MIT License.
-
-Te ObjectListView component is licensed under GPL3. The changes including migrating from .NET 2.0 to 4.8.1 can be fund under project directory.
+This project is licensed under GPL v3 License. The ObjectListView component is licensed under GPL v3 as well. The changes including migrating from .NET 2.0 to 4.8.1 can be fund under project directory.
