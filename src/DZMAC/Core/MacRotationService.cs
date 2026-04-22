@@ -39,6 +39,21 @@ namespace Dzmac.Core
 
         public static (bool Success, string Message) TryRotateMac(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
         {
+            if (adapter == null)
+            {
+                throw new ArgumentNullException(nameof(adapter));
+            }
+
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (progress == null)
+            {
+                throw new ArgumentNullException(nameof(progress));
+            }
+
             progress.Report("Starting MAC update...");
 
             try
@@ -174,5 +189,6 @@ namespace Dzmac.Core
 
             progress.Report("Change failed. Reverted to factory settings.");
         }
+
     }
 }

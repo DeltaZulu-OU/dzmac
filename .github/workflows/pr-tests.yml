@@ -24,27 +24,7 @@ jobs:
         run: msbuild src/DZMAC.sln /p:Configuration=Release /p:Platform="Any CPU" /m
 
       - name: Run unit tests
-        shell: pwsh
-        run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-
-          if (-not (Test-Path $vswhere)) {
-            throw "vswhere.exe not found at $vswhere"
-          }
-
-          $installPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
-
-          if (-not $installPath) {
-            throw "Visual Studio installation not found via vswhere"
-          }
-
-          $vstest = Join-Path $installPath 'Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe'
-
-          if (-not (Test-Path $vstest)) {
-            throw "vstest.console.exe not found at $vstest"
-          }
-
-          & $vstest 'src\DZMAC.Tests\bin\Release\DZMAC.Tests.dll' /Logger:trx
+        run: dotnet test src/DZMAC.Tests/DZMAC.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
 
       - name: Upload test results
         if: always()

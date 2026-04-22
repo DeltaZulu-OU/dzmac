@@ -32,6 +32,9 @@ namespace Dzmac.Forms
         private void InitializeComponent()
         {
             this.MainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this._loadingPanel = new System.Windows.Forms.Panel();
+            this.LoadingLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
+            this._loadingProgressBar = new System.Windows.Forms.ProgressBar();
             this.InfoTabs = new System.Windows.Forms.TabControl();
             this.InformationPage = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -135,11 +138,11 @@ namespace Dzmac.Forms
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
-            this._loadingPanel = new System.Windows.Forms.Panel();
-            this.LoadingLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this._loadingLabel = new System.Windows.Forms.Label();
-            this._loadingProgressBar = new System.Windows.Forms.ProgressBar();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.MainTableLayoutPanel.SuspendLayout();
+            this._loadingPanel.SuspendLayout();
+            this.LoadingLayoutPanel.SuspendLayout();
             this.InfoTabs.SuspendLayout();
             this.InformationPage.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -176,8 +179,46 @@ namespace Dzmac.Forms
             this.MainTableLayoutPanel.RowCount = 2;
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 75F));
+            this.MainTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.MainTableLayoutPanel.Size = new System.Drawing.Size(962, 528);
             this.MainTableLayoutPanel.TabIndex = 0;
+            // 
+            // _loadingPanel
+            // 
+            this._loadingPanel.BackColor = System.Drawing.SystemColors.Control;
+            this._loadingPanel.Controls.Add(this.LoadingLayoutPanel);
+            this._loadingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._loadingPanel.Location = new System.Drawing.Point(0, 127);
+            this._loadingPanel.Margin = new System.Windows.Forms.Padding(0);
+            this._loadingPanel.Name = "_loadingPanel";
+            this._loadingPanel.Size = new System.Drawing.Size(962, 381);
+            this._loadingPanel.TabIndex = 2;
+            this._loadingPanel.Visible = false;
+            // 
+            // LoadingLayoutPanel
+            // 
+            this.LoadingLayoutPanel.ColumnCount = 1;
+            this.LoadingLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.LoadingLayoutPanel.Controls.Add(this._loadingProgressBar, 0, 0);
+            this.LoadingLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.LoadingLayoutPanel.Location = new System.Drawing.Point(0, 0);
+            this.LoadingLayoutPanel.Name = "LoadingLayoutPanel";
+            this.LoadingLayoutPanel.RowCount = 1;
+            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.LoadingLayoutPanel.Size = new System.Drawing.Size(962, 381);
+            this.LoadingLayoutPanel.TabIndex = 0;
+            // 
+            // _loadingProgressBar
+            // 
+            this._loadingProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this._loadingProgressBar.Location = new System.Drawing.Point(0, 0);
+            this._loadingProgressBar.Margin = new System.Windows.Forms.Padding(0);
+            this._loadingProgressBar.MarqueeAnimationSpeed = 20;
+            this._loadingProgressBar.Name = "_loadingProgressBar";
+            this._loadingProgressBar.Size = new System.Drawing.Size(962, 6);
+            this._loadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this._loadingProgressBar.TabIndex = 1;
             // 
             // InfoTabs
             // 
@@ -185,10 +226,10 @@ namespace Dzmac.Forms
             this.InfoTabs.Controls.Add(this.IPAddressPage);
             this.InfoTabs.Controls.Add(this.PresetsPage);
             this.InfoTabs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.InfoTabs.Location = new System.Drawing.Point(3, 135);
+            this.InfoTabs.Location = new System.Drawing.Point(3, 511);
             this.InfoTabs.Name = "InfoTabs";
             this.InfoTabs.SelectedIndex = 0;
-            this.InfoTabs.Size = new System.Drawing.Size(956, 390);
+            this.InfoTabs.Size = new System.Drawing.Size(956, 14);
             this.InfoTabs.TabIndex = 0;
             // 
             // InformationPage
@@ -197,7 +238,7 @@ namespace Dzmac.Forms
             this.InformationPage.Location = new System.Drawing.Point(4, 22);
             this.InformationPage.Name = "InformationPage";
             this.InformationPage.Padding = new System.Windows.Forms.Padding(3);
-            this.InformationPage.Size = new System.Drawing.Size(948, 364);
+            this.InformationPage.Size = new System.Drawing.Size(948, 0);
             this.InformationPage.TabIndex = 0;
             this.InformationPage.Text = "Information";
             this.InformationPage.UseVisualStyleBackColor = true;
@@ -216,7 +257,7 @@ namespace Dzmac.Forms
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 41.89944F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 58.10056F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 358);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 0);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // ConnectionDetailsGroup
@@ -244,7 +285,7 @@ namespace Dzmac.Forms
             this.ConnectionDetailsGroup.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ConnectionDetailsGroup.Location = new System.Drawing.Point(3, 3);
             this.ConnectionDetailsGroup.Name = "ConnectionDetailsGroup";
-            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 144);
+            this.ConnectionDetailsGroup.Size = new System.Drawing.Size(936, 1);
             this.ConnectionDetailsGroup.TabIndex = 0;
             this.ConnectionDetailsGroup.TabStop = false;
             this.ConnectionDetailsGroup.Text = "Connection Details";
@@ -423,15 +464,15 @@ namespace Dzmac.Forms
             // 
             this.PerformanceCounterGroup.Controls.Add(this.PerformancePanel);
             this.PerformanceCounterGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 153);
+            this.PerformanceCounterGroup.Location = new System.Drawing.Point(474, 3);
             this.PerformanceCounterGroup.Name = "PerformanceCounterGroup";
-            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 202);
+            this.PerformanceCounterGroup.Size = new System.Drawing.Size(465, 1);
             this.PerformanceCounterGroup.TabIndex = 2;
             this.PerformanceCounterGroup.TabStop = false;
             this.PerformanceCounterGroup.Text = " ";
-            //
+            // 
             // PerformancePanel
-            //
+            // 
             this.PerformancePanel.BackColor = System.Drawing.Color.White;
             this.PerformancePanel.ColumnCount = 1;
             this.PerformancePanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -446,72 +487,72 @@ namespace Dzmac.Forms
             this.PerformancePanel.Padding = new System.Windows.Forms.Padding(6);
             this.PerformancePanel.RowCount = 5;
             this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 78F));
-            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            this.PerformancePanel.Size = new System.Drawing.Size(459, 183);
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.PerformancePanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.PerformancePanel.Size = new System.Drawing.Size(459, 0);
             this.PerformancePanel.TabIndex = 0;
-            //
+            // 
             // _performanceSentSpeedLabel
-            //
+            // 
             this._performanceSentSpeedLabel.AutoSize = true;
             this._performanceSentSpeedLabel.BackColor = System.Drawing.Color.White;
             this._performanceSentSpeedLabel.Dock = System.Windows.Forms.DockStyle.Top;
             this._performanceSentSpeedLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
             this._performanceSentSpeedLabel.ForeColor = System.Drawing.Color.Green;
-            this._performanceSentSpeedLabel.Location = new System.Drawing.Point(9, 164);
+            this._performanceSentSpeedLabel.Location = new System.Drawing.Point(9, -6);
             this._performanceSentSpeedLabel.Name = "_performanceSentSpeedLabel";
             this._performanceSentSpeedLabel.Size = new System.Drawing.Size(441, 13);
             this._performanceSentSpeedLabel.TabIndex = 4;
             this._performanceSentSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
-            //
+            // 
             // _performanceSentLabel
-            //
+            // 
             this._performanceSentLabel.AutoSize = true;
             this._performanceSentLabel.BackColor = System.Drawing.Color.White;
             this._performanceSentLabel.Dock = System.Windows.Forms.DockStyle.Top;
             this._performanceSentLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
             this._performanceSentLabel.ForeColor = System.Drawing.Color.Green;
-            this._performanceSentLabel.Location = new System.Drawing.Point(9, 151);
+            this._performanceSentLabel.Location = new System.Drawing.Point(9, -19);
             this._performanceSentLabel.Name = "_performanceSentLabel";
             this._performanceSentLabel.Size = new System.Drawing.Size(441, 13);
             this._performanceSentLabel.TabIndex = 3;
             this._performanceSentLabel.Text = "Sent    : 0 B";
-            //
+            // 
             // _performanceReceivedSpeedLabel
-            //
+            // 
             this._performanceReceivedSpeedLabel.AutoSize = true;
             this._performanceReceivedSpeedLabel.BackColor = System.Drawing.Color.White;
             this._performanceReceivedSpeedLabel.Dock = System.Windows.Forms.DockStyle.Top;
             this._performanceReceivedSpeedLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
             this._performanceReceivedSpeedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this._performanceReceivedSpeedLabel.Location = new System.Drawing.Point(9, 138);
+            this._performanceReceivedSpeedLabel.Location = new System.Drawing.Point(9, -32);
             this._performanceReceivedSpeedLabel.Name = "_performanceReceivedSpeedLabel";
             this._performanceReceivedSpeedLabel.Size = new System.Drawing.Size(441, 13);
             this._performanceReceivedSpeedLabel.TabIndex = 2;
             this._performanceReceivedSpeedLabel.Text = "-Speed  : 0 bps (Peak 0 bps)";
-            //
+            // 
             // _performanceReceivedLabel
-            //
+            // 
             this._performanceReceivedLabel.AutoSize = true;
             this._performanceReceivedLabel.BackColor = System.Drawing.Color.White;
             this._performanceReceivedLabel.Dock = System.Windows.Forms.DockStyle.Top;
             this._performanceReceivedLabel.Font = new System.Drawing.Font("Consolas", 8.25F);
             this._performanceReceivedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this._performanceReceivedLabel.Location = new System.Drawing.Point(9, 125);
+            this._performanceReceivedLabel.Location = new System.Drawing.Point(9, -45);
             this._performanceReceivedLabel.Name = "_performanceReceivedLabel";
             this._performanceReceivedLabel.Size = new System.Drawing.Size(441, 13);
             this._performanceReceivedLabel.TabIndex = 1;
             this._performanceReceivedLabel.Text = "Received: 0 B";
-            //
+            // 
             // _performanceGraphPanel
-            //
+            // 
             this._performanceGraphPanel.BackColor = System.Drawing.Color.White;
             this._performanceGraphPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this._performanceGraphPanel.Location = new System.Drawing.Point(9, 9);
             this._performanceGraphPanel.Name = "_performanceGraphPanel";
-            this._performanceGraphPanel.Size = new System.Drawing.Size(441, 116);
+            this._performanceGraphPanel.Size = new System.Drawing.Size(441, 1);
             this._performanceGraphPanel.TabIndex = 0;
             this._performanceGraphPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.PerformanceGraphPanel_Paint);
             // 
@@ -527,9 +568,9 @@ namespace Dzmac.Forms
             this.ChangeMacAddressGroup.Controls.Add(this.RandomMacButton);
             this.ChangeMacAddressGroup.Controls.Add(this.macTextBox);
             this.ChangeMacAddressGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 153);
+            this.ChangeMacAddressGroup.Location = new System.Drawing.Point(3, 3);
             this.ChangeMacAddressGroup.Name = "ChangeMacAddressGroup";
-            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 202);
+            this.ChangeMacAddressGroup.Size = new System.Drawing.Size(465, 1);
             this.ChangeMacAddressGroup.TabIndex = 1;
             this.ChangeMacAddressGroup.TabStop = false;
             this.ChangeMacAddressGroup.Text = "Change Mac Address";
@@ -691,17 +732,16 @@ namespace Dzmac.Forms
             this.Ipv4AddressListView.TabIndex = 0;
             this.Ipv4AddressListView.UseCompatibleStateImageBehavior = false;
             this.Ipv4AddressListView.View = System.Windows.Forms.View.Details;
-            this.Ipv4AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             // 
             // Ipv4AddressColumnHeader
             // 
             this.Ipv4AddressColumnHeader.Text = "IP Address";
-            this.Ipv4AddressColumnHeader.Width = 220;
+            this.Ipv4AddressColumnHeader.Width = 25;
             // 
             // Ipv4SubnetMaskColumnHeader
             // 
             this.Ipv4SubnetMaskColumnHeader.Text = "Subnet Mask";
-            this.Ipv4SubnetMaskColumnHeader.Width = 200;
+            this.Ipv4SubnetMaskColumnHeader.Width = 25;
             // 
             // Ipv4GatewayGroupBox
             // 
@@ -709,7 +749,7 @@ namespace Dzmac.Forms
             this.Ipv4GatewayGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Ipv4GatewayGroupBox.Location = new System.Drawing.Point(3, 112);
             this.Ipv4GatewayGroupBox.Name = "Ipv4GatewayGroupBox";
-            this.Ipv4GatewayGroupBox.Size = new System.Drawing.Size(459, 87);
+            this.Ipv4GatewayGroupBox.Size = new System.Drawing.Size(459, 86);
             this.Ipv4GatewayGroupBox.TabIndex = 1;
             this.Ipv4GatewayGroupBox.TabStop = false;
             this.Ipv4GatewayGroupBox.Text = "Gateway";
@@ -725,24 +765,23 @@ namespace Dzmac.Forms
             this.Ipv4GatewayListView.HideSelection = false;
             this.Ipv4GatewayListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv4GatewayListView.Name = "Ipv4GatewayListView";
-            this.Ipv4GatewayListView.Size = new System.Drawing.Size(453, 68);
+            this.Ipv4GatewayListView.Size = new System.Drawing.Size(453, 67);
             this.Ipv4GatewayListView.TabIndex = 0;
             this.Ipv4GatewayListView.UseCompatibleStateImageBehavior = false;
             this.Ipv4GatewayListView.View = System.Windows.Forms.View.Details;
-            this.Ipv4GatewayListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             // 
             // Ipv4GatewayColumnHeader
             // 
             this.Ipv4GatewayColumnHeader.Text = "Gateway";
-            this.Ipv4GatewayColumnHeader.Width = 420;
+            this.Ipv4GatewayColumnHeader.Width = 25;
             // 
             // Ipv4DnsGroupBox
             // 
             this.Ipv4DnsGroupBox.Controls.Add(this.Ipv4DnsListView);
             this.Ipv4DnsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Ipv4DnsGroupBox.Location = new System.Drawing.Point(3, 205);
+            this.Ipv4DnsGroupBox.Location = new System.Drawing.Point(3, 204);
             this.Ipv4DnsGroupBox.Name = "Ipv4DnsGroupBox";
-            this.Ipv4DnsGroupBox.Size = new System.Drawing.Size(459, 144);
+            this.Ipv4DnsGroupBox.Size = new System.Drawing.Size(459, 145);
             this.Ipv4DnsGroupBox.TabIndex = 2;
             this.Ipv4DnsGroupBox.TabStop = false;
             this.Ipv4DnsGroupBox.Text = "DNS Server";
@@ -758,16 +797,15 @@ namespace Dzmac.Forms
             this.Ipv4DnsListView.HideSelection = false;
             this.Ipv4DnsListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv4DnsListView.Name = "Ipv4DnsListView";
-            this.Ipv4DnsListView.Size = new System.Drawing.Size(453, 125);
+            this.Ipv4DnsListView.Size = new System.Drawing.Size(453, 126);
             this.Ipv4DnsListView.TabIndex = 0;
             this.Ipv4DnsListView.UseCompatibleStateImageBehavior = false;
             this.Ipv4DnsListView.View = System.Windows.Forms.View.Details;
-            this.Ipv4DnsListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             // 
             // Ipv4DnsColumnHeader
             // 
             this.Ipv4DnsColumnHeader.Text = "DNS Server";
-            this.Ipv4DnsColumnHeader.Width = 420;
+            this.Ipv4DnsColumnHeader.Width = 25;
             // 
             // Ipv6ColumnLayoutPanel
             // 
@@ -813,8 +851,6 @@ namespace Dzmac.Forms
             this.Ipv6AddressListView.TabIndex = 0;
             this.Ipv6AddressListView.UseCompatibleStateImageBehavior = false;
             this.Ipv6AddressListView.View = System.Windows.Forms.View.Details;
-            this.Ipv6AddressListView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.None);
-
             // 
             // Ipv6AddressColumnHeader
             // 
@@ -825,7 +861,6 @@ namespace Dzmac.Forms
             // 
             this.Ipv6PrefixColumnHeader.Text = "Prefix";
             this.Ipv6PrefixColumnHeader.Width = 200;
-            this.Ipv6PrefixColumnHeader.AutoResize(ColumnHeaderAutoResizeStyle.None);
             // 
             // Ipv6GatewayGroupBox
             // 
@@ -917,7 +952,7 @@ namespace Dzmac.Forms
             this.ConnectionsGrid.Name = "ConnectionsGrid";
             this.ConnectionsGrid.ShowGroups = false;
             this.ConnectionsGrid.ShowItemToolTips = true;
-            this.ConnectionsGrid.Size = new System.Drawing.Size(956, 126);
+            this.ConnectionsGrid.Size = new System.Drawing.Size(956, 121);
             this.ConnectionsGrid.SpaceBetweenGroups = 1;
             this.ConnectionsGrid.TabIndex = 1;
             this.ConnectionsGrid.UseCompatibleStateImageBehavior = false;
@@ -957,6 +992,7 @@ namespace Dzmac.Forms
             this.toolStripSeparator2,
             this.ImportPresetItem,
             this.ExportPresetItem,
+            this.toolStripSeparator9,
             this.AssociateItem,
             this.toolStripSeparator3,
             this.ExitItem});
@@ -1066,17 +1102,17 @@ namespace Dzmac.Forms
             this.toolStripSeparator4.Size = new System.Drawing.Size(271, 6);
             // 
             // ToggleAdapterEnabledItem
-            //
+            // 
             this.ToggleAdapterEnabledItem.Name = "ToggleAdapterEnabledItem";
             this.ToggleAdapterEnabledItem.Size = new System.Drawing.Size(274, 22);
             this.ToggleAdapterEnabledItem.Text = "Disable Adapter";
             this.ToggleAdapterEnabledItem.Click += new System.EventHandler(this.ToggleAdapterEnabledItem_Click);
-            //
+            // 
             // toolStripSeparator8
-            //
+            // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
             this.toolStripSeparator8.Size = new System.Drawing.Size(271, 6);
-            //
+            // 
             // Dhcp4Item
             // 
             this.Dhcp4Item.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1120,7 +1156,6 @@ namespace Dzmac.Forms
             this.DeleteItem.Name = "DeleteItem";
             this.DeleteItem.Size = new System.Drawing.Size(274, 22);
             this.DeleteItem.Text = "Delete Network Adapter from Registry";
-            this.DeleteItem.Visible = true;
             this.DeleteItem.Click += new System.EventHandler(this.DeleteItem_Click);
             // 
             // OptionsMenu
@@ -1216,56 +1251,6 @@ namespace Dzmac.Forms
             this.AboutItem.Text = "About DZMAC";
             this.AboutItem.Click += new System.EventHandler(this.AboutItem_Click);
             // 
-            // _loadingPanel
-            //
-            this._loadingPanel.BackColor = System.Drawing.SystemColors.Control;
-            this._loadingPanel.Controls.Add(this.LoadingLayoutPanel);
-            this._loadingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._loadingPanel.Location = new System.Drawing.Point(0, 0);
-            this._loadingPanel.Margin = new System.Windows.Forms.Padding(0);
-            this._loadingPanel.Name = "_loadingPanel";
-            this._loadingPanel.Size = new System.Drawing.Size(962, 132);
-            this._loadingPanel.TabIndex = 2;
-            this._loadingPanel.Visible = false;
-            //
-            // LoadingLayoutPanel
-            //
-            this.LoadingLayoutPanel.ColumnCount = 1;
-            this.LoadingLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.LoadingLayoutPanel.Controls.Add(this._loadingProgressBar, 0, 0);
-            this.LoadingLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.LoadingLayoutPanel.Location = new System.Drawing.Point(0, 0);
-            this.LoadingLayoutPanel.Name = "LoadingLayoutPanel";
-            this.LoadingLayoutPanel.RowCount = 1;
-            this.LoadingLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.LoadingLayoutPanel.Size = new System.Drawing.Size(962, 132);
-            this.LoadingLayoutPanel.TabIndex = 0;
-            //
-            // _loadingLabel
-            //
-            this._loadingLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this._loadingLabel.AutoSize = true;
-            this._loadingLabel.Location = new System.Drawing.Point(403, 59);
-            this._loadingLabel.Name = "_loadingLabel";
-            this._loadingLabel.Size = new System.Drawing.Size(156, 13);
-            this._loadingLabel.TabIndex = 0;
-            this._loadingLabel.Text = "Loading network adapters...";
-            this._loadingLabel.Visible = false;
-            //
-            // _loadingProgressBar
-            //
-            this._loadingProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._loadingProgressBar.Location = new System.Drawing.Point(0, 0);
-            this._loadingProgressBar.Margin = new System.Windows.Forms.Padding(0);
-            this._loadingProgressBar.MarqueeAnimationSpeed = 20;
-            this._loadingProgressBar.Maximum = 100;
-            this._loadingProgressBar.Minimum = 0;
-            this._loadingProgressBar.Name = "_loadingProgressBar";
-            this._loadingProgressBar.Size = new System.Drawing.Size(962, 6);
-            this._loadingProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            this._loadingProgressBar.TabIndex = 1;
-            //
             // MainStatusBar
             // 
             this.MainStatusBar.Location = new System.Drawing.Point(0, 552);
@@ -1274,6 +1259,22 @@ namespace Dzmac.Forms
             this.MainStatusBar.SizingGrip = false;
             this.MainStatusBar.TabIndex = 1;
             this.MainStatusBar.Text = "Ready";
+            // 
+            // _loadingLabel
+            // 
+            this._loadingLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this._loadingLabel.AutoSize = true;
+            this._loadingLabel.Location = new System.Drawing.Point(403, 59);
+            this._loadingLabel.Name = "_loadingLabel";
+            this._loadingLabel.Size = new System.Drawing.Size(156, 13);
+            this._loadingLabel.TabIndex = 0;
+            this._loadingLabel.Text = "Loading network adapters...";
+            this._loadingLabel.Visible = false;
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(237, 6);
             // 
             // MainForm
             // 
@@ -1295,6 +1296,8 @@ namespace Dzmac.Forms
             this.Load += new System.EventHandler(this.MainForm_LoadAsync);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.MainTableLayoutPanel.ResumeLayout(false);
+            this._loadingPanel.ResumeLayout(false);
+            this.LoadingLayoutPanel.ResumeLayout(false);
             this.InfoTabs.ResumeLayout(false);
             this.InformationPage.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -1433,5 +1436,6 @@ namespace Dzmac.Forms
         private TableLayoutPanel LoadingLayoutPanel;
         private Label _loadingLabel;
         private ProgressBar _loadingProgressBar;
+        private ToolStripSeparator toolStripSeparator9;
     }
 }

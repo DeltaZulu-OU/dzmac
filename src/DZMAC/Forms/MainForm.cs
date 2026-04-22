@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using Dzmac.Core;
+using Dzmac.Core.Presets;
 using Dzmac.Core.Reporting;
 using Dzmac.DTO;
 using Dzmac.Properties;
@@ -66,13 +67,23 @@ namespace Dzmac.Forms
         private IReadOnlyDictionary<string, NetworkInterface> _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
         private List<Vendor> _vendorComboItems;
         private int _vendorComboLoadedCount;
+        private readonly List<TpfPreset> _presets = new List<TpfPreset>();
+        private string _currentPresetFilePath;
+        private readonly string _startupPresetPath;
+        private ListBox _presetListBox;
+        private ListView _presetPropertyListView;
+        private Button _presetNewButton;
+        private Button _presetEditButton;
+        private Button _presetDeleteButton;
+        private Button _presetApplyButton;
 
-        public MainForm()
+        public MainForm(string startupPresetPath = null)
         {
             _vm = new VendorList();
             _adminService = new AdapterAdminService();
             _networkReportBuilder = new TextNetworkReportBuilder();
             _connectionDetailsTooltip = new ToolTip();
+            _startupPresetPath = startupPresetPath;
             InitializeComponent();
             ConfigureV1Surface();
             _loadingPanel.BringToFront();
@@ -91,6 +102,11 @@ namespace Dzmac.Forms
             VendorComboBox.MouseWheel += VendorComboBox_MouseWheel;
             VendorComboBox.KeyDown += VendorComboBox_KeyDown;
             PersistentAddressCheckBox.Checked = true;
+            _currentPresetFilePath = !string.IsNullOrWhiteSpace(_startupPresetPath)
+                ? _startupPresetPath
+                : System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default.tpf");
+            BuildPresetSurface();
+            LoadPresetFileIfExists(_currentPresetFilePath, mustExist: !string.IsNullOrWhiteSpace(_startupPresetPath));
             UpdateSelectionState();
         }
 
@@ -100,7 +116,28 @@ namespace Dzmac.Forms
 
         private void AboutItem_Click(object sender, EventArgs e) => new AboutBox().Show(this);
 
-        private void AssociateItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void AssociateItem_Click(object sender, EventArgs e)
+        {
+            var executablePath = Application.ExecutablePath;
+            var openCommand = TpfFileAssociationService.BuildOpenCommand(executablePath);
+            using var dialog = new TpfAssociationDialog(openCommand);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            try
+            {
+                TpfFileAssociationService.AssociateWithCurrentUser(executablePath);
+                MainStatusBar.Text = "Associated .tpf files with DZMAC for current user.";
+                _ = MessageBox.Show("Successfully associated .tpf files with DZMAC.", Resources.Success_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MainStatusBar.Text = "Failed to associate .tpf files.";
+                _ = MessageBox.Show(ex.Message, Resources.Failure_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
 
         private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => _reenableOnChange = AutoStartCheckBox.Checked;
 
@@ -129,6 +166,8 @@ namespace Dzmac.Forms
             var progress = new Progress<string>(status => MainStatusBar.Text = status);
             ChangeMacButton.Enabled = false;
             RestoreMacButton.Enabled = false;
+            MainStatusBar.Text = $"Applying MAC address for {_selected.Name}...";
+            await Task.Yield();
 
             try
             {
@@ -282,7 +321,43 @@ namespace Dzmac.Forms
 
         private void ExitItem_Click(object sender, EventArgs e) => Close();
 
-        private void ExportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void ExportPresetItem_Click(object sender, EventArgs e)
+        {
+            if (_presets.Count == 0)
+            {
+                MessageBox.Show("There are no presets to export.", Resources.Information_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var picker = new PresetSelectionDialog("Export Presets", _presets);
+            if (picker.ShowDialog(this) != DialogResult.OK || picker.SelectedIndices.Count == 0)
+            {
+                return;
+            }
+
+            using var saveDialog = new SaveFileDialog
+            {
+                Filter = "TPF Preset Files (*.tpf)|*.tpf|All Files (*.*)|*.*",
+                DefaultExt = "tpf",
+                AddExtension = true,
+                FileName = System.IO.Path.GetFileName(_currentPresetFilePath)
+            };
+
+            if (saveDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            var exportFile = new TpfFile();
+            foreach (var selectedIndex in picker.SelectedIndices)
+            {
+                exportFile.Presets.Add(ClonePreset(_presets[selectedIndex]));
+            }
+
+            exportFile.SelectedPresetIndex = 0;
+            TpfSerializer.Save(saveDialog.FileName, exportFile);
+            MainStatusBar.Text = $"Exported {exportFile.Presets.Count} preset(s) to {saveDialog.FileName}.";
+        }
 
         private void ExportReportItem_Click(object sender, EventArgs e)
         {
@@ -318,7 +393,77 @@ namespace Dzmac.Forms
 
         private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/zbalkan/DZMAC/wiki/Help");
 
-        private void ImportPresetItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void ImportPresetItem_Click(object sender, EventArgs e)
+        {
+            using var openDialog = new OpenFileDialog
+            {
+                Filter = "TPF Preset Files (*.tpf)|*.tpf|All Files (*.*)|*.*",
+                DefaultExt = "tpf",
+                CheckFileExists = true
+            };
+
+            if (openDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            TpfFile imported;
+            try
+            {
+                imported = TpfSerializer.Load(openDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Import Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (imported.Presets.Count == 0)
+            {
+                MessageBox.Show("The selected file does not contain importable presets.", "Import Preset", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using var picker = new PresetSelectionDialog("Import Presets", imported.Presets);
+            if (picker.ShowDialog(this) != DialogResult.OK || picker.SelectedIndices.Count == 0)
+            {
+                return;
+            }
+
+            var importedCount = 0;
+            var duplicatePresetNames = new List<string>();
+            foreach (var selectedIndex in picker.SelectedIndices)
+            {
+                var importedPreset = imported.Presets[selectedIndex];
+                if (IsDuplicatePresetName(importedPreset.Name))
+                {
+                    duplicatePresetNames.Add(importedPreset.Name);
+                    continue;
+                }
+
+                _presets.Add(ClonePreset(importedPreset));
+                importedCount++;
+            }
+
+            if (duplicatePresetNames.Count > 0)
+            {
+                var duplicateList = string.Join(Environment.NewLine, duplicatePresetNames.Distinct(StringComparer.OrdinalIgnoreCase).Select(name => $"- {name}"));
+                MessageBox.Show(
+                    $"Cannot import presets with duplicate names:{Environment.NewLine}{duplicateList}",
+                    "Import Preset",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+
+            if (importedCount == 0)
+            {
+                MainStatusBar.Text = "No presets were imported due to duplicate names.";
+                return;
+            }
+
+            BindPresetList();
+            MainStatusBar.Text = $"Imported {importedCount} preset(s) from {openDialog.FileName}.";
+        }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -438,7 +583,22 @@ namespace Dzmac.Forms
             _ = RestartPerformanceMonitoringAsync(_selected.ConfigId);
         }
 
-        private void OpenPresetItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void OpenPresetItem_Click(object sender, EventArgs e)
+        {
+            using var openDialog = new OpenFileDialog
+            {
+                Filter = "TPF Preset Files (*.tpf)|*.tpf|All Files (*.*)|*.*",
+                DefaultExt = "tpf",
+                CheckFileExists = true
+            };
+
+            if (openDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            LoadPresetFileIfExists(openDialog.FileName, mustExist: true);
+        }
 
         private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => _persistOriginalMacRecord = PersistentAddressCheckBox.Checked;
 
@@ -516,38 +676,72 @@ namespace Dzmac.Forms
 
         private async void VendorComboBox_SelectedIndexChanged(object sender, EventArgs e) => await TryLoadNextVendorBatchIfNeededAsync();
 
-        private void RestoreMacButton_Click(object sender, EventArgs e)
+        private async void RestoreMacButton_Click(object sender, EventArgs e)
         {
             if (_selected == null)
             {
                 return;
             }
 
-            if (!_selected.Adapter.Changed)
+            var selected = _selected;
+            if (!selected.Adapter.Changed)
             {
                 return;
             }
 
-            if (_adminService.ResetRegistryMac(_selected.Adapter).IsSuccess)
-            {
-                _ = MessageBox.Show(Resources.MacAddressRestoreSuccess, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ChangeMacButton.Enabled = false;
+            RestoreMacButton.Enabled = false;
+            MainStatusBar.Text = $"Restoring original MAC address for {selected.Name}...";
+            await Task.Yield();
 
-                if (_reenableOnChange && _adminService.SetAdapterEnabled(_selected.Adapter, false).IsSuccess)
+            try
+            {
+                var resetResult = await Task.Run(() => _adminService.ResetRegistryMac(selected.Adapter));
+                if (resetResult.IsSuccess)
                 {
-                    _ = _adminService.SetAdapterEnabled(_selected.Adapter, true);
-                }
+                    MainStatusBar.Text = $"Restored original MAC address for {selected.Name}.";
+                    _ = MessageBox.Show(Resources.MacAddressRestoreSuccess, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                _ = RefreshConnectionsBackground();
+                    if (_reenableOnChange)
+                    {
+                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(selected.Adapter, false));
+                        _ = await Task.Run(() => _adminService.SetAdapterEnabled(selected.Adapter, true));
+                    }
+
+                    _ = RefreshConnectionsBackground();
+                }
+                else
+                {
+                    MainStatusBar.Text = $"Failed to restore original MAC address for {selected.Name}.";
+                    _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            else
+            finally
             {
-                _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                UpdateSelectionState();
             }
         }
 
-        private void SavePresetAsItem_Click(object sender, EventArgs e) => NotImplemented();
+        private void SavePresetAsItem_Click(object sender, EventArgs e)
+        {
+            using var saveDialog = new SaveFileDialog
+            {
+                Filter = "TPF Preset Files (*.tpf)|*.tpf|All Files (*.*)|*.*",
+                DefaultExt = "tpf",
+                AddExtension = true,
+                FileName = System.IO.Path.GetFileName(_currentPresetFilePath)
+            };
 
-        private void SavePresetItem_Click(object sender, EventArgs e) => NotImplemented();
+            if (saveDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            _currentPresetFilePath = saveDialog.FileName;
+            SavePresetsToCurrentPath();
+        }
+
+        private void SavePresetItem_Click(object sender, EventArgs e) => SavePresetsToCurrentPath();
 
         private void ShowSpeedInKBytesPerSecItem_CheckedChanged(object sender, EventArgs e)
         {
@@ -775,25 +969,509 @@ namespace Dzmac.Forms
         {
             // Keep v1 UI surface aligned with implemented feature set.
             ExportReportItem.Visible = true;
-            toolStripSeparator1.Visible = false;
-            OpenPresetItem.Visible = false;
-            SavePresetItem.Visible = false;
-            SavePresetAsItem.Visible = false;
-            toolStripSeparator2.Visible = false;
-            ImportPresetItem.Visible = false;
-            ExportPresetItem.Visible = false;
-            AssociateItem.Visible = false;
+            toolStripSeparator1.Visible = true;
+            OpenPresetItem.Visible = true;
+            SavePresetItem.Visible = true;
+            SavePresetAsItem.Visible = true;
+            toolStripSeparator2.Visible = true;
+            ImportPresetItem.Visible = true;
+            ExportPresetItem.Visible = true;
+            AssociateItem.Visible = true;
             toolStripSeparator7.Visible = false;
             CliParamsHelpItem.Visible = true;
             toolStripSeparator6.Visible = true;
             CheckUpdateItem.Visible = false;
 
-            if (InfoTabs.TabPages.Contains(PresetsPage))
+            PersistentAddressCheckBox.Visible = true;
+        }
+
+        private void BuildPresetSurface()
+        {
+            var root = new TableLayoutPanel
             {
-                InfoTabs.TabPages.Remove(PresetsPage);
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 2
+            };
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 260F));
+            root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            root.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            root.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+
+            _presetListBox = new ListBox { Dock = DockStyle.Fill };
+            _presetListBox.SelectedIndexChanged += (_, __) => BindSelectedPresetDetails();
+            root.Controls.Add(_presetListBox, 0, 0);
+
+            _presetPropertyListView = new ListView
+            {
+                Dock = DockStyle.Fill,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = true,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable
+            };
+            _presetPropertyListView.Columns.Add("Property", 180);
+            _presetPropertyListView.Columns.Add("Value", 420);
+            root.Controls.Add(_presetPropertyListView, 1, 0);
+
+            var buttonFlow = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight
+            };
+
+            _presetNewButton = new Button { Text = "New", Width = 70 };
+            _presetNewButton.Click += PresetNewButton_Click;
+            buttonFlow.Controls.Add(_presetNewButton);
+
+            _presetEditButton = new Button { Text = "Edit", Width = 70 };
+            _presetEditButton.Click += PresetEditButton_Click;
+            buttonFlow.Controls.Add(_presetEditButton);
+
+            _presetDeleteButton = new Button { Text = "Delete", Width = 70 };
+            _presetDeleteButton.Click += PresetDeleteButton_Click;
+            buttonFlow.Controls.Add(_presetDeleteButton);
+
+            _presetApplyButton = new Button { Text = "Apply", Width = 70 };
+            _presetApplyButton.Click += PresetApplyButton_Click;
+            buttonFlow.Controls.Add(_presetApplyButton);
+
+            root.Controls.Add(buttonFlow, 0, 1);
+            root.SetColumnSpan(buttonFlow, 2);
+
+            PresetsPage.Controls.Add(root);
+        }
+
+        private void PresetNewButton_Click(object sender, EventArgs e)
+        {
+            var draft = new TpfPreset
+            {
+                Name = string.Empty,
+                MacMode = TpfMacMode.Original,
+                CustomMac = string.Empty,
+                Ipv4 = null
+            };
+            using var dialog = new PresetEditorDialog("Create New Preset", draft, startBlank: true);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
             }
 
-            PersistentAddressCheckBox.Visible = true;
+            if (IsDuplicatePresetName(dialog.Preset.Name))
+            {
+                MessageBox.Show(
+                    $"A preset named '{dialog.Preset.Name}' already exists. Please choose a different name.",
+                    "Create New Preset",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            _presets.Add(dialog.Preset);
+            BindPresetList();
+            _presetListBox.SelectedIndex = _presets.Count - 1;
+        }
+
+        private void PresetEditButton_Click(object sender, EventArgs e)
+        {
+            var selectedIndex = _presetListBox.SelectedIndex;
+            var selected = GetSelectedPreset();
+            if (selected == null)
+            {
+                return;
+            }
+
+            using var dialog = new PresetEditorDialog("Edit Preset", selected);
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            if (IsDuplicatePresetName(dialog.Preset.Name, selectedIndex))
+            {
+                MessageBox.Show(
+                    $"A preset named '{dialog.Preset.Name}' already exists. Please choose a different name.",
+                    "Edit Preset",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return;
+            }
+
+            _presets[selectedIndex] = dialog.Preset;
+            BindPresetList();
+            _presetListBox.SelectedIndex = selectedIndex;
+        }
+
+        private void PresetDeleteButton_Click(object sender, EventArgs e)
+        {
+            var selectedIndex = _presetListBox.SelectedIndex;
+            if (selectedIndex < 0 || selectedIndex >= _presets.Count)
+            {
+                return;
+            }
+
+            var selectedPreset = _presets[selectedIndex];
+            var confirmDelete = MessageBox.Show(
+                $"Delete preset '{selectedPreset.Name}'?",
+                "Delete Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (confirmDelete != DialogResult.Yes)
+            {
+                return;
+            }
+
+            _presets.RemoveAt(selectedIndex);
+            BindPresetList();
+        }
+
+        private async void PresetApplyButton_Click(object sender, EventArgs e)
+        {
+            var selectedPreset = GetSelectedPreset();
+            var selectedConnection = _selected;
+            if (selectedPreset == null || selectedConnection == null)
+            {
+                return;
+            }
+
+            var confirmApply = MessageBox.Show(
+                $"Apply preset '{selectedPreset.Name}' to '{selectedConnection.Name}'?",
+                "Apply Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (confirmApply != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var progress = new Progress<string>(status => MainStatusBar.Text = status);
+            MainStatusBar.Text = $"Applying preset '{selectedPreset.Name}' to '{selectedConnection.Name}'...";
+            await Task.Yield();
+
+            var (macApplied, macError) = await Task.Run(() =>
+            {
+                var success = TryApplyPresetMac(selectedPreset, selectedConnection, progress, out var error);
+                return (success, error);
+            });
+
+            if (!macApplied)
+            {
+                MessageBox.Show(macError, "Apply Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MainStatusBar.Text = $"Failed to apply preset '{selectedPreset.Name}' to '{selectedConnection.Name}'.";
+                return;
+            }
+
+            var (ipv4Applied, ipv4Error) = await Task.Run(() =>
+            {
+                var success = TryApplyPresetIpv4(selectedPreset.Ipv4, selectedConnection, out var error);
+                return (success, error);
+            });
+
+            if (!ipv4Applied)
+            {
+                MessageBox.Show(ipv4Error, "Apply Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MainStatusBar.Text = $"Failed to apply preset '{selectedPreset.Name}' to '{selectedConnection.Name}'.";
+                return;
+            }
+
+            MainStatusBar.Text = $"Applied preset '{selectedPreset.Name}' successfully.";
+            _ = RefreshConnectionsBackground();
+        }
+
+        private bool TryApplyPresetMac(TpfPreset preset, NetworkConnection selectedConnection, IProgress<string> progress, out string error)
+        {
+            error = string.Empty;
+
+            switch (preset.MacMode)
+            {
+                case TpfMacMode.Original:
+                    var resetResult = _adminService.ResetRegistryMac(selectedConnection.Adapter);
+                    if (!resetResult.IsSuccess)
+                    {
+                        error = $"Failed to restore original MAC address: {resetResult.Message}";
+                        return false;
+                    }
+
+                    return true;
+                case TpfMacMode.Custom:
+                    var normalized = (preset.CustomMac ?? string.Empty).Replace("-", string.Empty).Replace(":", string.Empty);
+                    if (!MacAddress.IsValidMac(normalized))
+                    {
+                        error = $"Invalid custom MAC in preset '{preset.Name}'.";
+                        return false;
+                    }
+
+                    return TryRotateMac(selectedConnection, new MacAddress(normalized), progress, out error);
+                case TpfMacMode.Random:
+                    return TryApplyRandomMac(selectedConnection, useLocallyAdministeredFirstOctet: false, progress, out error);
+                case TpfMacMode.RandomWith02:
+                    return TryApplyRandomMac(selectedConnection, useLocallyAdministeredFirstOctet: true, progress, out error);
+                default:
+                    error = $"Unsupported MAC mode: 0x{(byte)preset.MacMode:X2}";
+                    return false;
+            }
+        }
+
+        private bool TryApplyRandomMac(NetworkConnection selectedConnection, bool useLocallyAdministeredFirstOctet, IProgress<string> progress, out string error)
+        {
+            error = string.Empty;
+
+            Vendor randomVendor;
+            try
+            {
+                randomVendor = _vm.GetRandom();
+            }
+            catch (Exception ex)
+            {
+                error = $"Failed to generate random MAC: {ex.Message}";
+                return false;
+            }
+
+            var randomMac = selectedConnection.GetRandom(randomVendor.Oui);
+            if (useLocallyAdministeredFirstOctet)
+            {
+                randomMac = randomMac.AsLocallyAdministered();
+            }
+
+            return TryRotateMac(selectedConnection, randomMac, progress, out error);
+        }
+
+        private bool TryRotateMac(NetworkConnection selectedConnection, MacAddress targetMac, IProgress<string> progress, out string error)
+        {
+            error = string.Empty;
+            var operation = MacRotationService.TryRotateMac(selectedConnection.Adapter, targetMac, _persistOriginalMacRecord, progress);
+            if (operation.Success)
+            {
+                return true;
+            }
+
+            error = operation.Message;
+            return false;
+        }
+
+        private bool TryApplyPresetIpv4(TpfIpv4Settings ipv4, NetworkConnection selectedConnection, out string error)
+        {
+            error = string.Empty;
+            if (ipv4 == null || !ipv4.Enabled)
+            {
+                return true;
+            }
+
+            if (!ipv4.IsStatic)
+            {
+                var dhcpEnableResult = _adminService.SetDhcpEnabled(selectedConnection.Adapter, true);
+                if (!dhcpEnableResult.IsSuccess)
+                {
+                    error = $"Failed to enable DHCPv4: {dhcpEnableResult.Message}";
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (!IpAddressValidator.TryValidateIpv4Address(ipv4.Address, out var normalizedAddress))
+            {
+                error = $"Invalid IPv4 address '{ipv4.Address}'.";
+                return false;
+            }
+
+            if (!IpAddressValidator.TryValidateIpv4SubnetMask(ipv4.SubnetMask, out var normalizedSubnet))
+            {
+                error = $"Invalid IPv4 subnet mask '{ipv4.SubnetMask}'.";
+                return false;
+            }
+
+            if (!selectedConnection.Adapter.TrySetIPv4Addresses(new[] { normalizedAddress }, new[] { normalizedSubnet }))
+            {
+                error = "Failed to set static IPv4 address.";
+                return false;
+            }
+
+            if (ipv4.GatewayEnabled && !string.IsNullOrWhiteSpace(ipv4.DefaultGateway))
+            {
+                if (!IpAddressValidator.TryValidateIpv4Address(ipv4.DefaultGateway, out var normalizedGateway))
+                {
+                    error = $"Invalid IPv4 gateway '{ipv4.DefaultGateway}'.";
+                    return false;
+                }
+
+                if (!selectedConnection.Adapter.TrySetIPv4Gateways(new[] { normalizedGateway }, new[] { ipv4.GatewayMetric }))
+                {
+                    error = "Failed to set IPv4 default gateway.";
+                    return false;
+                }
+            }
+
+            if (ipv4.DnsEnabled)
+            {
+                if (!IpAddressValidator.TryValidateIpv4Address(ipv4.PrimaryDnsServer, out var normalizedDns))
+                {
+                    error = $"Invalid IPv4 DNS server '{ipv4.PrimaryDnsServer}'.";
+                    return false;
+                }
+
+                if (!selectedConnection.Adapter.TrySetIPv4DnsServers(new[] { normalizedDns }))
+                {
+                    error = "Failed to set IPv4 DNS server.";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void BindPresetList()
+        {
+            _presetListBox.BeginUpdate();
+            _presetListBox.Items.Clear();
+            foreach (var preset in _presets)
+            {
+                _presetListBox.Items.Add(preset.Name);
+            }
+
+            _presetListBox.EndUpdate();
+            BindSelectedPresetDetails();
+        }
+
+        private void BindSelectedPresetDetails()
+        {
+            _presetPropertyListView.BeginUpdate();
+            _presetPropertyListView.Items.Clear();
+
+            var selected = GetSelectedPreset();
+            if (selected != null)
+            {
+                foreach (var pair in TpfPresetFormatter.ToProperties(selected))
+                {
+                    _presetPropertyListView.Items.Add(new ListViewItem(new[] { pair.Key, pair.Value }));
+                }
+            }
+
+            _presetPropertyListView.EndUpdate();
+        }
+
+        private TpfPreset GetSelectedPreset()
+        {
+            var index = _presetListBox.SelectedIndex;
+            if (index < 0 || index >= _presets.Count)
+            {
+                return null;
+            }
+
+            return _presets[index];
+        }
+
+        private static TpfPreset ClonePreset(TpfPreset preset)
+        {
+            return new TpfPreset
+            {
+                Name = preset.Name,
+                MacMode = preset.MacMode,
+                CustomMac = preset.CustomMac,
+                Ipv4 = preset.Ipv4 == null
+                    ? null
+                    : new TpfIpv4Settings
+                    {
+                        Enabled = preset.Ipv4.Enabled,
+                        IsStatic = preset.Ipv4.IsStatic,
+                        Address = preset.Ipv4.Address,
+                        SubnetMask = preset.Ipv4.SubnetMask,
+                        GatewayEnabled = preset.Ipv4.GatewayEnabled,
+                        DefaultGateway = preset.Ipv4.DefaultGateway,
+                        GatewayMetric = preset.Ipv4.GatewayMetric,
+                        DnsEnabled = preset.Ipv4.DnsEnabled,
+                        PrimaryDnsServer = preset.Ipv4.PrimaryDnsServer
+                    }
+            };
+        }
+
+        private bool IsDuplicatePresetName(string presetName, int excludeIndex = -1)
+        {
+            var normalizedName = (presetName ?? string.Empty).Trim();
+            for (var i = 0; i < _presets.Count; i++)
+            {
+                if (i == excludeIndex)
+                {
+                    continue;
+                }
+
+                if (string.Equals((_presets[i].Name ?? string.Empty).Trim(), normalizedName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void LoadPresetFileIfExists(string path, bool mustExist = false)
+        {
+            if (!System.IO.File.Exists(path))
+            {
+                if (mustExist)
+                {
+                    MessageBox.Show($"Preset file not found: {path}", "Open Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _currentPresetFilePath = path;
+                    _presets.Clear();
+                    BindPresetList();
+                    return;
+                }
+
+                _currentPresetFilePath = path;
+                var defaultFile = TpfDefaults.CreateDefaultFile();
+                _presets.Clear();
+                _presets.AddRange(defaultFile.Presets.Select(ClonePreset));
+                BindPresetList();
+
+                if (_presets.Count > 0)
+                {
+                    _presetListBox.SelectedIndex = defaultFile.SelectedPresetIndex < _presets.Count
+                        ? defaultFile.SelectedPresetIndex
+                        : 0;
+                }
+
+                SavePresetsToCurrentPath();
+                MainStatusBar.Text = $"Created default preset file at {path}.";
+                return;
+            }
+
+            try
+            {
+                var file = TpfSerializer.Load(path);
+                _presets.Clear();
+                _presets.AddRange(file.Presets.Select(ClonePreset));
+                _currentPresetFilePath = path;
+                BindPresetList();
+                MainStatusBar.Text = $"Loaded {_presets.Count} preset(s) from {path}.";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Open Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void SavePresetsToCurrentPath()
+        {
+            try
+            {
+                var file = new TpfFile();
+                foreach (var preset in _presets)
+                {
+                    file.Presets.Add(ClonePreset(preset));
+                }
+
+                if (_presetListBox.SelectedIndex >= 0 && _presetListBox.SelectedIndex < _presets.Count)
+                {
+                    file.SelectedPresetIndex = (byte)_presetListBox.SelectedIndex;
+                }
+
+                TpfSerializer.Save(_currentPresetFilePath, file);
+                MainStatusBar.Text = $"Saved {_presets.Count} preset(s) to {_currentPresetFilePath}.";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Save Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
         }
 
         private string BuildTextReport()

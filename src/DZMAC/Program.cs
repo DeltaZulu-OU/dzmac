@@ -27,6 +27,15 @@ namespace Dzmac
                 return 0;
             }
 
+            if (args.Length == 1 && args[0].EndsWith(".tpf", StringComparison.OrdinalIgnoreCase))
+            {
+                Diagnostics.Info("application_start", ("host", "gui"), ("source", "file_association"));
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm(args[0]));
+                return 0;
+            }
+
             Diagnostics.Info("application_start", ("host", "cli"));
             EnsureConsole();
             return CliHandler.Run(args);
