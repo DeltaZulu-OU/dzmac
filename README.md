@@ -10,24 +10,27 @@ The goal is to provide a focused, predictable, and maintainable application cent
 
 This project is in **alpha** stage.
 
-The focus is on stabilizing core functionality before expanding scope for DZMAC. [TMAC](https://technitium.com/tmac/) has been around over a decade and it has been used by hundreds of thousands of people, if not millions. DZMAC is a reimplementation from scratch, trying to be as faithful as possible to the original. However, there are some design decisions made explicitly excluding some fetures.
+DZMAC is a from-scratch reimplementation of [TMAC](https://technitium.com/tmac/). The current focus is stabilizing the core adapter-management workflow before expanding the feature set.
+
+TMAC has existed for more than a decade and has been widely used. DZMAC tries to preserve the familiar core experience where it makes sense, but it deliberately does not aim for full feature parity. Some TMAC features are excluded or redesigned to keep DZMAC smaller, clearer, and easier to maintain.
 
 ## Usage
 
-The usage is *almost* the same as TMAC. If you have ever used TMAC, it is very easy to start. The actions are simple and the UI is compact.
+DZMAC shows likely physical network adapters by default. This keeps the main adapter list focused on the devices most users want to manage day to day.
 
-### Adapter-type definitions
-- **Physical adapter**: an adapter reported as hardware-backed by Windows adapter metadata (preferred: `MSFT_NetAdapter`; fallback: `Win32_NetworkAdapter.PhysicalAdapter`).
-- **Virtual/logical adapter**: an adapter reported as virtual/filter/endpoint/logical by Windows metadata, or one with `PhysicalAdapter = false` on older WMI paths.
-- **Fallback classification**: if explicit adapter-type properties are unavailable, DZMAC falls back to `PNPDeviceID` prefix inference (`PCI\\`, `USB\\`, `ACPI\\`) as best effort only.
+Use **Options → Show All Adapters** to include virtual, logical, VPN, hypervisor, filter, and other software-defined adapters.
 
-### Showing physical vs virtual adapters
-- By default, DZMAC focuses on likely physical adapters for a cleaner day-to-day list.
-- Use **Options → Show All Adapters** to include virtual/logical adapters in the grid.
-- **File → Export Text Report** exports exactly what is currently visible in the adapter list.
+**File → Export Text Report** exports exactly what is currently visible in the adapter list. To export all adapters, enable **Show All Adapters** first.
 
+Presets are managed from the **Presets** tab. DZMAC supports `.tpf` preset files for the currently supported preset fields. You can open, save, save as, import, and export presets from the **File** menu. Launching DZMAC with a `.tpf` path opens that preset file directly:
 
-See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
+```powershell
+DZMAC.exe <path-to-file>.tpf
+```
+
+DZMAC can read supported data from TMAC .tpf files, but updated files are not guaranteed to remain compatible with TMAC.
+
+See the [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
 
 ![Main window showing Information Details](assets/main-info.png)
 ![Main window showing IP Addresses](assets/main-ip.png)
@@ -35,89 +38,72 @@ See [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
 
 ## How DZMAC differs from TMAC
 
-DZMAC started as a reimplementation of TMAC, but it intentionally makes different
-product and UX choices. The list below highlights the most important current
-differences so expectations are clear.
+DZMAC is inspired by TMAC, but it makes different product and UX decisions. The main differences are listed below.
 
-### Physical adapters first (virtual adapters optional)
+### Physical adapters first
 
-By default, DZMAC focuses the adapter list on likely physical adapters for a
-cleaner day-to-day experience. Virtual/logical adapters can still be shown
-through **Options → Show All Adapters**.
+DZMAC uses Windows adapter metadata to decide whether an adapter is physical or virtual/logical.
 
-This also affects **File → Export Text Report**: the export contains exactly
-what is currently shown in the adapter list. To export all adapters (including
-virtual/logical), enable **Options → Show All Adapters** first.
+The preferred source is `MSFT_NetAdapter`. On older paths, DZMAC falls back to `Win32_NetworkAdapter.PhysicalAdapter`. If explicit adapter-type metadata is unavailable, DZMAC uses `PNPDeviceID` prefix inference such as `PCI\\`, `USB\\`, and `ACPI\\` as a best-effort fallback.
 
-### Presets and `.tpf` workflow
+This classification is intentionally conservative. Some real hardware may still appear as non-physical depending on driver metadata. Use **Options → Show All Adapters** when you need the full adapter list.
 
-- On first launch, DZMAC creates a default `default.tpf` file in the application directory when one does not exist.
-- You can manage presets in the **Presets** tab and apply the selected preset to the currently selected adapter.
-- Use **File → Open Preset** to load a preset file, **Save Preset** / **Save Preset As** to persist edits, and **Import Preset** / **Export Preset** for selective transfer between files.
-- Launching `DZMAC.exe <path-to-file>.tpf` opens that preset file directly in the GUI.
-- Note that, DZMAC can read TMAC `.tpf` files, but **it is not backwards compatible**. Therefore, you cannot make updated `.tpf` files to work with TMAC.
+### Adapter state changes are menu-driven
 
-### Adapter enable/disable is menu-driven
+The Enabled checkbox in the adapter list is read-only. It is a status indicator, not an action control.
 
-The **Enabled** checkbox in the adapter list is intentionally read-only and
-serves as a status indicator only.
+Adapter state changes are performed through **Action → Enable Adapter** and **Action → Disable Adapter**. This keeps confirmation dialogs, status-bar feedback, diagnostics, and error handling in one consistent workflow.
 
-Adapter state changes are performed exclusively through
-**Action → Enable Adapter** / **Action → Disable Adapter** so the flow can
-consistently enforce confirmation dialogs, status-bar feedback, and diagnostics.
+### Preset support is limited to the supported DZMAC model
 
-### Event logs
+DZMAC supports `.tpf` preset workflows, including:
 
-The Windows event logs are used for diagnosing issues, and can be found under **Event Logs > Applications > DZMAC**. For a clearer understanding, visit [Event Log Catalog](https://github.com/zbalkan/dzmac/wiki/Event-Log-Catalog) page.
+- creating a default `default.tpf` file on first launch when one does not exist
+- creating, editing, deleting, and applying presets from the Presets tab
+- opening, saving, importing, and exporting preset files from the File menu
+- opening a preset file directly at startup
+- optional current-user `.tpf` file association through **File → Associate with Preset Files (.tpf)**
 
-### Portable
+The parser is resilient by design. It reads the supported preset subset and ignores unsupported or unparseable residual data where possible.
 
-There's no installer. It's a single-file executable relying on .NET Framework 4.8.1, installed on all Windiws 10 & 11 endpoints by default. It also helps the size of the application to be as small as possible.
+### Event logs are used for diagnostics
 
-### Narrower feature scope, fewer bundled utilities
+DZMAC writes diagnostic events to Windows Event Log under:
 
-The following decisions define the current user-facing scope:
+`Event Viewer → Applications and Services Logs → DZMAC`
 
-#### No DHCPv6
+See the Event Log Catalog for event details.
 
-Only DHCPv4 is supported. DHCPv6 is intentionally out of scope.
+# Portable by design
 
-#### No proxy management
+DZMAC does not currently ship with an installer. It is distributed as a small executable that relies on .NET Framework 4.8.1, which is available by default on supported Windows 10 and Windows 11 endpoints.
 
-Internet Explorer / system proxy configuration is not supported.
+# Narrower feature scope
 
-#### No auto-updater
+The following TMAC-adjacent features are intentionally out of scope for the current DZMAC version:
 
-The application does not include update infrastructure.
+| Feature| DZMAC status |
+|---|---|
+| DHCPv6 | Not supported |
+| Proxy management | Not supported |
+| Auto-updater | Not included |
+| System tray mode | Not included |
+| Tray animation | Not included |
 
-#### No system tray
-
-The application is not a background utility:
-- no system tray icon
-- no tray animation
-
-#### Preset files (`.tpf`) are supported
-
-DZMAC now includes preset management compatible with `.tpf` files:
-- dedicated **Presets** tab with create/edit/delete/apply actions
-- **File** menu support for open/save/save-as/import/export preset workflows
-- startup support for opening a `.tpf` file directly (including via file association)
-- optional current-user `.tpf` association through **File → Associate with Preset Files (.tpf)**
-
-The serializer focuses on the supported subset (MAC mode + IPv4 fields) and keeps parsing resilient when unsupported residual bytes are encountered.
+Only DHCPv4 is currently supported. Internet Explorer / system proxy configuration, background tray behavior, tray animation, and built-in update infrastructure are deliberately excluded.
 
 ## Acknowledgements
 
-First and foremost, I'd like to thank [Shreyas Zare](https://github.com/ShreyasZare) for [Technitium MAC Address Changer](https://technitium.com/tmac/) and other amazing contributins for the community.
+First and foremost, I'd like to thank [Shreyas Zare](https://github.com/ShreyasZare) for [Technitium MAC Address Changer](https://technitium.com/tmac/) and other amazing contributions for the community.
 
 Also, thanks to the following projects and resources:
 
 - [MACAddressTool](https://github.com/sietseringers/MACAddressTool) for internals and implementation ideas.
-- The [objectlistview](https://objectlistview.sourceforge.net/cs/index.html) project for list-view handling.
-- [MAC-Address-Text-Box-and-Class article on CodeProject](https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class) for MAC address textbox implementation reference.
-
-
+- The [ObjectListView](https://objectlistview.sourceforge.net/cs/index.html) project for list-view handling.
+- [MAC-Address-Text-Box-and-Class article on CodeProject (archived)](https://web.archive.org/web/20161025183601/http://www.codeproject.com/Articles/15117/MAC-Address-Text-Box-and-Class) for MAC address textbox implementation reference.
 
 ## License
 
-This project is licensed under GPL v3 License. The ObjectListView component is licensed under GPL v3 as well. The changes including migrating from .NET 2.0 to 4.8.1 can be fund under project directory.
+This project is licensed under GPL v3 License.
+
+The ObjectListView component is licensed under GPL v3 as well. The changes including migrating from .NET 2.0 to 4.8.1 can be fund under project directory.
