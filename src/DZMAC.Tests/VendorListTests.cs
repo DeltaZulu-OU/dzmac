@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 using System.Text;
 using Dzmac.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests
 {

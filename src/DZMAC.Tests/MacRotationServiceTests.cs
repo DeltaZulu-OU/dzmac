@@ -1,7 +1,6 @@
 using System.Management;
 using System.Net.NetworkInformation;
 using Dzmac.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests
 {
@@ -123,11 +122,14 @@ namespace Dzmac.Tests
 
             public override bool TryValidateAdapterDescription(string registryKey, string description) => true;
 
-            public override void SetStringValue(string registryKey, string valueName, string value) { }
+            public override void SetStringValue(string registryKey, string valueName, string value)
+            { }
 
-            public override void DeleteValue(string registryKey, string valueName) { }
+            public override void DeleteValue(string registryKey, string valueName)
+            { }
 
-            public override void DeleteKeyTree(string registryKey) { }
+            public override void DeleteKeyTree(string registryKey)
+            { }
 
             public override void EnsureNetworkAddressParameter(string registryKey)
             {
@@ -140,7 +142,8 @@ namespace Dzmac.Tests
 
         private sealed class NoOpProgress : IProgress<string>
         {
-            public void Report(string value) { }
+            public void Report(string value)
+            { }
         }
     }
 }

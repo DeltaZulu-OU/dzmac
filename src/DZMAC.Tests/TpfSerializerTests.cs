@@ -1,7 +1,6 @@
 using Dzmac.Core.Presets;
-using System.IO;
 
-namespace DZMAC.Tests;
+namespace Dzmac.Tests;
 
 [TestClass]
 public class TpfSerializerTests
@@ -99,7 +98,6 @@ public class TpfSerializerTests
         Assert.AreEqual("Original MAC Address", loaded.Presets[1].Name);
         Assert.AreEqual("Sample Network", loaded.Presets[2].Name);
     }
-
 
     [TestMethod]
     public void CreateDefaultFile_ContainsThreeExpectedPresets()

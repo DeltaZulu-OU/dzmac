@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net.NetworkInformation;
+﻿using System.Net.NetworkInformation;
 using Dzmac.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests
 {
@@ -53,7 +51,18 @@ namespace Dzmac.Tests
         public void GetNewMacForOuiShouldThrowWhenOuiHasInvalidFormat()
         {
             _ = Assert.ThrowsException<ArgumentException>(() => MacAddress.GetNewMac("ZZZZZZ"));
+            _ = Assert.ThrowsException<ArgumentException>(() => MacAddress.GetNewMac("AABB0"));
             _ = Assert.ThrowsException<ArgumentException>(() => MacAddress.GetNewMac("AABBCCDD"));
+        }
+
+        [TestMethod]
+        public void GetNewMacShouldSetLocallyAdministeredBitAndClearMulticastBit()
+        {
+            var mac = MacAddress.GetNewMac().ToString();
+            var firstOctet = Convert.ToByte(mac.Substring(0, 2), 16);
+
+            Assert.AreEqual(0x02, firstOctet & 0x02, "Expected locally administered bit to be set.");
+            Assert.AreEqual(0x00, firstOctet & 0x01, "Expected multicast bit to be cleared.");
         }
 
         [TestMethod]

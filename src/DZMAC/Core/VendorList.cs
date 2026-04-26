@@ -61,7 +61,7 @@ namespace Dzmac.Core
             Debug.WriteLine($"Querying vendor list (OUI: {normalized})...");
             var records = Records;
             return useWildcard
-                ? records.FirstOrDefault(v => MatchesLocallyAdministeredNibbleWildcard(v.Oui, normalized))
+                ? records.FirstOrDefault(v => MatchesIgnoringSecondNibble(v.Oui, normalized))
                 : records.FirstOrDefault(v => v.Oui == normalized);
         }
 
@@ -94,6 +94,7 @@ namespace Dzmac.Core
             return selected.Value;
         }
 
+        // This wrapper intentionally uses Task.Run() to avoid SynchronizationContext deadlocks on UI threads.
         public void Refresh() => Task.Run(() => RefreshAsync(CancellationToken.None)).GetAwaiter().GetResult();
 
         public Task RefreshAsync(CancellationToken cancellationToken)
@@ -204,7 +205,7 @@ namespace Dzmac.Core
             }
         }
 
-        private static bool MatchesLocallyAdministeredNibbleWildcard(string candidate, string pattern) => candidate.Length == 6
+        private static bool MatchesIgnoringSecondNibble(string candidate, string pattern) => candidate.Length == 6
                    && pattern.Length == 6
                    && candidate[0] == pattern[0]
                    && string.Equals(candidate.Substring(2), pattern.Substring(2), StringComparison.Ordinal);

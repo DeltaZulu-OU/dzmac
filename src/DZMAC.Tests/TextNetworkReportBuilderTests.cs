@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using Dzmac.Core.Reporting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dzmac.Tests
 {

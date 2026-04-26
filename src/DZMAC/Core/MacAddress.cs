@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Net.NetworkInformation;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Dzmac.Core
@@ -81,10 +82,8 @@ namespace Dzmac.Core
         /// <returns>A MAC address having 01 as the least significant bits of the first byte, but otherwise random.</returns>
         public static MacAddress GetNewMac()
         {
-            var r = new Random();
-
             var bytes = new byte[6];
-            r.NextBytes(bytes);
+            FillRandomBytes(bytes);
 
             // Set second bit to 1
             bytes[0] = (byte)(bytes[0] | 0x02);
@@ -106,16 +105,15 @@ namespace Dzmac.Core
                 throw new ArgumentNullException(nameof(oui));
             }
 
-            if (!Regex.IsMatch(oui, "^[0-9A-Fa-f]{6}$", RegexOptions.CultureInvariant))
+            if (oui.Length != 6 || !Regex.IsMatch(oui, "^[0-9A-Fa-f]{6}$", RegexOptions.CultureInvariant))
             {
-                throw new ArgumentException("OUI must be exactly 6 hex characters.", nameof(oui));
+                throw new ArgumentException($"OUI must be exactly 6 hex characters, got '{oui}'.", nameof(oui));
             }
 
             var ouiOctet = ConvertHexStringToByteArray(oui);
 
-            var r = new Random();
             var nicSpecificOctet = new byte[3];
-            r.NextBytes(nicSpecificOctet);
+            FillRandomBytes(nicSpecificOctet);
 
             var newMac = MergeByteArrays(ouiOctet, nicSpecificOctet);
             return new MacAddress(MacToString(newMac));
@@ -241,6 +239,12 @@ namespace Dzmac.Core
             Buffer.BlockCopy(firstArray, 0, combinedArray, 0, firstArray.Length);
             Buffer.BlockCopy(secondArray, 0, combinedArray, firstArray.Length, secondArray.Length);
             return combinedArray;
+        }
+
+        private static void FillRandomBytes(byte[] bytes)
+        {
+            using var rng = new RNGCryptoServiceProvider();
+            rng.GetBytes(bytes);
         }
 
         private bool Equals(MacAddress other)
