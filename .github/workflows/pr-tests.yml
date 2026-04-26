@@ -2,6 +2,21 @@ name: PR Tests
 
 on:
   pull_request:
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+      - '**/*.props'
+      - '**/*.targets'
+      - '**/*.config'
+      - '**/packages.config'
+      - '**/global.json'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/Directory.Packages.props'
+      - '**/nuget.config'
+      - '.github/workflows/pr-tests.yml'
 
 jobs:
   test:
