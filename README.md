@@ -74,11 +74,11 @@ DZMAC writes diagnostic events to Windows Event Log under:
 
 See the Event Log Catalog for event details.
 
-# Portable by design
+### Portable by design
 
 DZMAC does not currently ship with an installer. It is distributed as a small executable that relies on .NET Framework 4.8.1, which is available by default on supported Windows 10 and Windows 11 endpoints.
 
-# Narrower feature scope
+### Narrower feature scope
 
 The following TMAC-adjacent features are intentionally out of scope for the current DZMAC version:
 
