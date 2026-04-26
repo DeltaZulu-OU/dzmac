@@ -78,7 +78,7 @@ namespace Dzmac.Core
                 var stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    var operationTask = Task.Run(() => command.Execute(timeoutCts.Token), timeoutCts.Token);
+                    var operationTask = Task.Run(() => command.Execute(timeoutCts.Token));
                     var (Success, Message) = await operationTask.ConfigureAwait(false);
                     stopwatch.Stop();
 
