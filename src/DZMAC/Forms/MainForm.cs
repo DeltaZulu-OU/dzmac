@@ -79,6 +79,7 @@ namespace Dzmac.Forms
             _connectionDetailsTooltip = new ToolTip();
             _startupPresetPath = startupPresetPath;
             InitializeComponent();
+            Icon = AppIconProvider.GetIcon();
             ConfigureV1Surface();
             _loadingPanel.BringToFront();
             _loadingPanel.Visible = true;

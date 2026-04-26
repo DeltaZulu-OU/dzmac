@@ -23,6 +23,7 @@ namespace Dzmac.Forms
             _workingCopy = ClonePreset(seed);
 
             InitializeComponent();
+            Icon = AppIconProvider.GetIcon();
             Text = title;
 
             SaveButton.Click += SaveButton_Click;
