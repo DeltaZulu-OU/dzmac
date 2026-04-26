@@ -1,5 +1,8 @@
 # DZMAC
 
+[![PR Tests](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/pr-tests.yml/badge.svg)](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/pr-tests.yml)
+[![Dependabot Updates](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/dependabot/dependabot-updates)
+
 ## Overview
 
 DZMAC is a Windows desktop application to spoof MAC address. It is a reimplementation of [Technitium MAC Address Changer (TMAC)](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
