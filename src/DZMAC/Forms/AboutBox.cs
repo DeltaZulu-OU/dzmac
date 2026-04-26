@@ -77,7 +77,7 @@ namespace Dzmac.Forms
         private void ProjectLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ProjectLinkLabel.LinkVisited = true;
-            Process.Start("https://github.com/zbalkan/DZMAC");
+            Process.Start("https://github.com/DeltaZulu-OU/dzmac");
         }
 
         private string GetDebuggerDisplay() => "About";

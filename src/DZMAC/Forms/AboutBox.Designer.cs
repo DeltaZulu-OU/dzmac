@@ -111,7 +111,7 @@
             this.ProjectLinkLabel.Size = new System.Drawing.Size(199, 13);
             this.ProjectLinkLabel.TabIndex = 4;
             this.ProjectLinkLabel.TabStop = true;
-            this.ProjectLinkLabel.Text = "https://github.com/zbalkan/DZMAC";
+            this.ProjectLinkLabel.Text = "https://github.com/DeltaZulu-OU/dzmac";
             this.ProjectLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.ProjectLinkLabel_LinkClicked);
             // 
             // CloseButton

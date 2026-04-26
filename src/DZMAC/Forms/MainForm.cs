@@ -393,7 +393,7 @@ namespace Dzmac.Forms
             }
         }
 
-        private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/zbalkan/DZMAC/wiki/Help");
+        private void HelpTopicsItem_Click(object sender, EventArgs e) => VisitUrl("https://github.com/DeltaZulu-OU/dzmac/wiki/Help");
 
         private void ImportPresetItem_Click(object sender, EventArgs e)
         {
@@ -818,7 +818,7 @@ namespace Dzmac.Forms
         private void WikiLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             WikiLink.LinkVisited = true;
-            VisitUrl("https://github.com/zbalkan/DZMAC/wiki/Help#why-does-setting-the-first-octet-to-02-help-with-some-wi-fi-mac-changes");
+            VisitUrl("https://github.com/DeltaZulu-OU/dzmac/wiki/Help#why-does-setting-the-first-octet-to-02-help-with-some-wi-fi-mac-changes");
         }
 
         private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => _locallyAdministered = ZeroTwoCheckBox.Checked;
