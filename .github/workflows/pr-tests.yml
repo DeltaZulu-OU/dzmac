@@ -18,6 +18,27 @@ on:
       - '**/nuget.config'
       - '.github/workflows/pr-tests.yml'
 
+  push:
+    branches:
+      - master
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+      - '**/*.props'
+      - '**/*.targets'
+      - '**/*.config'
+      - '**/packages.config'
+      - '**/global.json'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/Directory.Packages.props'
+      - '**/nuget.config'
+      - '.github/workflows/pr-tests.yml'
+
+  workflow_dispatch:
+  
 jobs:
   test:
     runs-on: windows-latest
