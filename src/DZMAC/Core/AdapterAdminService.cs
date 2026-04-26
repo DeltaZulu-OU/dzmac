@@ -72,13 +72,22 @@ namespace Dzmac.Core
             Exception? lastException = null;
             for (var attempt = 1; attempt <= _policy.RetryCount; attempt++)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return AdapterAdminResult.Failed(
+                        AdapterAdminResultCode.Timeout,
+                        "Operation cancelled.",
+                        ("operation", command.Name),
+                        ("adapter", command.AdapterName));
+                }
+
                 using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 timeoutCts.CancelAfter(TimeSpan.FromSeconds(_policy.TimeoutSeconds));
 
                 var stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    var operationTask = Task.Run(() => command.Execute(timeoutCts.Token), timeoutCts.Token);
+                    var operationTask = Task.Run(() => command.Execute(timeoutCts.Token));
                     var (Success, Message) = await operationTask.ConfigureAwait(false);
                     stopwatch.Stop();
 
