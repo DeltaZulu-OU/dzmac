@@ -5,7 +5,7 @@
         private const string HelpText =
 @"DZMAC Command Line
 
-Visit https://github.com/zbalkan/DZMAC/ for more information and usage examples.
+Visit https://github.com/DeltaZulu-OU/dzmac/ for more information and usage examples.
 
 Usage: DZMAC -n network_connection_name [options]
 
