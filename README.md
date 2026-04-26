@@ -2,7 +2,7 @@
 
 ## Overview
 
-DZMAC is a Windows desktop application to spoof MAC address. It is a reimplementation of [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
+DZMAC is a Windows desktop application to spoof MAC address. It is a reimplementation of [Technitium MAC Address Changer (TMAC)](https://technitium.com/tmac/), not a reverse-engineering product, but does **not** aim for feature parity.
 
 The goal is to provide a focused, predictable, and maintainable application centered on core adapter management workflows.
 
@@ -10,9 +10,11 @@ The goal is to provide a focused, predictable, and maintainable application cent
 
 This project is in **alpha** stage.
 
-The focus is on stabilizing core functionality before expanding scope for DZMAC. [Technitium MAC Address Changer aka TMAC](https://technitium.com/tmac/) has been around over a decade and it has been used by hundreds of thousands of people, if not millions. DZMAC is a reimplementation from scratch, trying to be as faithful as possible to the original. However, there are some design decisions made explicitly excluding some fetures.
+The focus is on stabilizing core functionality before expanding scope for DZMAC. [TMAC](https://technitium.com/tmac/) has been around over a decade and it has been used by hundreds of thousands of people, if not millions. DZMAC is a reimplementation from scratch, trying to be as faithful as possible to the original. However, there are some design decisions made explicitly excluding some fetures.
 
 ## Usage
+
+The usage is *almost* the same as TMAC. If you have ever used TMAC, it is very easy to start. The actions are simple and the UI is compact.
 
 ### Adapter-type definitions
 - **Physical adapter**: an adapter reported as hardware-backed by Windows adapter metadata (preferred: `MSFT_NetAdapter`; fallback: `Win32_NetworkAdapter.PhysicalAdapter`).
