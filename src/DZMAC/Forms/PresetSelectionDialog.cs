@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Dzmac.Core;
 using Dzmac.Core.Presets;
 
 namespace Dzmac.Forms
@@ -20,6 +21,7 @@ namespace Dzmac.Forms
             _presets = presets ?? throw new ArgumentNullException(nameof(presets));
 
             InitializeComponent();
+            Icon = AppIconProvider.GetIcon();
             Text = title;
 
             PresetCheckedListBox.SelectedIndexChanged += PresetCheckedListBox_SelectedIndexChanged;

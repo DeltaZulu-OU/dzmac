@@ -56,6 +56,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -119,6 +120,7 @@
     </Compile>
     <Compile Include="Core\AdapterAdminService.cs" />
     <Compile Include="Core\AdapterCollaborators.cs" />
+    <Compile Include="Core\AppIconProvider.cs" />
     <Compile Include="Core\AppSettings.cs" />
     <Compile Include="Core\Diagnostics.cs" />
     <Compile Include="Core\DiagnosticsEventCatalog.cs" />

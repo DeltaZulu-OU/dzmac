@@ -137,7 +137,7 @@
             this.MinimizeBox = false;
             this.Name = "AboutBox";
             this.Padding = new System.Windows.Forms.Padding(12);
-            this.ShowIcon = false;
+            this.ShowIcon = true;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "About";

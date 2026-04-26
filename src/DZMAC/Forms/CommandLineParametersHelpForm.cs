@@ -1,5 +1,6 @@
 ﻿using System.Windows.Forms;
 using Dzmac.Cli;
+using Dzmac.Core;
 
 namespace Dzmac.Forms
 {
@@ -8,6 +9,7 @@ namespace Dzmac.Forms
         public CommandLineParametersHelpForm()
         {
             InitializeComponent();
+            Icon = AppIconProvider.GetIcon();
             HelpTextBox.Text = CommandLineHelpContent.Text;
         }
     }
