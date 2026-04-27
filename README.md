@@ -69,13 +69,13 @@ DZMAC supports `.tpf` preset workflows, including:
 
 The parser is resilient by design. It reads the supported preset subset and ignores unsupported or unparseable residual data where possible.
 
+It is not backwards compatible. So, DZMAC `.tpf` files cannot be read by TMAC. 
+
 ### Event logs are used for diagnostics
 
-DZMAC writes diagnostic events to Windows Event Log under:
+DZMAC writes diagnostic events to Windows Event Log under, `Event Viewer → Windows Logs → Application`. The logs have `Source` set as DZMAC.
 
-`Event Viewer → Applications and Services Logs → DZMAC`
-
-See the Event Log Catalog for event details.
+See the [Event Log Catalog](https://github.com/DeltaZulu-OU/dzmac/wiki/Event-Log-Catalog) for event details.
 
 ### Portable by design
 
