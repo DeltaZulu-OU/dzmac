@@ -425,7 +425,7 @@ namespace Dzmac
             value = string.Empty;
             error = string.Empty;
 
-            if (index + 1 >= args.Count)
+            if (index + 1 >= args.Count || args[index + 1].StartsWith("-", StringComparison.Ordinal))
             {
                 error = $"Missing value for option '{args[index]}'.";
                 return false;
