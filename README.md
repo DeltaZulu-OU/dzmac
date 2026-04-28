@@ -39,6 +39,7 @@ See the [wiki](https://github.com/zbalkan/DZMAC/wiki/Help) for help.
 ![Main window showing Information Details](assets/main-info.png)
 ![Main window showing IP Addresses](assets/main-ip.png)
 ![Main window showing Presets](assets/main-presets.png)
+![CLI showing help text](assets/cli.png)
 
 ## How DZMAC differs from TMAC
 
