@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -66,25 +66,31 @@ namespace Dzmac.Core
 
         private static string BuildMessage(string template, string eventName, string? message, IEnumerable<(string Key, object? Value)> context, Exception? exception)
         {
-            var contextText = string.Join(", ", context.Select(item => $"{item.Key}={NormalizeValue(item.Value)}"));
-            var logMessage = $"template=\"{template}\", event={eventName}";
+            var sb = new StringBuilder();
+            sb.AppendLine(template);
+            sb.Append($"  Event: {eventName}");
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                logMessage += $", message=\"{message!.Replace("\"", "'")}\"";
+                sb.AppendLine();
+                sb.Append($"  Message: {message!.Replace("\"", "'")}");
             }
 
-            if (!string.IsNullOrWhiteSpace(contextText))
+            foreach (var item in context)
             {
-                logMessage += $", {contextText}";
+                sb.AppendLine();
+                sb.Append($"  {item.Key}: {NormalizeValue(item.Value)}");
             }
 
             if (exception is not null)
             {
-                logMessage += $", exceptionType={exception.GetType().Name}, exceptionDetail=\"{NormalizeValue(exception)}\"";
+                sb.AppendLine();
+                sb.Append($"  Exception: {exception.GetType().Name}");
+                sb.AppendLine();
+                sb.Append($"  Details: {NormalizeValue(exception)}");
             }
 
-            return logMessage;
+            return sb.ToString();
         }
 
         private static void EnsureEventLogInitialization()
@@ -115,7 +121,7 @@ namespace Dzmac.Core
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceWarning($"event=event_log_initialization_failed, source={EventLogSource}, message=\"{NormalizeValue(ex.Message)}\"");
+                    Trace.TraceWarning($"Event log initialization failed.\n  Event: event_log_initialization_failed\n  Source: {EventLogSource}\n  Message: {NormalizeValue(ex.Message)}");
                     _eventLogReady = false;
                     var retryAt = DateTime.UtcNow.AddSeconds(EventLogInitRetryDelaySeconds);
                     Interlocked.Exchange(ref _nextEventLogInitRetryTicks, retryAt.Ticks);
@@ -166,7 +172,7 @@ namespace Dzmac.Core
 
             if (Interlocked.CompareExchange(ref _queueOverflowWarned, 1, 0) == 0)
             {
-                Trace.TraceWarning($"event=diagnostics_queue_overflow, limit={PendingQueueLimit}: oldest entries will be dropped.");
+                Trace.TraceWarning($"Diagnostics queue overflow: oldest entries will be dropped.\n  Event: diagnostics_queue_overflow\n  Limit: {PendingQueueLimit}");
             }
 
             if (PendingEntries.TryDequeue(out _))
@@ -184,7 +190,7 @@ namespace Dzmac.Core
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"event=event_log_write_failed, source={EventLogSource}, id={entry.EventId}, message=\"{NormalizeValue(ex.Message)}\"");
+                Trace.TraceWarning($"Event log write failed.\n  Event: event_log_write_failed\n  Source: {EventLogSource}\n  Id: {entry.EventId}\n  Message: {NormalizeValue(ex.Message)}");
                 _eventLogReady = false;
                 EnsureEventLogInitialization();
                 return false;
