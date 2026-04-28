@@ -55,24 +55,24 @@ jobs:
         id: artifacts
         shell: pwsh
         run: |
-          $buildOutputDir = 'src/DZMAC/bin/Release'
-          $expectedDmacExe = Join-Path $buildOutputDir 'DMAC.exe'
+          $buildOutputDir = 'src/DZMAC/bin/Release/net481'
+          $expectedDzmacExe = Join-Path $buildOutputDir 'DZMAC.exe'
           $dzmacExe = Join-Path $buildOutputDir 'DZMAC.exe'
 
-          if (Test-Path $expectedDmacExe) {
-            $releaseExe = $expectedDmacExe
+          if (Test-Path $expectedDzmacExe) {
+            $releaseExe = $expectedDzmacExe
           }
           elseif (Test-Path $dzmacExe) {
-            $releaseExe = $expectedDmacExe
+            $releaseExe = $expectedDzmacExe
             Copy-Item $dzmacExe $releaseExe -Force
           }
           else {
-            throw 'Neither DMAC.exe nor DZMAC.exe was found in release output.'
+            throw 'Neither DZMAC.exe nor DZMAC.exe was found in release output.'
           }
 
           $sha256 = (Get-FileHash -Path $releaseExe -Algorithm SHA256).Hash.ToLowerInvariant()
           $shaPath = "$releaseExe.sha256"
-          "${sha256} *DMAC.exe" | Set-Content -Path $shaPath -NoNewline
+          "${sha256} *DZMAC.exe" | Set-Content -Path $shaPath -NoNewline
 
           "exe_path=$releaseExe" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
           "sha_path=$shaPath" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
