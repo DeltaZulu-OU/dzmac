@@ -9,12 +9,13 @@
     <RootNamespace>Dzmac</RootNamespace>
     <AssemblyName>DZMAC</AssemblyName>
 
-    <Title>Dzmac.Core</Title>
-    <Description>Optional description here</Description>
+    <Title>DZMAC</Title>
+    <Description>Change and manage network adapter MAC addresses.</Description>
     <Company>DeltaZulu OÜ</Company>
     <Product>DZMAC</Product>
-    <Copyright>Copyright © 2024</Copyright>
-    <Version>1.0.0</Version> <StartupObject>Dzmac.Program</StartupObject>
+    <Copyright>Copyright © 2026</Copyright>
+    <Version>1.0.0</Version>
+    <StartupObject>Dzmac.Program</StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>

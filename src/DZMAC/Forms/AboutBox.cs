@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 using Dzmac.Core;
@@ -18,9 +17,6 @@ namespace Dzmac.Forms
             var productName = AssemblyProduct;
             Text = $"About {productName}";
             ProductNameLabel!.Text = productName;
-            ProductNameLabel!.Image = AppIconProvider.GetBitmap(new Size(16, 16));
-            ProductNameLabel!.ImageAlign = ContentAlignment.MiddleLeft;
-            ProductNameLabel!.TextAlign = ContentAlignment.MiddleLeft;
             VersionLabel!.Text = $"Version {AssemblyVersion}";
             CopyrightLabel!.Text = AssemblyCopyright;
             DescriptionLabel!.Text = AssemblyDescription;
