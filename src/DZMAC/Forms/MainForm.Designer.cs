@@ -185,7 +185,6 @@ namespace Dzmac.Forms
             this.MainTableLayoutPanel.ColumnCount = 1;
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.MainTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.MainTableLayoutPanel.Controls.Add(this._loadingPanel, 0, 0);
             this.MainTableLayoutPanel.Controls.Add(this.InfoTabs, 0, 1);
             this.MainTableLayoutPanel.Controls.Add(this.ConnectionsGrid, 0, 0);
             this.MainTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -203,10 +202,10 @@ namespace Dzmac.Forms
             this._loadingPanel.BackColor = System.Drawing.SystemColors.Control;
             this._loadingPanel.Controls.Add(this.LoadingLayoutPanel);
             this._loadingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._loadingPanel.Location = new System.Drawing.Point(0, 127);
+            this._loadingPanel.Location = new System.Drawing.Point(0, 24);
             this._loadingPanel.Margin = new System.Windows.Forms.Padding(0);
             this._loadingPanel.Name = "_loadingPanel";
-            this._loadingPanel.Size = new System.Drawing.Size(962, 381);
+            this._loadingPanel.Size = new System.Drawing.Size(962, 528);
             this._loadingPanel.TabIndex = 2;
             this._loadingPanel.Visible = false;
             // 
@@ -1399,6 +1398,7 @@ namespace Dzmac.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(962, 575);
+            this.Controls.Add(this._loadingPanel);
             this.Controls.Add(this.MainTableLayoutPanel);
             this.Controls.Add(this.MainStatusBar);
             this.Controls.Add(this.Toolbar);
