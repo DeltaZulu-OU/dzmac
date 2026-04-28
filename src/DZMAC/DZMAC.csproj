@@ -14,7 +14,7 @@
     <Company>DeltaZulu OÜ</Company>
     <Product>DZMAC</Product>
     <Copyright>Copyright © 2026</Copyright>
-    <Version>1.0.0</Version>
+    <Version>1.0.1.0</Version>
     <StartupObject>Dzmac.Program</StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app.ico</ApplicationIcon>
