@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace Dzmac.Forms
 {
     internal sealed partial class PresetSelectionDialog
