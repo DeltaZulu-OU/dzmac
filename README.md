@@ -2,6 +2,7 @@
 
 [![PR Tests](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/pr-tests.yml/badge.svg)](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/pr-tests.yml)
 [![Dependabot Updates](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/dependabot/dependabot-updates)
+[![CodeQL](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/DeltaZulu-OU/dzmac/actions/workflows/github-code-scanning/codeql)
 
 ## Overview
 
