@@ -148,6 +148,12 @@ namespace Dzmac.Core.Presets
 
             Diagnostics.Info("tpf_save_start", ("presetCount", file.Presets.Count));
             using var ms = new MemoryStream();
+            if (file.Presets.Count > 255)
+            {
+                Diagnostics.Warning("tpf_preset_count_truncated", "Preset count exceeds 255; extra presets will not be saved.",
+                    ("totalCount", file.Presets.Count), ("savedCount", 255));
+            }
+
             var serializedPresetCount = Math.Min(255, file.Presets.Count);
             var selectedPresetIndex = serializedPresetCount == 0
                 ? 0

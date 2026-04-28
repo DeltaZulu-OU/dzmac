@@ -133,6 +133,11 @@ namespace Dzmac
             MacAddress mac;
             if (macOperation.IsRandom)
             {
+                if (manager.IsEmpty)
+                {
+                    throw new DZMACException("Vendor list is empty. Download the OUI list first by running the GUI application and using Help > Update OUI List.");
+                }
+
                 var vendor = manager.GetRandom();
                 mac = MacAddress.GetNewMac(vendor.Oui);
             }
@@ -304,6 +309,7 @@ namespace Dzmac
                         break;
 
                     case "-s":
+                        // -s (statistics) is a TMAC-only flag; silently ignored for compatibility.
                         break;
 
                     case "-i6":

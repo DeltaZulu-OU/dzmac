@@ -85,13 +85,7 @@ namespace Dzmac.Core
                 throw new DZMACException("Vendor list is empty. Update the OUI list from the About menu.");
             }
 
-            Vendor? selected = null;
-            while (selected == null)
-            {
-                selected = GetByIndex(_random.Next(records.Count));
-            }
-
-            return selected.Value;
+            return GetByIndex(_random.Next(records.Count))!.Value;
         }
 
         // This wrapper intentionally uses Task.Run() to avoid SynchronizationContext deadlocks on UI threads.

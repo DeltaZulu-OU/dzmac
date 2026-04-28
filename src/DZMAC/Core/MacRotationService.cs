@@ -182,9 +182,9 @@ namespace Dzmac.Core
                 Thread.Sleep(MacPollingIntervalMs);
                 _ = adapter.TryEnableAdapter();
             }
-            catch
+            catch (Exception ex)
             {
-                // no-op: best-effort revert
+                Diagnostics.Warning("mac_revert_failed", ex.Message, ("adapter", adapter?.Name ?? "unknown"));
             }
 
             progress.Report("Change failed. Reverted to factory settings.");
