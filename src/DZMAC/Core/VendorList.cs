@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -85,13 +83,7 @@ namespace Dzmac.Core
                 throw new DZMACException("Vendor list is empty. Update the OUI list from the About menu.");
             }
 
-            Vendor? selected = null;
-            while (selected == null)
-            {
-                selected = GetByIndex(_random.Next(records.Count));
-            }
-
-            return selected.Value;
+            return GetByIndex(_random.Next(records.Count))!.Value;
         }
 
         // This wrapper intentionally uses Task.Run() to avoid SynchronizationContext deadlocks on UI threads.
@@ -115,7 +107,10 @@ namespace Dzmac.Core
         /// </summary>
         public void AddRange(IEnumerable<Vendor> vendors)
         {
-            if (vendors == null) throw new ArgumentNullException(nameof(vendors));
+            if (vendors is null)
+            {
+                throw new ArgumentNullException(nameof(vendors));
+            }
 
             Debug.WriteLine("Adding to vendor list...");
             lock (_sync)
@@ -133,7 +128,10 @@ namespace Dzmac.Core
         /// </summary>
         public void ReplaceAll(IEnumerable<Vendor> vendors)
         {
-            if (vendors == null) throw new ArgumentNullException(nameof(vendors));
+            if (vendors is null)
+            {
+                throw new ArgumentNullException(nameof(vendors));
+            }
 
             Debug.WriteLine("Replacing vendor list content...");
             var newList = new List<Vendor>();
@@ -237,7 +235,10 @@ namespace Dzmac.Core
 
         private static string NormalizeOui(string oui)
         {
-            if (oui == null) throw new ArgumentNullException(nameof(oui));
+            if (oui is null)
+            {
+                throw new ArgumentNullException(nameof(oui));
+            }
 
             var normalized = oui.Trim().TrimStart('\uFEFF').ToUpperInvariant();
             if (!OuiPattern.IsMatch(normalized))
@@ -250,7 +251,10 @@ namespace Dzmac.Core
 
         private static string NormalizeVendorName(string vendor)
         {
-            if (vendor == null) return string.Empty;
+            if (vendor is null)
+            {
+                return string.Empty;
+            }
 
             var sanitized = vendor.Replace("\r", string.Empty).Replace("\n", " ").Trim();
             sanitized = new string(sanitized
@@ -327,7 +331,7 @@ namespace Dzmac.Core
             vendor = default;
             reason = string.Empty;
 
-            if (fields == null || fields.Count < 2)
+            if (fields is null || fields.Count < 2)
             {
                 reason = "too few columns";
                 return false;
@@ -369,10 +373,16 @@ namespace Dzmac.Core
         private static bool TryExtractOui(string raw, out string oui)
         {
             oui = string.Empty;
-            if (string.IsNullOrWhiteSpace(raw)) return false;
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return false;
+            }
 
             var compact = new string(raw.Trim().TrimStart('﻿').Where(Uri.IsHexDigit).ToArray()).ToUpperInvariant();
-            if (compact.Length != 6 || !OuiPattern.IsMatch(compact)) return false;
+            if (compact.Length != 6 || !OuiPattern.IsMatch(compact))
+            {
+                return false;
+            }
 
             oui = compact;
             return true;
@@ -385,7 +395,7 @@ namespace Dzmac.Core
                 var lines = new List<string>();
                 using var reader = new StreamReader(csvPath, new UTF8Encoding(false, true));
                 string? line;
-                while ((line = reader.ReadLine()) != null)
+                while ((line = reader.ReadLine()) is not null)
                 {
                     lines.Add(line);
                 }
@@ -481,7 +491,10 @@ namespace Dzmac.Core
         {
             foreach (var value in values)
             {
-                if (!string.IsNullOrWhiteSpace(value)) return value;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    return value;
+                }
             }
             return null;
         }

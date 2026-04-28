@@ -1,4 +1,6 @@
-﻿using System.Windows.Forms;
+﻿#nullable enable
+
+using System.Windows.Forms;
 using BrightIdeasSoftware;
 
 namespace Dzmac.Forms
@@ -8,7 +10,7 @@ namespace Dzmac.Forms
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer? components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -16,7 +18,7 @@ namespace Dzmac.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
             }
@@ -121,6 +123,7 @@ namespace Dzmac.Forms
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ImportPresetItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ExportPresetItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.AssociateItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ExitItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -149,7 +152,6 @@ namespace Dzmac.Forms
             this.AboutItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainStatusBar = new System.Windows.Forms.StatusBar();
             this._loadingLabel = new System.Windows.Forms.Label();
-            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.MainTableLayoutPanel.SuspendLayout();
             this._loadingPanel.SuspendLayout();
             this.LoadingLayoutPanel.SuspendLayout();
@@ -681,7 +683,7 @@ namespace Dzmac.Forms
             this.IPAddressPage.Location = new System.Drawing.Point(4, 22);
             this.IPAddressPage.Name = "IPAddressPage";
             this.IPAddressPage.Padding = new System.Windows.Forms.Padding(3);
-            this.IPAddressPage.Size = new System.Drawing.Size(948, 364);
+            this.IPAddressPage.Size = new System.Drawing.Size(948, 0);
             this.IPAddressPage.TabIndex = 1;
             this.IPAddressPage.Text = "IP Address";
             this.IPAddressPage.UseVisualStyleBackColor = true;
@@ -698,7 +700,7 @@ namespace Dzmac.Forms
             this.IpAddressLayoutPanel.Name = "IpAddressLayoutPanel";
             this.IpAddressLayoutPanel.RowCount = 1;
             this.IpAddressLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.IpAddressLayoutPanel.Size = new System.Drawing.Size(942, 358);
+            this.IpAddressLayoutPanel.Size = new System.Drawing.Size(942, 0);
             this.IpAddressLayoutPanel.TabIndex = 0;
             // 
             // Ipv4ColumnLayoutPanel
@@ -715,7 +717,7 @@ namespace Dzmac.Forms
             this.Ipv4ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30.96591F));
             this.Ipv4ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 26.42045F));
             this.Ipv4ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 42.61364F));
-            this.Ipv4ColumnLayoutPanel.Size = new System.Drawing.Size(465, 352);
+            this.Ipv4ColumnLayoutPanel.Size = new System.Drawing.Size(465, 1);
             this.Ipv4ColumnLayoutPanel.TabIndex = 0;
             // 
             // Ipv4AddressGroupBox
@@ -724,7 +726,7 @@ namespace Dzmac.Forms
             this.Ipv4AddressGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Ipv4AddressGroupBox.Location = new System.Drawing.Point(3, 3);
             this.Ipv4AddressGroupBox.Name = "Ipv4AddressGroupBox";
-            this.Ipv4AddressGroupBox.Size = new System.Drawing.Size(459, 103);
+            this.Ipv4AddressGroupBox.Size = new System.Drawing.Size(459, 1);
             this.Ipv4AddressGroupBox.TabIndex = 0;
             this.Ipv4AddressGroupBox.TabStop = false;
             this.Ipv4AddressGroupBox.Text = "Internet Protocol v4 (DHCPv4)";
@@ -741,7 +743,7 @@ namespace Dzmac.Forms
             this.Ipv4AddressListView.HideSelection = false;
             this.Ipv4AddressListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv4AddressListView.Name = "Ipv4AddressListView";
-            this.Ipv4AddressListView.Size = new System.Drawing.Size(453, 84);
+            this.Ipv4AddressListView.Size = new System.Drawing.Size(453, 0);
             this.Ipv4AddressListView.TabIndex = 0;
             this.Ipv4AddressListView.UseCompatibleStateImageBehavior = false;
             this.Ipv4AddressListView.View = System.Windows.Forms.View.Details;
@@ -760,9 +762,9 @@ namespace Dzmac.Forms
             // 
             this.Ipv4GatewayGroupBox.Controls.Add(this.Ipv4GatewayListView);
             this.Ipv4GatewayGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Ipv4GatewayGroupBox.Location = new System.Drawing.Point(3, 112);
+            this.Ipv4GatewayGroupBox.Location = new System.Drawing.Point(3, 3);
             this.Ipv4GatewayGroupBox.Name = "Ipv4GatewayGroupBox";
-            this.Ipv4GatewayGroupBox.Size = new System.Drawing.Size(459, 86);
+            this.Ipv4GatewayGroupBox.Size = new System.Drawing.Size(459, 1);
             this.Ipv4GatewayGroupBox.TabIndex = 1;
             this.Ipv4GatewayGroupBox.TabStop = false;
             this.Ipv4GatewayGroupBox.Text = "Gateway";
@@ -778,7 +780,7 @@ namespace Dzmac.Forms
             this.Ipv4GatewayListView.HideSelection = false;
             this.Ipv4GatewayListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv4GatewayListView.Name = "Ipv4GatewayListView";
-            this.Ipv4GatewayListView.Size = new System.Drawing.Size(453, 67);
+            this.Ipv4GatewayListView.Size = new System.Drawing.Size(453, 0);
             this.Ipv4GatewayListView.TabIndex = 0;
             this.Ipv4GatewayListView.UseCompatibleStateImageBehavior = false;
             this.Ipv4GatewayListView.View = System.Windows.Forms.View.Details;
@@ -792,9 +794,9 @@ namespace Dzmac.Forms
             // 
             this.Ipv4DnsGroupBox.Controls.Add(this.Ipv4DnsListView);
             this.Ipv4DnsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Ipv4DnsGroupBox.Location = new System.Drawing.Point(3, 204);
+            this.Ipv4DnsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.Ipv4DnsGroupBox.Name = "Ipv4DnsGroupBox";
-            this.Ipv4DnsGroupBox.Size = new System.Drawing.Size(459, 145);
+            this.Ipv4DnsGroupBox.Size = new System.Drawing.Size(459, 1);
             this.Ipv4DnsGroupBox.TabIndex = 2;
             this.Ipv4DnsGroupBox.TabStop = false;
             this.Ipv4DnsGroupBox.Text = "DNS Server";
@@ -810,7 +812,7 @@ namespace Dzmac.Forms
             this.Ipv4DnsListView.HideSelection = false;
             this.Ipv4DnsListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv4DnsListView.Name = "Ipv4DnsListView";
-            this.Ipv4DnsListView.Size = new System.Drawing.Size(453, 126);
+            this.Ipv4DnsListView.Size = new System.Drawing.Size(453, 0);
             this.Ipv4DnsListView.TabIndex = 0;
             this.Ipv4DnsListView.UseCompatibleStateImageBehavior = false;
             this.Ipv4DnsListView.View = System.Windows.Forms.View.Details;
@@ -834,7 +836,7 @@ namespace Dzmac.Forms
             this.Ipv6ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 31.25F));
             this.Ipv6ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 26.42045F));
             this.Ipv6ColumnLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 42.61364F));
-            this.Ipv6ColumnLayoutPanel.Size = new System.Drawing.Size(465, 352);
+            this.Ipv6ColumnLayoutPanel.Size = new System.Drawing.Size(465, 1);
             this.Ipv6ColumnLayoutPanel.TabIndex = 1;
             // 
             // Ipv6AddressGroupBox
@@ -843,7 +845,7 @@ namespace Dzmac.Forms
             this.Ipv6AddressGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Ipv6AddressGroupBox.Location = new System.Drawing.Point(3, 3);
             this.Ipv6AddressGroupBox.Name = "Ipv6AddressGroupBox";
-            this.Ipv6AddressGroupBox.Size = new System.Drawing.Size(459, 103);
+            this.Ipv6AddressGroupBox.Size = new System.Drawing.Size(459, 1);
             this.Ipv6AddressGroupBox.TabIndex = 0;
             this.Ipv6AddressGroupBox.TabStop = false;
             this.Ipv6AddressGroupBox.Text = "Internet Protocol v6 (Stateless)";
@@ -860,7 +862,7 @@ namespace Dzmac.Forms
             this.Ipv6AddressListView.HideSelection = false;
             this.Ipv6AddressListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv6AddressListView.Name = "Ipv6AddressListView";
-            this.Ipv6AddressListView.Size = new System.Drawing.Size(453, 84);
+            this.Ipv6AddressListView.Size = new System.Drawing.Size(453, 0);
             this.Ipv6AddressListView.TabIndex = 0;
             this.Ipv6AddressListView.UseCompatibleStateImageBehavior = false;
             this.Ipv6AddressListView.View = System.Windows.Forms.View.Details;
@@ -879,9 +881,9 @@ namespace Dzmac.Forms
             // 
             this.Ipv6GatewayGroupBox.Controls.Add(this.Ipv6GatewayListView);
             this.Ipv6GatewayGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Ipv6GatewayGroupBox.Location = new System.Drawing.Point(3, 112);
+            this.Ipv6GatewayGroupBox.Location = new System.Drawing.Point(3, 3);
             this.Ipv6GatewayGroupBox.Name = "Ipv6GatewayGroupBox";
-            this.Ipv6GatewayGroupBox.Size = new System.Drawing.Size(459, 86);
+            this.Ipv6GatewayGroupBox.Size = new System.Drawing.Size(459, 1);
             this.Ipv6GatewayGroupBox.TabIndex = 1;
             this.Ipv6GatewayGroupBox.TabStop = false;
             this.Ipv6GatewayGroupBox.Text = "Gateway/Next Hop";
@@ -897,7 +899,7 @@ namespace Dzmac.Forms
             this.Ipv6GatewayListView.HideSelection = false;
             this.Ipv6GatewayListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv6GatewayListView.Name = "Ipv6GatewayListView";
-            this.Ipv6GatewayListView.Size = new System.Drawing.Size(453, 67);
+            this.Ipv6GatewayListView.Size = new System.Drawing.Size(453, 0);
             this.Ipv6GatewayListView.TabIndex = 0;
             this.Ipv6GatewayListView.UseCompatibleStateImageBehavior = false;
             this.Ipv6GatewayListView.View = System.Windows.Forms.View.Details;
@@ -911,9 +913,9 @@ namespace Dzmac.Forms
             // 
             this.Ipv6DnsGroupBox.Controls.Add(this.Ipv6DnsListView);
             this.Ipv6DnsGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.Ipv6DnsGroupBox.Location = new System.Drawing.Point(3, 204);
+            this.Ipv6DnsGroupBox.Location = new System.Drawing.Point(3, 3);
             this.Ipv6DnsGroupBox.Name = "Ipv6DnsGroupBox";
-            this.Ipv6DnsGroupBox.Size = new System.Drawing.Size(459, 145);
+            this.Ipv6DnsGroupBox.Size = new System.Drawing.Size(459, 1);
             this.Ipv6DnsGroupBox.TabIndex = 2;
             this.Ipv6DnsGroupBox.TabStop = false;
             this.Ipv6DnsGroupBox.Text = "DNS Server";
@@ -929,7 +931,7 @@ namespace Dzmac.Forms
             this.Ipv6DnsListView.HideSelection = false;
             this.Ipv6DnsListView.Location = new System.Drawing.Point(3, 16);
             this.Ipv6DnsListView.Name = "Ipv6DnsListView";
-            this.Ipv6DnsListView.Size = new System.Drawing.Size(453, 126);
+            this.Ipv6DnsListView.Size = new System.Drawing.Size(453, 0);
             this.Ipv6DnsListView.TabIndex = 0;
             this.Ipv6DnsListView.UseCompatibleStateImageBehavior = false;
             this.Ipv6DnsListView.View = System.Windows.Forms.View.Details;
@@ -945,13 +947,13 @@ namespace Dzmac.Forms
             this.PresetsPage.Location = new System.Drawing.Point(4, 22);
             this.PresetsPage.Name = "PresetsPage";
             this.PresetsPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PresetsPage.Size = new System.Drawing.Size(948, 364);
+            this.PresetsPage.Size = new System.Drawing.Size(948, 0);
             this.PresetsPage.TabIndex = 2;
             this.PresetsPage.Text = "Presets";
             this.PresetsPage.UseVisualStyleBackColor = true;
             // 
             // PresetRootLayout
-            //
+            // 
             this.PresetRootLayout.ColumnCount = 2;
             this.PresetRootLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 260F));
             this.PresetRootLayout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -964,20 +966,20 @@ namespace Dzmac.Forms
             this.PresetRootLayout.RowCount = 2;
             this.PresetRootLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.PresetRootLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.PresetRootLayout.Size = new System.Drawing.Size(942, 358);
+            this.PresetRootLayout.Size = new System.Drawing.Size(942, 0);
             this.PresetRootLayout.TabIndex = 0;
-            //
+            // 
             // _presetListBox
-            //
+            // 
             this._presetListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this._presetListBox.FormattingEnabled = true;
             this._presetListBox.Location = new System.Drawing.Point(3, 3);
             this._presetListBox.Name = "_presetListBox";
-            this._presetListBox.Size = new System.Drawing.Size(254, 312);
+            this._presetListBox.Size = new System.Drawing.Size(254, 1);
             this._presetListBox.TabIndex = 0;
-            //
+            // 
             // _presetPropertyListView
-            //
+            // 
             this._presetPropertyListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.PresetPropertyColumnHeader,
             this.PresetValueColumnHeader});
@@ -988,71 +990,70 @@ namespace Dzmac.Forms
             this._presetPropertyListView.HideSelection = false;
             this._presetPropertyListView.Location = new System.Drawing.Point(263, 3);
             this._presetPropertyListView.Name = "_presetPropertyListView";
-            this._presetPropertyListView.Size = new System.Drawing.Size(676, 312);
+            this._presetPropertyListView.Size = new System.Drawing.Size(676, 1);
             this._presetPropertyListView.TabIndex = 1;
             this._presetPropertyListView.UseCompatibleStateImageBehavior = false;
             this._presetPropertyListView.View = System.Windows.Forms.View.Details;
-            //
+            // 
             // PresetPropertyColumnHeader
-            //
+            // 
             this.PresetPropertyColumnHeader.Text = "Property";
             this.PresetPropertyColumnHeader.Width = 180;
-            //
+            // 
             // PresetValueColumnHeader
-            //
+            // 
             this.PresetValueColumnHeader.Text = "Value";
             this.PresetValueColumnHeader.Width = 420;
-            //
+            // 
             // PresetButtonFlowPanel
-            //
+            // 
             this.PresetRootLayout.SetColumnSpan(this.PresetButtonFlowPanel, 2);
             this.PresetButtonFlowPanel.Controls.Add(this._presetNewButton);
             this.PresetButtonFlowPanel.Controls.Add(this._presetEditButton);
             this.PresetButtonFlowPanel.Controls.Add(this._presetDeleteButton);
             this.PresetButtonFlowPanel.Controls.Add(this._presetApplyButton);
             this.PresetButtonFlowPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PresetButtonFlowPanel.FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight;
-            this.PresetButtonFlowPanel.Location = new System.Drawing.Point(3, 321);
+            this.PresetButtonFlowPanel.Location = new System.Drawing.Point(3, -36);
             this.PresetButtonFlowPanel.Name = "PresetButtonFlowPanel";
             this.PresetButtonFlowPanel.Size = new System.Drawing.Size(936, 34);
             this.PresetButtonFlowPanel.TabIndex = 2;
-            //
+            // 
             // _presetNewButton
-            //
+            // 
             this._presetNewButton.Location = new System.Drawing.Point(3, 3);
             this._presetNewButton.Name = "_presetNewButton";
             this._presetNewButton.Size = new System.Drawing.Size(70, 23);
             this._presetNewButton.TabIndex = 0;
             this._presetNewButton.Text = "New";
             this._presetNewButton.UseVisualStyleBackColor = true;
-            //
+            // 
             // _presetEditButton
-            //
+            // 
             this._presetEditButton.Location = new System.Drawing.Point(79, 3);
             this._presetEditButton.Name = "_presetEditButton";
             this._presetEditButton.Size = new System.Drawing.Size(70, 23);
             this._presetEditButton.TabIndex = 1;
             this._presetEditButton.Text = "Edit";
             this._presetEditButton.UseVisualStyleBackColor = true;
-            //
+            // 
             // _presetDeleteButton
-            //
+            // 
             this._presetDeleteButton.Location = new System.Drawing.Point(155, 3);
             this._presetDeleteButton.Name = "_presetDeleteButton";
             this._presetDeleteButton.Size = new System.Drawing.Size(70, 23);
             this._presetDeleteButton.TabIndex = 2;
             this._presetDeleteButton.Text = "Delete";
             this._presetDeleteButton.UseVisualStyleBackColor = true;
-            //
+            // 
             // _presetApplyButton
-            //
+            // 
             this._presetApplyButton.Location = new System.Drawing.Point(231, 3);
             this._presetApplyButton.Name = "_presetApplyButton";
             this._presetApplyButton.Size = new System.Drawing.Size(70, 23);
             this._presetApplyButton.TabIndex = 3;
             this._presetApplyButton.Text = "Apply";
             this._presetApplyButton.UseVisualStyleBackColor = true;
-            //
+            // 
             // ConnectionsGrid
             // 
             this.ConnectionsGrid.Alignment = System.Windows.Forms.ListViewAlignment.SnapToGrid;
@@ -1170,6 +1171,11 @@ namespace Dzmac.Forms
             this.ExportPresetItem.Size = new System.Drawing.Size(240, 22);
             this.ExportPresetItem.Text = "Export Preset";
             this.ExportPresetItem.Click += new System.EventHandler(this.ExportPresetItem_Click);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(237, 6);
             // 
             // AssociateItem
             // 
@@ -1388,11 +1394,6 @@ namespace Dzmac.Forms
             this._loadingLabel.Text = "Loading network adapters...";
             this._loadingLabel.Visible = false;
             // 
-            // toolStripSeparator9
-            // 
-            this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(237, 6);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1448,124 +1449,124 @@ namespace Dzmac.Forms
 
         #endregion
 
-        private TableLayoutPanel MainTableLayoutPanel;
-        private TabControl InfoTabs;
-        private TabPage InformationPage;
-        private TabPage IPAddressPage;
-        private TableLayoutPanel IpAddressLayoutPanel;
-        private TableLayoutPanel Ipv4ColumnLayoutPanel;
-        private GroupBox Ipv4AddressGroupBox;
-        private ListView Ipv4AddressListView;
-        private ColumnHeader Ipv4AddressColumnHeader;
-        private ColumnHeader Ipv4SubnetMaskColumnHeader;
-        private GroupBox Ipv4GatewayGroupBox;
-        private ListView Ipv4GatewayListView;
-        private ColumnHeader Ipv4GatewayColumnHeader;
-        private GroupBox Ipv4DnsGroupBox;
-        private ListView Ipv4DnsListView;
-        private ColumnHeader Ipv4DnsColumnHeader;
-        private TableLayoutPanel Ipv6ColumnLayoutPanel;
-        private GroupBox Ipv6AddressGroupBox;
-        private ListView Ipv6AddressListView;
-        private ColumnHeader Ipv6AddressColumnHeader;
-        private ColumnHeader Ipv6PrefixColumnHeader;
-        private GroupBox Ipv6GatewayGroupBox;
-        private ListView Ipv6GatewayListView;
-        private ColumnHeader Ipv6GatewayColumnHeader;
-        private GroupBox Ipv6DnsGroupBox;
-        private ListView Ipv6DnsListView;
-        private ColumnHeader Ipv6DnsColumnHeader;
-        private TabPage PresetsPage;
-        private DataListView ConnectionsGrid;
-        private MenuStrip Toolbar;
-        private ToolStripMenuItem FileMenu;
-        private ToolStripMenuItem ExportReportItem;
-        private ToolStripMenuItem OpenPresetItem;
-        private ToolStripMenuItem SavePresetItem;
-        private ToolStripMenuItem SavePresetAsItem;
-        private ToolStripMenuItem ImportPresetItem;
-        private ToolStripMenuItem ExportPresetItem;
-        private ToolStripMenuItem ActionMenu;
-        private ToolStripMenuItem OptionsMenu;
-        private ToolStripMenuItem NetworkConnectionsItem;
-        private ToolStripMenuItem ShowSpeedInKBytesPerSecItem;
-        private ToolStripMenuItem ShowAllAdaptersItem;
-        private ToolStripMenuItem HelpMenu;
-        private ToolStripMenuItem AssociateItem;
-        private ToolStripMenuItem ExitItem;
-        private ToolStripMenuItem RefreshItem;
-        private ToolStripMenuItem ToggleAdapterEnabledItem;
-        private ToolStripMenuItem Dhcp4Item;
-        private ToolStripMenuItem DeleteItem;
-        private ToolStripMenuItem DhcpEnabledItem;
-        private ToolStripMenuItem DhcpReleaseIpItem;
-        private ToolStripMenuItem DhcpRenewIpItem;
-        private FlowLayoutPanel flowLayoutPanel1;
-        private GroupBox ConnectionDetailsGroup;
-        private Label ConnectionLabel;
-        private GroupBox ChangeMacAddressGroup;
-        private GroupBox PerformanceCounterGroup;
-        private Label ConnectionValueTextbox;
-        private Label DeviceLabel;
-        private Label DeviceValueTextbox;
-        private StatusBar MainStatusBar;
-        private ToolStripMenuItem HelpTopicsItem;
-        private ToolStripMenuItem CliParamsHelpItem;
-        private ToolStripMenuItem CheckUpdateItem;
-        private ToolStripMenuItem UpdateOuiItem;
-        private ToolStripMenuItem AboutItem;
-        private ToolStripSeparator toolStripSeparator1;
-        private ToolStripSeparator toolStripSeparator2;
-        private ToolStripSeparator toolStripSeparator3;
-        private ToolStripSeparator toolStripSeparator4;
-        private ToolStripSeparator toolStripSeparator8;
-        private ToolStripSeparator toolStripSeparator6;
-        private ToolStripSeparator toolStripSeparator5;
-        private ToolStripSeparator toolStripSeparator7;
-        private Label HardwareIdLabel;
-        private Label ConfigIdValueTextbox;
-        private Label ConfigIdLabel;
-        private Label HardwareIdValueTextbox;
-        private Label Ipv4ValueTextbox;
-        private Label Ipv4Label;
-        private Label Ipv6ValueTextbox;
-        private Label Ipv6Label;
-        private Label OriginalMacVendorTextbox;
-        private Label OriginalMacValueTextbox;
-        private Label OriginalMacLabel;
-        private Label ActiveMacVendorTextbox;
-        private Label ActiveMacValueTextbox;
-        private Label ActiveMacLabel;
-        private Button RestoreMacButton;
-        private Button ChangeMacButton;
-        private CheckBox ZeroTwoCheckBox;
-        private CheckBox PersistentAddressCheckBox;
-        private CheckBox AutoStartCheckBox;
-        private ComboBox VendorComboBox;
-        private Button RandomMacButton;
-        private Controls.MacTextBox macTextBox;
-        private LinkLabel WikiLink;
-        private TableLayoutPanel tableLayoutPanel1;
-        private TableLayoutPanel PerformancePanel;
-        private Label _performanceSentSpeedLabel;
-        private Label _performanceSentLabel;
-        private Label _performanceReceivedSpeedLabel;
-        private Label _performanceReceivedLabel;
-        private Panel _performanceGraphPanel;
-        private Panel _loadingPanel;
-        private TableLayoutPanel LoadingLayoutPanel;
-        private Label _loadingLabel;
-        private ProgressBar _loadingProgressBar;
-        private ToolStripSeparator toolStripSeparator9;
-        private TableLayoutPanel PresetRootLayout;
-        private ListBox _presetListBox;
-        private ListView _presetPropertyListView;
-        private ColumnHeader PresetPropertyColumnHeader;
-        private ColumnHeader PresetValueColumnHeader;
-        private FlowLayoutPanel PresetButtonFlowPanel;
-        private Button _presetNewButton;
-        private Button _presetEditButton;
-        private Button _presetDeleteButton;
-        private Button _presetApplyButton;
+        private TableLayoutPanel? MainTableLayoutPanel;
+        private TabControl? InfoTabs;
+        private TabPage? InformationPage;
+        private TabPage? IPAddressPage;
+        private TableLayoutPanel? IpAddressLayoutPanel;
+        private TableLayoutPanel? Ipv4ColumnLayoutPanel;
+        private GroupBox? Ipv4AddressGroupBox;
+        private ListView? Ipv4AddressListView;
+        private ColumnHeader? Ipv4AddressColumnHeader;
+        private ColumnHeader? Ipv4SubnetMaskColumnHeader;
+        private GroupBox? Ipv4GatewayGroupBox;
+        private ListView? Ipv4GatewayListView;
+        private ColumnHeader? Ipv4GatewayColumnHeader;
+        private GroupBox? Ipv4DnsGroupBox;
+        private ListView? Ipv4DnsListView;
+        private ColumnHeader? Ipv4DnsColumnHeader;
+        private TableLayoutPanel? Ipv6ColumnLayoutPanel;
+        private GroupBox? Ipv6AddressGroupBox;
+        private ListView? Ipv6AddressListView;
+        private ColumnHeader? Ipv6AddressColumnHeader;
+        private ColumnHeader? Ipv6PrefixColumnHeader;
+        private GroupBox? Ipv6GatewayGroupBox;
+        private ListView? Ipv6GatewayListView;
+        private ColumnHeader? Ipv6GatewayColumnHeader;
+        private GroupBox? Ipv6DnsGroupBox;
+        private ListView? Ipv6DnsListView;
+        private ColumnHeader? Ipv6DnsColumnHeader;
+        private TabPage? PresetsPage;
+        private DataListView? ConnectionsGrid;
+        private MenuStrip? Toolbar;
+        private ToolStripMenuItem? FileMenu;
+        private ToolStripMenuItem? ExportReportItem;
+        private ToolStripMenuItem? OpenPresetItem;
+        private ToolStripMenuItem? SavePresetItem;
+        private ToolStripMenuItem? SavePresetAsItem;
+        private ToolStripMenuItem? ImportPresetItem;
+        private ToolStripMenuItem? ExportPresetItem;
+        private ToolStripMenuItem? ActionMenu;
+        private ToolStripMenuItem? OptionsMenu;
+        private ToolStripMenuItem? NetworkConnectionsItem;
+        private ToolStripMenuItem? ShowSpeedInKBytesPerSecItem;
+        private ToolStripMenuItem? ShowAllAdaptersItem;
+        private ToolStripMenuItem? HelpMenu;
+        private ToolStripMenuItem? AssociateItem;
+        private ToolStripMenuItem? ExitItem;
+        private ToolStripMenuItem? RefreshItem;
+        private ToolStripMenuItem? ToggleAdapterEnabledItem;
+        private ToolStripMenuItem? Dhcp4Item;
+        private ToolStripMenuItem? DeleteItem;
+        private ToolStripMenuItem? DhcpEnabledItem;
+        private ToolStripMenuItem? DhcpReleaseIpItem;
+        private ToolStripMenuItem? DhcpRenewIpItem;
+        private FlowLayoutPanel? flowLayoutPanel1;
+        private GroupBox? ConnectionDetailsGroup;
+        private Label? ConnectionLabel;
+        private GroupBox? ChangeMacAddressGroup;
+        private GroupBox? PerformanceCounterGroup;
+        private Label? ConnectionValueTextbox;
+        private Label? DeviceLabel;
+        private Label? DeviceValueTextbox;
+        private StatusBar? MainStatusBar;
+        private ToolStripMenuItem? HelpTopicsItem;
+        private ToolStripMenuItem? CliParamsHelpItem;
+        private ToolStripMenuItem? CheckUpdateItem;
+        private ToolStripMenuItem? UpdateOuiItem;
+        private ToolStripMenuItem? AboutItem;
+        private ToolStripSeparator? toolStripSeparator1;
+        private ToolStripSeparator? toolStripSeparator2;
+        private ToolStripSeparator? toolStripSeparator3;
+        private ToolStripSeparator? toolStripSeparator4;
+        private ToolStripSeparator? toolStripSeparator8;
+        private ToolStripSeparator? toolStripSeparator6;
+        private ToolStripSeparator? toolStripSeparator5;
+        private ToolStripSeparator? toolStripSeparator7;
+        private Label? HardwareIdLabel;
+        private Label? ConfigIdValueTextbox;
+        private Label? ConfigIdLabel;
+        private Label? HardwareIdValueTextbox;
+        private Label? Ipv4ValueTextbox;
+        private Label? Ipv4Label;
+        private Label? Ipv6ValueTextbox;
+        private Label? Ipv6Label;
+        private Label? OriginalMacVendorTextbox;
+        private Label? OriginalMacValueTextbox;
+        private Label? OriginalMacLabel;
+        private Label? ActiveMacVendorTextbox;
+        private Label? ActiveMacValueTextbox;
+        private Label? ActiveMacLabel;
+        private Button? RestoreMacButton;
+        private Button? ChangeMacButton;
+        private CheckBox? ZeroTwoCheckBox;
+        private CheckBox? PersistentAddressCheckBox;
+        private CheckBox? AutoStartCheckBox;
+        private ComboBox? VendorComboBox;
+        private Button? RandomMacButton;
+        private Controls.MacTextBox? macTextBox;
+        private LinkLabel? WikiLink;
+        private TableLayoutPanel? tableLayoutPanel1;
+        private TableLayoutPanel? PerformancePanel;
+        private Label? _performanceSentSpeedLabel;
+        private Label? _performanceSentLabel;
+        private Label? _performanceReceivedSpeedLabel;
+        private Label? _performanceReceivedLabel;
+        private Panel? _performanceGraphPanel;
+        private Panel? _loadingPanel;
+        private TableLayoutPanel? LoadingLayoutPanel;
+        private Label? _loadingLabel;
+        private ProgressBar? _loadingProgressBar;
+        private ToolStripSeparator? toolStripSeparator9;
+        private TableLayoutPanel? PresetRootLayout;
+        private ListBox? _presetListBox;
+        private ListView? _presetPropertyListView;
+        private ColumnHeader? PresetPropertyColumnHeader;
+        private ColumnHeader? PresetValueColumnHeader;
+        private FlowLayoutPanel? PresetButtonFlowPanel;
+        private Button? _presetNewButton;
+        private Button? _presetEditButton;
+        private Button? _presetDeleteButton;
+        private Button? _presetApplyButton;
     }
 }

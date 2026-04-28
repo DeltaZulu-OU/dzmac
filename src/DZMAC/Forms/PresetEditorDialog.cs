@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 using System.Windows.Forms;
 using Dzmac.Core;
@@ -13,9 +11,9 @@ namespace Dzmac.Forms
 
         public TpfPreset Preset => ClonePreset(_workingCopy);
 
-        public PresetEditorDialog(string title, TpfPreset seed, bool startBlank = false)
+        public PresetEditorDialog(string title, TpfPreset? seed, bool startBlank = false)
         {
-            if (seed == null)
+            if (seed is null)
             {
                 throw new ArgumentNullException(nameof(seed));
             }
@@ -26,21 +24,20 @@ namespace Dzmac.Forms
             Icon = AppIconProvider.GetIcon();
             Text = title;
 
-            SaveButton.Click += SaveButton_Click;
+            SaveButton!.Click += SaveButton_Click;
 
-            _includeMacCheckBox.CheckedChanged += (_, __) => RefreshMacControlState();
-            _useCustomMacRadio.CheckedChanged += (_, __) => RefreshMacControlState();
+            _includeMacCheckBox!.CheckedChanged += (_, __) => RefreshMacControlState();
+            _useCustomMacRadio!.CheckedChanged += (_, __) => RefreshMacControlState();
 
-            _includeIpv4CheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _dhcpIpv4CheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _ipv4AddressCheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _ipv4GatewayCheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
-            _ipv4DnsCheckBox.CheckedChanged += (_, __) => RefreshIpv4ControlState();
+            _includeIpv4CheckBox!.CheckedChanged += (_, __) => RefreshIpv4ControlState();
+            _dhcpIpv4CheckBox!.CheckedChanged += (_, __) => RefreshIpv4ControlState();
+            _ipv4AddressCheckBox!.CheckedChanged += (_, __) => RefreshIpv4ControlState();
+            _ipv4GatewayCheckBox!.CheckedChanged += (_, __) => RefreshIpv4ControlState();
+            _ipv4DnsCheckBox!.CheckedChanged += (_, __) => RefreshIpv4ControlState();
 
-            _ipv4AddressGrid.ContextMenuStrip = CreateGridMenu(_ipv4AddressGrid, "IP");
-            _ipv4GatewayGrid.ContextMenuStrip = CreateGridMenu(_ipv4GatewayGrid, "Gateway");
-            _ipv4DnsGrid.ContextMenuStrip = CreateGridMenu(_ipv4DnsGrid, "DNS");
-
+            _ipv4AddressGrid!.ContextMenuStrip = CreateGridMenu(_ipv4AddressGrid, "IP");
+            _ipv4GatewayGrid!.ContextMenuStrip = CreateGridMenu(_ipv4GatewayGrid, "Gateway");
+            _ipv4DnsGrid!.ContextMenuStrip = CreateGridMenu(_ipv4DnsGrid, "DNS");
             HookGridEvents(_ipv4AddressGrid);
             HookGridEvents(_ipv4GatewayGrid);
             HookGridEvents(_ipv4DnsGrid);
@@ -118,7 +115,7 @@ namespace Dzmac.Forms
 
             menu.Opening += (_, __) =>
             {
-                var hasSelection = GetSelectedRow(grid) != null;
+                var hasSelection = GetSelectedRow(grid) is not null;
                 addItem.Enabled = grid.Enabled && grid.Rows.Count == 0;
                 removeItem.Enabled = grid.Enabled && hasSelection;
                 copyItem.Enabled = grid.Enabled && hasSelection;
@@ -145,7 +142,7 @@ namespace Dzmac.Forms
         private static void RemoveSelectedGridRow(DataGridView grid)
         {
             var row = GetSelectedRow(grid);
-            if (row == null)
+            if (row is null)
             {
                 return;
             }
@@ -156,7 +153,7 @@ namespace Dzmac.Forms
         private static void CopySelectedGridRow(DataGridView grid)
         {
             var row = GetSelectedRow(grid);
-            if (row == null)
+            if (row is null)
             {
                 return;
             }
@@ -170,14 +167,14 @@ namespace Dzmac.Forms
             Clipboard.SetText(string.Join("\t", parts));
         }
 
-        private static DataGridViewRow GetSelectedRow(DataGridView grid)
+        private static DataGridViewRow? GetSelectedRow(DataGridView grid)
         {
             if (grid.SelectedRows.Count > 0)
             {
                 return grid.SelectedRows[0];
             }
 
-            if (grid.CurrentRow != null && !grid.CurrentRow.IsNewRow)
+            if (grid.CurrentRow is not null && !grid.CurrentRow.IsNewRow)
             {
                 return grid.CurrentRow;
             }
@@ -187,33 +184,32 @@ namespace Dzmac.Forms
 
         private void BindFromPreset(TpfPreset preset)
         {
-            _presetNameTextBox.Text = preset.Name;
-            _includeMacCheckBox.Checked = true;
+            _presetNameTextBox!.Text = preset.Name;
+            _includeMacCheckBox!.Checked = true;
 
             switch (preset.MacMode)
             {
                 case TpfMacMode.Random:
-                    _useRandomMacRadio.Checked = true;
+                    _useRandomMacRadio!.Checked = true;
                     break;
                 case TpfMacMode.RandomWith02:
-                    _useRandom02MacRadio.Checked = true;
+                    _useRandom02MacRadio!.Checked = true;
                     break;
                 case TpfMacMode.Custom:
-                    _useCustomMacRadio.Checked = true;
-                    _customMacTextBox.Text = preset.CustomMac ?? string.Empty;
+                    _useCustomMacRadio!.Checked = true;
+                    _customMacTextBox!.Text = preset.CustomMac ?? string.Empty;
                     break;
                 default:
-                    _useOriginalMacRadio.Checked = true;
+                    _useOriginalMacRadio!.Checked = true;
                     break;
             }
 
             var ipv4 = preset.Ipv4;
-            _includeIpv4CheckBox.Checked = ipv4?.Enabled == true;
-            _dhcpIpv4CheckBox.Checked = ipv4 != null && ipv4.Enabled && !ipv4.IsStatic;
-            _ipv4AddressCheckBox.Checked = ipv4 != null && ipv4.Enabled && ipv4.IsStatic;
-            _ipv4GatewayCheckBox.Checked = ipv4?.GatewayEnabled == true;
-            _ipv4DnsCheckBox.Checked = ipv4?.DnsEnabled == true;
-
+            _includeIpv4CheckBox!.Checked = ipv4?.Enabled == true;
+            _dhcpIpv4CheckBox!.Checked = ipv4 is not null && ipv4.Enabled && !ipv4.IsStatic;
+            _ipv4AddressCheckBox!.Checked = ipv4 is not null && ipv4.Enabled && ipv4.IsStatic;
+            _ipv4GatewayCheckBox!.Checked = ipv4?.GatewayEnabled == true;
+            _ipv4DnsCheckBox!.Checked = ipv4?.DnsEnabled == true;
             SetSingleRow(_ipv4AddressGrid, ipv4?.Address, ipv4?.SubnetMask);
             SetSingleRow(
                 _ipv4GatewayGrid,
@@ -227,30 +223,34 @@ namespace Dzmac.Forms
 
         private void BindAsBlankPreset()
         {
-            _presetNameTextBox.Text = string.Empty;
-            _includeMacCheckBox.Checked = false;
-            _useRandomMacRadio.Checked = false;
-            _useRandom02MacRadio.Checked = false;
-            _useOriginalMacRadio.Checked = false;
-            _useCustomMacRadio.Checked = false;
-            _customMacTextBox.Text = string.Empty;
+            _presetNameTextBox!.Text = string.Empty;
+            _includeMacCheckBox!.Checked = false;
+            _useRandomMacRadio!.Checked = false;
+            _useRandom02MacRadio!.Checked = false;
+            _useOriginalMacRadio!.Checked = false;
+            _useCustomMacRadio!.Checked = false;
+            _customMacTextBox!.Text = string.Empty;
 
-            _includeIpv4CheckBox.Checked = false;
-            _dhcpIpv4CheckBox.Checked = false;
-            _ipv4AddressCheckBox.Checked = false;
-            _ipv4GatewayCheckBox.Checked = false;
-            _ipv4DnsCheckBox.Checked = false;
+            _includeIpv4CheckBox!.Checked = false;
+            _dhcpIpv4CheckBox!.Checked = false;
+            _ipv4AddressCheckBox!.Checked = false;
+            _ipv4GatewayCheckBox!.Checked = false;
+            _ipv4DnsCheckBox!.Checked = false;
 
-            _ipv4AddressGrid.Rows.Clear();
-            _ipv4GatewayGrid.Rows.Clear();
-            _ipv4DnsGrid.Rows.Clear();
-
+            _ipv4AddressGrid!.Rows.Clear();
+            _ipv4GatewayGrid!.Rows.Clear();
+            _ipv4DnsGrid!.Rows.Clear();
             RefreshMacControlState();
             RefreshIpv4ControlState();
         }
 
-        private static void SetSingleRow(DataGridView grid, params string[] values)
+        private static void SetSingleRow(DataGridView? grid, params string?[] values)
         {
+            if (grid is null)
+            {
+                return;
+            }
+
             grid.Rows.Clear();
 
             var hasValue = false;
@@ -279,37 +279,36 @@ namespace Dzmac.Forms
 
         private void RefreshMacControlState()
         {
-            var macEnabled = _includeMacCheckBox.Checked;
-            _useRandomMacRadio.Enabled = macEnabled;
-            _useRandom02MacRadio.Enabled = macEnabled;
-            _useOriginalMacRadio.Enabled = macEnabled;
-            _useCustomMacRadio.Enabled = macEnabled;
-            _customMacTextBox.Enabled = macEnabled && _useCustomMacRadio.Checked;
+            var macEnabled = _includeMacCheckBox!.Checked;
+            _useRandomMacRadio!.Enabled = macEnabled;
+            _useRandom02MacRadio!.Enabled = macEnabled;
+            _useOriginalMacRadio!.Enabled = macEnabled;
+            _useCustomMacRadio!.Enabled = macEnabled;
+            _customMacTextBox!.Enabled = macEnabled && _useCustomMacRadio!.Checked;
         }
 
         private void RefreshIpv4ControlState()
         {
-            var include = _includeIpv4CheckBox.Checked;
-            _dhcpIpv4CheckBox.Enabled = include;
+            var include = _includeIpv4CheckBox!.Checked;
+            _dhcpIpv4CheckBox!.Enabled = include;
 
-            var useDhcp = include && _dhcpIpv4CheckBox.Checked;
-            _ipv4AddressCheckBox.Enabled = include && !useDhcp;
-            _ipv4GatewayCheckBox.Enabled = include && !useDhcp;
-            _ipv4DnsCheckBox.Enabled = include;
+            var useDhcp = include && _dhcpIpv4CheckBox!.Checked;
+            _ipv4AddressCheckBox!.Enabled = include && !useDhcp;
+            _ipv4GatewayCheckBox!.Enabled = include && !useDhcp;
+            _ipv4DnsCheckBox!.Enabled = include;
 
-            var useStaticAddress = include && !useDhcp && _ipv4AddressCheckBox.Checked;
-            _ipv4AddressGroup.Enabled = useStaticAddress;
-            _ipv4AddressGrid.Enabled = useStaticAddress;
+            var useStaticAddress = include && !useDhcp && _ipv4AddressCheckBox!.Checked;
+            _ipv4AddressGroup!.Enabled = useStaticAddress;
+            _ipv4AddressGrid!.Enabled = useStaticAddress;
 
-            var useGateway = include && !useDhcp && _ipv4GatewayCheckBox.Checked;
-            _ipv4GatewayGroup.Enabled = useGateway;
-            _ipv4GatewayGrid.Enabled = useGateway;
+            var useGateway = include && !useDhcp && _ipv4GatewayCheckBox!.Checked;
+            _ipv4GatewayGroup!.Enabled = useGateway;
+            _ipv4GatewayGrid!.Enabled = useGateway;
+            var useDns = include && _ipv4DnsCheckBox!.Checked;
+            _ipv4DnsGroup!.Enabled = useDns;
+            _ipv4DnsGrid!.Enabled = useDns;
 
-            var useDns = include && _ipv4DnsCheckBox.Checked;
-            _ipv4DnsGroup.Enabled = useDns;
-            _ipv4DnsGrid.Enabled = useDns;
-
-            _ipv4RightGroup.Text = useDhcp
+            _ipv4RightGroup!.Text = useDhcp
                 ? "Internet Protocol v4 [DHCPv4]"
                 : "Internet Protocol v4 [Static IP]";
 
@@ -318,28 +317,28 @@ namespace Dzmac.Forms
 
         private void RefreshIpv4GroupCaptions()
         {
-            _ipv4AddressGroup.Text = $"IP Address ({_ipv4AddressGrid.Rows.Count})";
-            _ipv4GatewayGroup.Text = $"Gateway ({_ipv4GatewayGrid.Rows.Count})";
-            _ipv4DnsGroup.Text = $"DNS Server ({_ipv4DnsGrid.Rows.Count})";
+            _ipv4AddressGroup!.Text = $"IP Address ({_ipv4AddressGrid!.Rows.Count})";
+            _ipv4GatewayGroup!.Text = $"Gateway ({_ipv4GatewayGrid!.Rows.Count})";
+            _ipv4DnsGroup!.Text = $"DNS Server ({_ipv4DnsGrid!.Rows.Count})";
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
         {
-            var name = (_presetNameTextBox.Text ?? string.Empty).Trim();
+            var name = (_presetNameTextBox!.Text ?? string.Empty).Trim();
             if (name.Length == 0)
             {
                 MessageBox.Show("Preset name is required.", "Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                _presetNameTextBox.Focus();
+                _presetNameTextBox!.Focus();
                 return;
             }
 
-            if (_includeMacCheckBox.Checked && _useCustomMacRadio.Checked)
+            if (_includeMacCheckBox!.Checked && _useCustomMacRadio!.Checked)
             {
-                var normalizedMac = (_customMacTextBox.Text ?? string.Empty).Replace("-", string.Empty).Replace(":", string.Empty).Trim();
+                var normalizedMac = (_customMacTextBox!.Text ?? string.Empty).Replace("-", string.Empty).Replace(":", string.Empty).Trim();
                 if (!MacAddress.IsValidMac(normalizedMac))
                 {
                     MessageBox.Show("Custom MAC address is invalid.", "Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    _customMacTextBox.Focus();
+                    _customMacTextBox!.Focus();
                     return;
                 }
 
@@ -367,22 +366,22 @@ namespace Dzmac.Forms
 
         private TpfMacMode ResolveMacMode()
         {
-            if (!_includeMacCheckBox.Checked)
+            if (!_includeMacCheckBox!.Checked)
             {
                 return TpfMacMode.Original;
             }
 
-            if (_useRandomMacRadio.Checked)
+            if (_useRandomMacRadio!.Checked)
             {
                 return TpfMacMode.Random;
             }
 
-            if (_useRandom02MacRadio.Checked)
+            if (_useRandom02MacRadio!.Checked)
             {
                 return TpfMacMode.RandomWith02;
             }
 
-            if (_useCustomMacRadio.Checked)
+            if (_useCustomMacRadio!.Checked)
             {
                 return TpfMacMode.Custom;
             }
@@ -392,15 +391,14 @@ namespace Dzmac.Forms
 
         private TpfIpv4Settings BuildIpv4Settings()
         {
-            if (!_includeIpv4CheckBox.Checked)
+            if (!_includeIpv4CheckBox!.Checked)
             {
                 return new TpfIpv4Settings { Enabled = false };
             }
 
-            var useDhcp = _dhcpIpv4CheckBox.Checked;
-            var useStaticAddress = !useDhcp && _ipv4AddressCheckBox.Checked;
-            var metric = 0;
-            _ = int.TryParse(GetGridValue(_ipv4GatewayGrid, 0, 1), out metric);
+            var useDhcp = _dhcpIpv4CheckBox!.Checked;
+            var useStaticAddress = !useDhcp && _ipv4AddressCheckBox!.Checked;
+            _ = int.TryParse(GetGridValue(_ipv4GatewayGrid, 0, 1), out var metric);
 
             return new TpfIpv4Settings
             {
@@ -408,10 +406,10 @@ namespace Dzmac.Forms
                 IsStatic = useStaticAddress,
                 Address = GetGridValue(_ipv4AddressGrid, 0, 0),
                 SubnetMask = GetGridValue(_ipv4AddressGrid, 0, 1),
-                GatewayEnabled = !useDhcp && _ipv4GatewayCheckBox.Checked,
+                GatewayEnabled = !useDhcp && _ipv4GatewayCheckBox!.Checked,
                 DefaultGateway = GetGridValue(_ipv4GatewayGrid, 0, 0),
                 GatewayMetric = metric,
-                DnsEnabled = _ipv4DnsCheckBox.Checked,
+                DnsEnabled = _ipv4DnsCheckBox!.Checked,
                 PrimaryDnsServer = GetGridValue(_ipv4DnsGrid, 0, 0)
             };
         }
@@ -419,7 +417,7 @@ namespace Dzmac.Forms
         private static bool TryValidateIpv4Settings(TpfIpv4Settings ipv4, out string error)
         {
             error = string.Empty;
-            if (ipv4 == null || !ipv4.Enabled)
+            if (ipv4 is null || !ipv4.Enabled)
             {
                 return true;
             }
@@ -459,9 +457,9 @@ namespace Dzmac.Forms
             return true;
         }
 
-        private static string GetGridValue(DataGridView grid, int row, int col)
+        private static string GetGridValue(DataGridView? grid, int row, int col)
         {
-            if (grid.Rows.Count <= row || grid.Columns.Count <= col)
+            if (grid is null || grid.Rows.Count <= row || grid.Columns.Count <= col)
             {
                 return string.Empty;
             }
@@ -469,14 +467,12 @@ namespace Dzmac.Forms
             return grid.Rows[row].Cells[col].Value?.ToString()?.Trim() ?? string.Empty;
         }
 
-        private static TpfPreset ClonePreset(TpfPreset preset)
+        private static TpfPreset ClonePreset(TpfPreset preset) => new TpfPreset
         {
-            return new TpfPreset
-            {
-                Name = preset.Name,
-                MacMode = preset.MacMode,
-                CustomMac = preset.CustomMac,
-                Ipv4 = preset.Ipv4 == null
+            Name = preset.Name,
+            MacMode = preset.MacMode,
+            CustomMac = preset.CustomMac,
+            Ipv4 = preset.Ipv4 is null
                     ? null
                     : new TpfIpv4Settings
                     {
@@ -490,7 +486,6 @@ namespace Dzmac.Forms
                         DnsEnabled = preset.Ipv4.DnsEnabled,
                         PrimaryDnsServer = preset.Ipv4.PrimaryDnsServer
                     }
-            };
-        }
+        };
     }
 }

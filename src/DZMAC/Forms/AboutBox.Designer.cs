@@ -1,11 +1,13 @@
-﻿namespace Dzmac.Forms
+﻿#nullable enable
+
+namespace Dzmac.Forms
 {
     internal partial class AboutBox
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer? components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -13,7 +15,7 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
             }
@@ -149,12 +151,12 @@
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel RootLayoutPanel;
-        private System.Windows.Forms.Label ProductNameLabel;
-        private System.Windows.Forms.Label VersionLabel;
-        private System.Windows.Forms.Label CopyrightLabel;
-        private System.Windows.Forms.Label DescriptionLabel;
-        private System.Windows.Forms.LinkLabel ProjectLinkLabel;
-        private System.Windows.Forms.Button CloseButton;
+        private System.Windows.Forms.TableLayoutPanel? RootLayoutPanel;
+        private System.Windows.Forms.Label? ProductNameLabel;
+        private System.Windows.Forms.Label? VersionLabel;
+        private System.Windows.Forms.Label? CopyrightLabel;
+        private System.Windows.Forms.Label? DescriptionLabel;
+        private System.Windows.Forms.LinkLabel? ProjectLinkLabel;
+        private System.Windows.Forms.Button? CloseButton;
     }
 }

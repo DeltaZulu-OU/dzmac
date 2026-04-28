@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,9 +44,9 @@ namespace Dzmac.DTO
         internal string IPv4Status { get; }
         internal string IPv6Status { get; }
         internal string OriginalMac { get; }
-        internal string OriginalVendor { get; }
+        internal string? OriginalVendor { get; }
         internal string ActiveMac { get; }
-        internal string ActiveVendor { get; }
+        internal string? ActiveVendor { get; }
         internal IReadOnlyList<AdapterIpv4Address> Ipv4Addresses { get; }
         internal IReadOnlyList<AdapterIpv6Address> Ipv6Addresses { get; }
         internal IReadOnlyList<string> Ipv4Gateways { get; }

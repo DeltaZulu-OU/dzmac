@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
@@ -90,7 +88,10 @@ namespace Dzmac.Core
             }
 
             Diagnostics.Info("oui_integrity_manifest_fetch_start", ("endpoint", manifestEndpoint));
-            var manifestResponse = await HttpClient.GetAsync(manifestEndpoint, cancellationToken).ConfigureAwait(false);
+            var manifestTimeoutSeconds = Math.Max(1, ConfigReader.Current.GetInt(AppSettingKeys.OuiDownloadTimeoutSeconds));
+            using var manifestTimeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(manifestTimeoutSeconds));
+            using var manifestLinkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, manifestTimeoutCts.Token);
+            var manifestResponse = await HttpClient.GetAsync(manifestEndpoint, manifestLinkedCts.Token).ConfigureAwait(false);
             manifestResponse.EnsureSuccessStatusCode();
             var manifestBody = await manifestResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
 

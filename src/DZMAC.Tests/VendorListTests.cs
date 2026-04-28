@@ -295,14 +295,14 @@ namespace Dzmac.Tests
             var temp = vendorList[index];
             Assert.AreNotEqual(default(Vendor), temp);
 
-            var vendor = vendorList[temp?.Oui];
+            var vendor = vendorList[temp!.Value.Oui];
             Assert.IsNotNull(vendor);
             Assert.IsNotNull(temp);
             Assert.AreNotEqual(default(Vendor), vendor);
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor?.Oui));
-            Assert.AreEqual(temp?.Oui, vendor?.Oui);
+            Assert.AreEqual(temp!.Value.Oui, vendor!.Value.Oui);
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor?.VendorName));
-            Assert.AreEqual(temp?.VendorName, vendor?.VendorName);
+            Assert.AreEqual(temp!.Value.VendorName, vendor!.Value.VendorName);
         }
 
         [TestMethod]
@@ -571,6 +571,36 @@ namespace Dzmac.Tests
             }
 
             Assert.AreEqual("Vendor A", vendor.VendorName);
+        }
+
+        [TestMethod]
+        public void GetRandomShouldThrowWhenListIsEmpty()
+        {
+            var dbPath = CreateTempDbPath("get-random-empty");
+
+            using var vendorList = new VendorList(dbPath);
+
+            Assert.ThrowsException<DZMACException>(() => vendorList.GetRandom());
+        }
+
+        [TestMethod]
+        public void GetRandomShouldReturnVendorWhenListIsNonEmpty()
+        {
+            var dbPath = CreateTempDbPath("get-random-nonempty");
+
+            using var vendorList = new VendorList(dbPath);
+
+            vendorList.AddRange(new List<Vendor>
+            {
+                new Vendor("A1B2C3", "Vendor A"),
+                new Vendor("D4E5F6", "Vendor B")
+            });
+
+            var vendor = vendorList.GetRandom();
+
+            Assert.AreNotEqual(default, vendor);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(vendor.Oui));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(vendor.VendorName));
         }
     }
 }

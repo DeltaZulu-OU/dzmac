@@ -37,9 +37,9 @@ namespace Dzmac.Core
         /// <param name="macAddress">Mac address with no punctuation marks.</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public MacAddress(string macAddress)
+        public MacAddress(string? macAddress)
         {
-            if (macAddress == null)
+            if (macAddress is null)
             {
                 throw new ArgumentNullException(nameof(macAddress));
             }
@@ -62,7 +62,7 @@ namespace Dzmac.Core
         /// <exception cref="ArgumentNullException"></exception>
         public MacAddress(PhysicalAddress macAddress)
         {
-            if (macAddress == null)
+            if (macAddress is null)
             {
                 throw new ArgumentNullException(nameof(macAddress));
             }
@@ -98,9 +98,9 @@ namespace Dzmac.Core
         /// </summary>
         /// <param name="oui">OUI of the vendor</param>
         /// <returns>A MAC address with the specified OUI.</returns>
-        public static MacAddress GetNewMac(string oui)
+        public static MacAddress GetNewMac(string? oui)
         {
-            if (oui == null)
+            if (oui is null)
             {
                 throw new ArgumentNullException(nameof(oui));
             }
@@ -250,9 +250,15 @@ namespace Dzmac.Core
         private bool Equals(MacAddress other)
         {
             if (other is null)
+            {
                 return false;
+            }
+
             if (ReferenceEquals(this, other))
+            {
                 return true;
+            }
+
             return _macAddress.Equals(other._macAddress);
         }
 

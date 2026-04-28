@@ -4,11 +4,11 @@ namespace Dzmac.Forms
 {
     internal sealed partial class PresetSelectionDialog
     {
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer? components = null;
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
             }
@@ -223,18 +223,18 @@ namespace Dzmac.Forms
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel RootLayoutPanel;
-        private System.Windows.Forms.SplitContainer ContentSplitContainer;
-        private System.Windows.Forms.CheckedListBox PresetCheckedListBox;
-        private System.Windows.Forms.ListView PropertyListView;
-        private System.Windows.Forms.Panel FooterPanel;
-        private System.Windows.Forms.FlowLayoutPanel LeftButtonFlowPanel;
-        private System.Windows.Forms.FlowLayoutPanel RightButtonFlowPanel;
-        private System.Windows.Forms.Button SelectAllButton;
-        private System.Windows.Forms.Button SelectNoneButton;
-        private System.Windows.Forms.Button OkButton;
-        private System.Windows.Forms.Button CancelDialogButton;
-        private System.Windows.Forms.ColumnHeader PropertyColumnHeader;
-        private System.Windows.Forms.ColumnHeader ValueColumnHeader;
+        private System.Windows.Forms.TableLayoutPanel? RootLayoutPanel;
+        private System.Windows.Forms.SplitContainer? ContentSplitContainer;
+        private System.Windows.Forms.CheckedListBox? PresetCheckedListBox;
+        private System.Windows.Forms.ListView? PropertyListView;
+        private System.Windows.Forms.Panel? FooterPanel;
+        private System.Windows.Forms.FlowLayoutPanel? LeftButtonFlowPanel;
+        private System.Windows.Forms.FlowLayoutPanel? RightButtonFlowPanel;
+        private System.Windows.Forms.Button? SelectAllButton;
+        private System.Windows.Forms.Button? SelectNoneButton;
+        private System.Windows.Forms.Button? OkButton;
+        private System.Windows.Forms.Button? CancelDialogButton;
+        private System.Windows.Forms.ColumnHeader? PropertyColumnHeader;
+        private System.Windows.Forms.ColumnHeader? ValueColumnHeader;
     }
 }

@@ -10,7 +10,7 @@ namespace Dzmac.Core.Reporting
     {
         public string BuildReport(IReadOnlyList<NetworkReportEntry> entries, DateTime generatedAt, string productVersion)
         {
-            if (entries == null)
+            if (entries is null)
             {
                 throw new ArgumentNullException(nameof(entries));
             }
@@ -28,16 +28,20 @@ namespace Dzmac.Core.Reporting
             for (var index = 0; index < entries.Count; index++)
             {
                 var entry = entries[index];
+                if (entry is null)
+                {
+                    continue;
+                }
                 report.AppendLine($"Interface #{index + 1}");
                 report.AppendLine("=============");
-                AppendField(report, "Connection Name", entry.Name);
-                AppendField(report, "Device Name", entry.Device);
-                AppendField(report, "Device Manufacturer", entry.DeviceManufacturer);
-                AppendField(report, "Hardware ID", entry.HardwareId);
-                AppendField(report, "Configuration ID", entry.ConfigId);
-                AppendField(report, "Active MAC Address", entry.ActiveMac);
-                AppendField(report, "Active MAC Address Vendor", entry.ActiveVendor);
-                AppendField(report, "Link Speed", entry.Speed?.ToLowerInvariant());
+                AppendField(report, "Connection Name", entry.Name ?? "N/A");
+                AppendField(report, "Device Name", entry.Device ?? "N/A");
+                AppendField(report, "Device Manufacturer", entry.DeviceManufacturer ?? "N/A");
+                AppendField(report, "Hardware ID", entry.HardwareId ?? "N/A");
+                AppendField(report, "Configuration ID", entry.ConfigId ?? "N/A");
+                AppendField(report, "Active MAC Address", entry.ActiveMac ?? "N/A");
+                AppendField(report, "Active MAC Address Vendor", entry.ActiveVendor ?? "N/A");
+                AppendField(report, "Link Speed", entry.Speed?.ToLowerInvariant() ?? "N/A");
                 AppendField(report, "Link Status", FormatLinkStatus(entry));
                 AppendField(report, "TCP/IPv4", (entry.IPv4Status == "Enabled").ToString());
                 AppendField(report, "TCP/IPv6", (entry.IPv6Status == "Enabled").ToString());
@@ -54,7 +58,7 @@ namespace Dzmac.Core.Reporting
 
         private static void AppendIpv4AddressFields(StringBuilder report, IReadOnlyList<NetworkReportIpv4Address> addresses)
         {
-            if (addresses == null || addresses.Count == 0)
+            if (addresses is null || addresses.Count == 0)
             {
                 return;
             }
@@ -68,7 +72,7 @@ namespace Dzmac.Core.Reporting
 
         private static void AppendMultiValueField(StringBuilder report, string label, IReadOnlyList<string> values, bool includeMetricPlaceholder)
         {
-            if (values == null || values.Count == 0)
+            if (values is null || values.Count == 0)
             {
                 return;
             }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Dzmac.Cli;
 using Dzmac.Core;
 using Dzmac.Forms;
 using Dzmac.Properties;
@@ -18,7 +19,7 @@ namespace Dzmac
             Application.ApplicationExit += ApplicationExitHandler;
             ConfigReader.Current.ValidateAndWarn();
 
-            if (args == null || args.Length == 0)
+            if (args is null || args.Length == 0)
             {
                 Diagnostics.Info("application_start", ("host", "gui"));
                 Application.EnableVisualStyles();

@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -34,7 +32,7 @@ namespace Dzmac.Core
                 using var configResults = configSearcher.Get();
                 var configResult = configResults.Cast<ManagementObject>().FirstOrDefault();
                 adapterConfig = NetworkAdapter.CreateBoundManagementObject(configResult);
-                var resolved = adapter != null || adapterConfig != null;
+                var resolved = adapter is not null || adapterConfig is not null;
                 if (!resolved)
                 {
                     Diagnostics.Warning("adapter_wmi_resolve_not_found", "No Win32 adapter objects were resolved.", ("configId", configId));
@@ -67,7 +65,7 @@ namespace Dzmac.Core
             try
             {
                 using var baseKey = Registry.LocalMachine.OpenSubKey(registryClassKey, false);
-                if (baseKey == null)
+                if (baseKey is null)
                 {
                     return null;
                 }
@@ -115,7 +113,7 @@ namespace Dzmac.Core
         public virtual bool TryValidateAdapterDescription(string registryKey, string description)
         {
             using var key = Registry.LocalMachine.OpenSubKey(registryKey, false);
-            if (key == null)
+            if (key is null)
             {
                 return false;
             }

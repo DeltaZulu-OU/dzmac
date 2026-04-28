@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 using System.Security;
 using System.Threading;
@@ -17,7 +15,7 @@ namespace Dzmac.Core
             VerificationFailed
         }
 
-        private struct MacApplyResult
+        private readonly struct MacApplyResult
         {
             public MacApplyResult(bool success, string message, MacApplyResultCode code)
             {
@@ -37,19 +35,19 @@ namespace Dzmac.Core
         private const int AttemptWatchdogTimeoutMs = 20000;
         private static readonly string[] LaaPrefixes = { "02", "06", "0A", "0E" };
 
-        public static (bool Success, string Message) TryRotateMac(NetworkAdapter adapter, MacAddress target, bool persistOriginalRecord, IProgress<string> progress)
+        public static (bool Success, string Message) TryRotateMac(NetworkAdapter? adapter, MacAddress? target, bool persistOriginalRecord, IProgress<string>? progress)
         {
-            if (adapter == null)
+            if (adapter is null)
             {
                 throw new ArgumentNullException(nameof(adapter));
             }
 
-            if (target == null)
+            if (target is null)
             {
                 throw new ArgumentNullException(nameof(target));
             }
 
-            if (progress == null)
+            if (progress is null)
             {
                 throw new ArgumentNullException(nameof(progress));
             }
@@ -164,7 +162,7 @@ namespace Dzmac.Core
 
             progress.Report("Verifying MAC change...");
             var liveMac = adapter.GetLiveLinkAddress();
-            if (liveMac != null && liveMac.Equals(target))
+            if (liveMac is not null && liveMac.Equals(target))
             {
                 return new MacApplyResult(true, "OK", MacApplyResultCode.Ok);
             }
@@ -182,9 +180,9 @@ namespace Dzmac.Core
                 Thread.Sleep(MacPollingIntervalMs);
                 _ = adapter.TryEnableAdapter();
             }
-            catch
+            catch (Exception ex)
             {
-                // no-op: best-effort revert
+                Diagnostics.Warning("mac_revert_failed", ex.Message, ("adapter", adapter?.Name ?? "unknown"));
             }
 
             progress.Report("Change failed. Reverted to factory settings.");

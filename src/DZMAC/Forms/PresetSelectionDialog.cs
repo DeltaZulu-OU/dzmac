@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +12,7 @@ namespace Dzmac.Forms
         private readonly IReadOnlyList<TpfPreset> _presets;
 
         public IReadOnlyList<int> SelectedIndices
-            => PresetCheckedListBox.CheckedIndices.Cast<int>().ToList();
+            => PresetCheckedListBox!.CheckedIndices.Cast<int>().ToList();
 
         public PresetSelectionDialog(string title, IReadOnlyList<TpfPreset> presets)
         {
@@ -24,7 +22,7 @@ namespace Dzmac.Forms
             Icon = AppIconProvider.GetIcon();
             Text = title;
 
-            PresetCheckedListBox.SelectedIndexChanged += PresetCheckedListBox_SelectedIndexChanged;
+            PresetCheckedListBox!.SelectedIndexChanged += PresetCheckedListBox_SelectedIndexChanged;
 
             foreach (var preset in _presets)
             {
@@ -45,7 +43,7 @@ namespace Dzmac.Forms
 
         private void SetAllChecks(bool checkedState)
         {
-            for (var i = 0; i < PresetCheckedListBox.Items.Count; i++)
+            for (var i = 0; i < PresetCheckedListBox!.Items.Count; i++)
             {
                 PresetCheckedListBox.SetItemChecked(i, checkedState);
             }
@@ -53,7 +51,16 @@ namespace Dzmac.Forms
 
         private void RefreshProperties()
         {
-            PropertyListView.BeginUpdate();
+            if (PresetCheckedListBox is null)
+            {
+                return;
+            }
+            if (PresetCheckedListBox.SelectedIndex < 0 || PresetCheckedListBox.SelectedIndex >= _presets.Count)
+            {
+                return;
+            }
+
+            PropertyListView!.BeginUpdate();
             PropertyListView.Items.Clear();
 
             if (PresetCheckedListBox.SelectedIndex >= 0 && PresetCheckedListBox.SelectedIndex < _presets.Count)

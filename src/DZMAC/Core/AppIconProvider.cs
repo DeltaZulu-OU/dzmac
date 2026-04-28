@@ -5,18 +5,31 @@ namespace Dzmac.Core
 {
     internal static class AppIconProvider
     {
-        private static readonly Icon CachedIcon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        private static readonly Icon? CachedIcon = TryExtractIcon();
 
-        public static Icon GetIcon() => CachedIcon;
+        public static Icon? GetIcon() => CachedIcon;
 
-        public static Bitmap GetBitmap(Size size)
+        public static Bitmap? GetBitmap(Size size)
         {
-            if (CachedIcon == null)
+            if (CachedIcon is null)
             {
                 return null;
             }
 
-            return new Bitmap(CachedIcon.ToBitmap(), size);
+            using var source = CachedIcon.ToBitmap();
+            return new Bitmap(source, size);
+        }
+
+        private static Icon? TryExtractIcon()
+        {
+            try
+            {
+                return Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

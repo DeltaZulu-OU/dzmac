@@ -49,7 +49,7 @@ public class TpfSerializerTests
         Assert.AreEqual("00-11-22-33-44-55", loaded.Presets[1].CustomMac);
         Assert.IsNotNull(loaded.Presets[1].Ipv4);
         Assert.AreEqual("192.168.1.10", loaded.Presets[1].Ipv4!.Address);
-        Assert.AreEqual("1.1.1.1", loaded.Presets[1].Ipv4.PrimaryDnsServer);
+        Assert.AreEqual("1.1.1.1", loaded.Presets[1]!.Ipv4!.PrimaryDnsServer);
     }
 
     [TestMethod]

@@ -5,13 +5,13 @@ namespace Dzmac.Tests
     [TestClass]
     public class AdapterTests
     {
-        private IEnumerable<NetworkAdapter> _adapters;
+        private IEnumerable<NetworkAdapter>? _adapters;
 
         [TestInitialize]
         public void Initialize() => _adapters = NetworkAdapterFactory.GetNetworkAdapters();
 
         [TestMethod]
-        public void AdapterListEnumerationShouldBeStable() => Assert.IsNotNull(_adapters.ToList());
+        public void AdapterListEnumerationShouldBeStable() => Assert.IsNotNull(_adapters?.ToList());
 
         [DataTestMethod]
         [DataRow("ROOT\\NET\\0000", false)]

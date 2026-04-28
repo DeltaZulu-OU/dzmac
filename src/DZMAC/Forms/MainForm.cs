@@ -47,11 +47,11 @@ namespace Dzmac.Forms
         private readonly double[] _sentPaintBuffer = new double[performanceSampleCapacity];
         private int _sampleCount;
         private int _sampleWriteIndex;
-        private NetworkInterface _selectedNetworkInterface;
-        private CancellationTokenSource _performanceLoopCancellation;
+        private NetworkInterface? _selectedNetworkInterface;
+        private CancellationTokenSource? _performanceLoopCancellation;
         private int _performanceResolveVersion;
         private int _performanceUiUpdatePending;
-        private string _performanceHistoryConfigId;
+        private string? _performanceHistoryConfigId;
         private bool _isRefreshing;
         private bool _isVendorListLoading;
         private bool _isVendorListReady;
@@ -61,17 +61,17 @@ namespace Dzmac.Forms
         private bool _locallyAdministered;
         private bool _persistOriginalMacRecord = true;
         private bool _reenableOnChange;
-        private CancellationTokenSource _refreshCancellation;
-        private CancellationTokenSource _vendorRefreshCancellation;
-        private NetworkConnection _selected;
+        private CancellationTokenSource? _refreshCancellation;
+        private CancellationTokenSource? _vendorRefreshCancellation;
+        private NetworkConnection? _selected;
         private IReadOnlyDictionary<string, NetworkInterface> _networkInterfacesById = new ReadOnlyDictionary<string, NetworkInterface>(new Dictionary<string, NetworkInterface>());
-        private List<Vendor> _vendorComboItems;
+        private List<Vendor>? _vendorComboItems;
         private int _vendorComboLoadedCount;
         private readonly List<TpfPreset> _presets = new List<TpfPreset>();
-        private string _currentPresetFilePath;
-        private readonly string _startupPresetPath;
+        private string? _currentPresetFilePath;
+        private readonly string? _startupPresetPath;
 
-        public MainForm(string startupPresetPath = null)
+        public MainForm(string? startupPresetPath = null)
         {
             _vm = new VendorList();
             _adminService = new AdapterAdminService();
@@ -81,35 +81,35 @@ namespace Dzmac.Forms
             InitializeComponent();
             Icon = AppIconProvider.GetIcon();
             ConfigureV1Surface();
-            _loadingPanel.BringToFront();
+            _loadingPanel!.BringToFront();
             _loadingPanel.Visible = true;
             _loadingProgressTimer = new System.Windows.Forms.Timer { Interval = 60 };
             _loadingProgressTimer.Tick += LoadingProgressTimer_Tick;
             _loadingProgressTimer.Start();
 
-            InfoTabs.SelectedIndexChanged += InfoTabs_SelectedIndexChanged;
+            InfoTabs!.SelectedIndexChanged += InfoTabs_SelectedIndexChanged;
             Shown += MainForm_ShownAsync;
-            ConnectionsGrid.EmptyListMsg = Resources.StatusNoAdaptersLoaded;
-            VendorComboBox.Enabled = false;
+            ConnectionsGrid!.EmptyListMsg = Resources.StatusNoAdaptersLoaded;
+            VendorComboBox!.Enabled = false;
             VendorComboBox.DropDown += VendorComboBox_DropDown;
             VendorComboBox.SelectionChangeCommitted += VendorComboBox_SelectionChangeCommitted;
             VendorComboBox.SelectedIndexChanged += VendorComboBox_SelectedIndexChanged;
             VendorComboBox.MouseWheel += VendorComboBox_MouseWheel;
             VendorComboBox.KeyDown += VendorComboBox_KeyDown;
-            PersistentAddressCheckBox.Checked = true;
+            PersistentAddressCheckBox!.Checked = true;
             _currentPresetFilePath = !string.IsNullOrWhiteSpace(_startupPresetPath)
                 ? _startupPresetPath
                 : System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "default.tpf");
-            _presetListBox.SelectedIndexChanged += (_, __) => BindSelectedPresetDetails();
-            _presetNewButton.Click += PresetNewButton_Click;
-            _presetEditButton.Click += PresetEditButton_Click;
-            _presetDeleteButton.Click += PresetDeleteButton_Click;
-            _presetApplyButton.Click += PresetApplyButton_Click;
+            _presetListBox!.SelectedIndexChanged += (_, __) => BindSelectedPresetDetails();
+            _presetNewButton!.Click += PresetNewButton_Click;
+            _presetEditButton!.Click += PresetEditButton_Click;
+            _presetDeleteButton!.Click += PresetDeleteButton_Click;
+            _presetApplyButton!.Click += PresetApplyButton_Click;
             LoadPresetFileIfExists(_currentPresetFilePath, mustExist: !string.IsNullOrWhiteSpace(_startupPresetPath));
             UpdateSelectionState();
         }
 
-        internal List<NetworkConnection> NetworkConnections { get; set; }
+        internal List<NetworkConnection>? NetworkConnections { get; set; }
 
         #region EventHandlers
 
@@ -132,26 +132,26 @@ namespace Dzmac.Forms
             try
             {
                 TpfFileAssociationService.AssociateWithCurrentUser(executablePath);
-                MainStatusBar.Text = "Associated .tpf files with DZMAC for current user.";
+                MainStatusBar!.Text = "Associated .tpf files with DZMAC for current user.";
                 _ = MessageBox.Show("Successfully associated .tpf files with DZMAC.", Resources.Success_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MainStatusBar.Text = "Failed to associate .tpf files.";
+                MainStatusBar!.Text = "Failed to associate .tpf files.";
                 _ = MessageBox.Show(ex.Message, Resources.Failure_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-        private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => _reenableOnChange = AutoStartCheckBox.Checked;
+        private void AutoStartCheckBox_CheckedChanged(object sender, EventArgs e) => _reenableOnChange = AutoStartCheckBox!.Checked;
 
         private async void ChangeMacButton_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
 
-            var targetMac = macTextBox.Text.Replace("-", string.Empty).Replace(":", string.Empty);
+            var targetMac = macTextBox!.Text.Replace("-", string.Empty).Replace(":", string.Empty);
 
             // Ignore default value to prevend accidents
             if (targetMac.Equals(zeroMacValue))
@@ -166,10 +166,10 @@ namespace Dzmac.Forms
             }
 
             var target = new MacAddress(targetMac);
-            var progress = new Progress<string>(status => MainStatusBar.Text = status);
-            ChangeMacButton.Enabled = false;
-            RestoreMacButton.Enabled = false;
-            MainStatusBar.Text = $"Applying MAC address for {_selected.Name}...";
+            var progress = new Progress<string>(status => MainStatusBar!.Text = status);
+            ChangeMacButton!.Enabled = false;
+            RestoreMacButton!.Enabled = false;
+            MainStatusBar!.Text = $"Applying MAC address for {_selected.Name}...";
             await Task.Yield();
 
             try
@@ -202,7 +202,7 @@ namespace Dzmac.Forms
                 return;
             }
 
-            if (ConnectionsGrid?.SelectedItem != null)
+            if (ConnectionsGrid?.SelectedItem is not null)
             {
                 // The event is triggered twice:
                 // First one is a reset event where index is 0xffffff (-1),
@@ -223,7 +223,7 @@ namespace Dzmac.Forms
 
         private void DeleteItem_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
@@ -238,16 +238,16 @@ namespace Dzmac.Forms
 
             if (confirmResult != DialogResult.Yes)
             {
-                MainStatusBar.Text = $"Registry delete canceled for {selectedAdapterName}.";
+                MainStatusBar!.Text = $"Registry delete canceled for {selectedAdapterName}.";
                 Diagnostics.Info("adapter_registry_delete_cancelled", ("adapter", selectedAdapterName));
                 return;
             }
 
-            MainStatusBar.Text = $"Deleting {selectedAdapterName} from registry...";
+            MainStatusBar!.Text = $"Deleting {selectedAdapterName} from registry...";
             var result = _adminService.DeleteAdapterFromRegistry(_selected.Adapter);
             if (result.IsSuccess)
             {
-                MainStatusBar.Text = $"Deleted {selectedAdapterName} from registry.";
+                MainStatusBar!.Text = $"Deleted {selectedAdapterName} from registry.";
                 Diagnostics.Info("adapter_registry_delete_succeeded", ("adapter", selectedAdapterName));
                 _ = MessageBox.Show(Resources.AdapterRegistryDeleteSuccess, Resources.DeleteAdapter_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _ = RefreshConnectionsBackground();
@@ -265,16 +265,16 @@ namespace Dzmac.Forms
 
         private void Dhcp4EnabledItem_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
 
-            if (DhcpEnabledItem.Checked)
+            if (DhcpEnabledItem!.Checked)
             {
                 if (_adminService.SetDhcpEnabled(_selected.Adapter, false).IsSuccess)
                 {
-                    DhcpEnabledItem.Checked = false;
+                    DhcpEnabledItem!.Checked = false;
                 }
             }
             else
@@ -290,7 +290,7 @@ namespace Dzmac.Forms
 
         private async void DhcpReleaseIpItem_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
@@ -307,7 +307,7 @@ namespace Dzmac.Forms
 
         private async void DhcpRenewIpItem_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
@@ -359,12 +359,12 @@ namespace Dzmac.Forms
 
             exportFile.SelectedPresetIndex = 0;
             TpfSerializer.Save(saveDialog.FileName, exportFile);
-            MainStatusBar.Text = $"Exported {exportFile.Presets.Count} preset(s) to {saveDialog.FileName}.";
+            MainStatusBar!.Text = $"Exported {exportFile.Presets.Count} preset(s) to {saveDialog.FileName}.";
         }
 
         private void ExportReportItem_Click(object sender, EventArgs e)
         {
-            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            if (NetworkConnections is null || NetworkConnections.Count == 0)
             {
                 _ = MessageBox.Show(Resources.NoAdaptersToExport, Resources.ExportTextReport_Title, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -385,11 +385,11 @@ namespace Dzmac.Forms
             {
                 var report = BuildTextReport();
                 System.IO.File.WriteAllText(dialog.FileName, report, Encoding.UTF8);
-                MainStatusBar.Text = $"Report exported: {dialog.FileName}";
+                MainStatusBar!.Text = $"Report exported: {dialog.FileName}";
             }
             catch (Exception ex)
             {
-                MainStatusBar.Text = Resources.ExportFailed;
+                MainStatusBar!.Text = Resources.ExportFailed;
                 _ = MessageBox.Show(ex.Message, Resources.ExportTextReport_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
@@ -460,12 +460,12 @@ namespace Dzmac.Forms
 
             if (importedCount == 0)
             {
-                MainStatusBar.Text = "No presets were imported due to duplicate names.";
+                MainStatusBar!.Text = "No presets were imported due to duplicate names.";
                 return;
             }
 
             BindPresetList();
-            MainStatusBar.Text = $"Imported {importedCount} preset(s) from {openDialog.FileName}.";
+            MainStatusBar!.Text = $"Imported {importedCount} preset(s) from {openDialog.FileName}.";
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -486,8 +486,8 @@ namespace Dzmac.Forms
 
         private void MainForm_LoadAsync(object sender, EventArgs e)
         {
-            ShowSpeedInKBytesPerSecItem.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
-            ShowAllAdaptersItem.Checked = Settings.Default.ShowAllAdapters;
+            ShowSpeedInKBytesPerSecItem!.Checked = Settings.Default.ShowSpeedInKBytesPerSec;
+            ShowAllAdaptersItem!.Checked = Settings.Default.ShowAllAdapters;
         }
 
         private void MainForm_ShownAsync(object sender, EventArgs e)
@@ -520,7 +520,7 @@ namespace Dzmac.Forms
             {
                 if (!IsDisposed)
                 {
-                    MainStatusBar.Text = Resources.StartupFailed;
+                    MainStatusBar!.Text = Resources.StartupFailed;
                     _ = MessageBox.Show(ex.Message, Resources.InitializationError_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -529,7 +529,7 @@ namespace Dzmac.Forms
         private async Task RunDhcpActionAsync(NetworkConnection selectedDetail, string actionName, string inProgressText, string successText, string failureText, Func<AdapterAdminResult> action)
         {
             var selectedAdapterName = selectedDetail.Name;
-            MainStatusBar.Text = $"{inProgressText} {selectedAdapterName}...";
+            MainStatusBar!.Text = $"{inProgressText} {selectedAdapterName}...";
 
             var operationResult = await Task.Run(() => action());
             var operationMessage = operationResult.Message;
@@ -547,11 +547,11 @@ namespace Dzmac.Forms
             Diagnostics.Warning("dhcp_action_failed", $"Could not {actionName} for '{selectedAdapterName}'. {operationMessage}", ("operationCode", operationResult.Code.ToString()));
         }
 
-        private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid.AutoResizeColumns();
+        private void MainForm_Resize(object sender, EventArgs e) => ConnectionsGrid!.AutoResizeColumns();
 
         private void LoadingProgressTimer_Tick(object sender, EventArgs e)
         {
-            if (_loadingProgressBar == null || IsDisposed)
+            if (_loadingProgressBar is null || IsDisposed)
             {
                 return;
             }
@@ -562,8 +562,12 @@ namespace Dzmac.Forms
 
         private void NetworkConnectionsItem_Click(object sender, EventArgs e) => OpenNetworkConnections();
 
-        private void SetConnectionDetailValue(Label label, string value)
+        private void SetConnectionDetailValue(Label? label, string? value)
         {
+            if (label is null)
+            {
+                return;
+            }
             var displayValue = string.IsNullOrWhiteSpace(value) ? "..." : value;
             label.Text = displayValue;
             _connectionDetailsTooltip.SetToolTip(label, displayValue == "..." ? string.Empty : displayValue);
@@ -571,7 +575,7 @@ namespace Dzmac.Forms
 
         private void InfoTabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 StopPerformanceMonitoring();
                 return;
@@ -603,11 +607,11 @@ namespace Dzmac.Forms
             LoadPresetFileIfExists(openDialog.FileName, mustExist: true);
         }
 
-        private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => _persistOriginalMacRecord = PersistentAddressCheckBox.Checked;
+        private void PersistentAddressCheckBox_CheckedChanged(object sender, EventArgs e) => _persistOriginalMacRecord = PersistentAddressCheckBox?.Checked ?? false;
 
         private void RandomMacButton_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
@@ -633,7 +637,7 @@ namespace Dzmac.Forms
 
             var matchedVendor = _vm.FindByMac(randomMac, _locallyAdministered);
             var vendorDisplayName = matchedVendor?.VendorName ?? randomVendor.VendorName;
-            VendorComboBox.SelectedItem = null;
+            VendorComboBox!.SelectedItem = null;
             VendorComboBox.Text = vendorDisplayName;
 
             if (_locallyAdministered)
@@ -641,7 +645,7 @@ namespace Dzmac.Forms
                 randomMac = randomMac.AsLocallyAdministered();
             }
 
-            macTextBox.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);
+            macTextBox!.Text = randomMac.ToString(MacAddress.MacDelimiter.Colon);
         }
 
         private async void RefreshItem_Click(object sender, EventArgs e) => await RefreshConnectionsBackground();
@@ -650,14 +654,13 @@ namespace Dzmac.Forms
 
         private void VendorComboBox_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            if (!(VendorComboBox.SelectedItem is Vendor selectedVendor))
+            if (VendorComboBox!.SelectedItem is not Vendor selectedVendor)
             {
                 return;
             }
 
             var selectedVendorName = selectedVendor.VendorName;
-            BeginInvoke(new Action(() =>
-            {
+            BeginInvoke(new Action(() => {
                 if (IsDisposed)
                 {
                     return;
@@ -681,7 +684,7 @@ namespace Dzmac.Forms
 
         private async void RestoreMacButton_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selected is null)
             {
                 return;
             }
@@ -692,9 +695,9 @@ namespace Dzmac.Forms
                 return;
             }
 
-            ChangeMacButton.Enabled = false;
-            RestoreMacButton.Enabled = false;
-            MainStatusBar.Text = $"Restoring original MAC address for {selected.Name}...";
+            ChangeMacButton!.Enabled = false;
+            RestoreMacButton!.Enabled = false;
+            MainStatusBar!.Text = $"Restoring original MAC address for {selected.Name}...";
             await Task.Yield();
 
             try
@@ -748,11 +751,11 @@ namespace Dzmac.Forms
 
         private void ShowSpeedInKBytesPerSecItem_CheckedChanged(object sender, EventArgs e)
         {
-            var showSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem.Checked;
+            var showSpeedInKBytesPerSec = ShowSpeedInKBytesPerSecItem!.Checked;
             Settings.Default.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
             Settings.Default.Save();
 
-            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            if (NetworkConnections is null || NetworkConnections.Count == 0)
             {
                 return;
             }
@@ -762,21 +765,21 @@ namespace Dzmac.Forms
                 networkConnection.ShowSpeedInKBytesPerSec = showSpeedInKBytesPerSec;
             }
 
-            ConnectionsGrid.BeginUpdate();
+            ConnectionsGrid!.BeginUpdate();
             ConnectionsGrid.RefreshObjects(NetworkConnections);
             ConnectionsGrid.EndUpdate();
         }
 
         private async void ShowAllAdaptersItem_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Default.ShowAllAdapters = ShowAllAdaptersItem.Checked;
+            Settings.Default.ShowAllAdapters = ShowAllAdaptersItem!.Checked;
             Settings.Default.Save();
             await RefreshConnectionsBackground();
         }
 
         private async void ToggleAdapterEnabledItem_Click(object sender, EventArgs e)
         {
-            if (!(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection))
+            if (ConnectionsGrid?.SelectedObject is not NetworkConnection selectedConnection)
             {
                 return;
             }
@@ -793,7 +796,7 @@ namespace Dzmac.Forms
                 return;
             }
 
-            MainStatusBar.Text = Resources.StatusDownloadingOui;
+            MainStatusBar!.Text = Resources.StatusDownloadingOui;
             _vendorRefreshCancellation?.Cancel();
             _vendorRefreshCancellation?.Dispose();
             _vendorRefreshCancellation = new CancellationTokenSource();
@@ -818,19 +821,18 @@ namespace Dzmac.Forms
 
         private void WikiLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            WikiLink.LinkVisited = true;
+            WikiLink!.LinkVisited = true;
             VisitUrl("https://github.com/DeltaZulu-OU/dzmac/wiki/Help#why-does-setting-the-first-octet-to-02-help-with-some-wi-fi-mac-changes");
         }
 
-        private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => _locallyAdministered = ZeroTwoCheckBox.Checked;
-
+        private void ZeroTwoCheckBox_CheckedChanged(object sender, EventArgs e) => _locallyAdministered = ZeroTwoCheckBox!.Checked;
         #endregion EventHandlers
 
         #region Private Methods
 
-        private static void DisposeConnections(List<NetworkConnection> connections)
+        private static void DisposeConnections(List<NetworkConnection>? connections)
         {
-            if (connections == null)
+            if (connections is null)
             {
                 return;
             }
@@ -841,16 +843,16 @@ namespace Dzmac.Forms
             }
         }
 
-        private static void DisposeConnections(List<NetworkConnection> connections, ISet<NetworkConnection> excludedConnections)
+        private static void DisposeConnections(List<NetworkConnection>? connections, ISet<NetworkConnection> excludedConnections)
         {
-            if (connections == null)
+            if (connections is null)
             {
                 return;
             }
 
             foreach (var networkConnection in connections)
             {
-                if (excludedConnections != null && excludedConnections.Contains(networkConnection))
+                if (excludedConnections is not null && excludedConnections.Contains(networkConnection))
                 {
                     continue;
                 }
@@ -880,8 +882,13 @@ namespace Dzmac.Forms
             }
         }
 
-        private static void PopulateSingleValueRows(ListView listView, IEnumerable<string> values, string fallback)
+        private static void PopulateSingleValueRows(ListView? listView, IEnumerable<string> values, string fallback)
         {
+            if (listView is null)
+            {
+                return;
+            }
+
             listView.BeginUpdate();
             listView.Items.Clear();
 
@@ -913,7 +920,7 @@ namespace Dzmac.Forms
 
         private void BindIpAddressDetails()
         {
-            if (Ipv4AddressListView == null)
+            if (Ipv4AddressListView is null)
             {
                 return;
             }
@@ -929,7 +936,7 @@ namespace Dzmac.Forms
 
         private void BindSelection()
         {
-            var hasSelection = _selected != null;
+            var hasSelection = _selected is not null;
             if (!hasSelection)
             {
                 SetConnectionDetailValue(ConnectionValueTextbox, null);
@@ -942,28 +949,28 @@ namespace Dzmac.Forms
                 SetConnectionDetailValue(OriginalMacVendorTextbox, null);
                 SetConnectionDetailValue(ActiveMacValueTextbox, null);
                 SetConnectionDetailValue(ActiveMacVendorTextbox, null);
-                DhcpEnabledItem.Checked = false;
+                DhcpEnabledItem!.Checked = false;
                 BindIpAddressDetails();
                 StopPerformanceMonitoring();
                 UpdateSelectionState();
                 return;
             }
 
-            SetConnectionDetailValue(ConnectionValueTextbox, _selected.Name);
-            SetConnectionDetailValue(DeviceValueTextbox, _selected.Device);
-            SetConnectionDetailValue(HardwareIdValueTextbox, _selected.HardwareId);
-            SetConnectionDetailValue(ConfigIdValueTextbox, _selected.ConfigId);
-            SetConnectionDetailValue(Ipv4ValueTextbox, _selected.IPv4Status);
-            SetConnectionDetailValue(Ipv6ValueTextbox, _selected.IPv6Status);
-            SetConnectionDetailValue(OriginalMacValueTextbox, _selected.OriginalMac);
-            SetConnectionDetailValue(OriginalMacVendorTextbox, _selected.OriginalVendor);
-            SetConnectionDetailValue(ActiveMacValueTextbox, _selected.ActiveMac);
-            SetConnectionDetailValue(ActiveMacVendorTextbox, _selected.ActiveVendor);
-            DhcpEnabledItem.Checked = _selected.IsDhcpEnabled;
+            SetConnectionDetailValue(ConnectionValueTextbox, _selected!.Name);
+            SetConnectionDetailValue(DeviceValueTextbox, _selected!.Device);
+            SetConnectionDetailValue(HardwareIdValueTextbox, _selected!.HardwareId);
+            SetConnectionDetailValue(ConfigIdValueTextbox, _selected!.ConfigId);
+            SetConnectionDetailValue(Ipv4ValueTextbox, _selected!.IPv4Status);
+            SetConnectionDetailValue(Ipv6ValueTextbox, _selected!.IPv6Status);
+            SetConnectionDetailValue(OriginalMacValueTextbox, _selected!.OriginalMac);
+            SetConnectionDetailValue(OriginalMacVendorTextbox, _selected!.OriginalVendor);
+            SetConnectionDetailValue(ActiveMacValueTextbox, _selected!.ActiveMac);
+            SetConnectionDetailValue(ActiveMacVendorTextbox, _selected!.ActiveVendor);
+            DhcpEnabledItem!.Checked = _selected!.IsDhcpEnabled;
             BindIpAddressDetails();
             if (IsPerformanceTabVisible())
             {
-                _ = RestartPerformanceMonitoringAsync(_selected.ConfigId);
+                _ = RestartPerformanceMonitoringAsync(_selected!.ConfigId);
             }
             UpdateSelectionState();
         }
@@ -971,21 +978,21 @@ namespace Dzmac.Forms
         private void ConfigureV1Surface()
         {
             // Keep v1 UI surface aligned with implemented feature set.
-            ExportReportItem.Visible = true;
-            toolStripSeparator1.Visible = true;
-            OpenPresetItem.Visible = true;
-            SavePresetItem.Visible = true;
-            SavePresetAsItem.Visible = true;
-            toolStripSeparator2.Visible = true;
-            ImportPresetItem.Visible = true;
-            ExportPresetItem.Visible = true;
-            AssociateItem.Visible = true;
-            toolStripSeparator7.Visible = false;
-            CliParamsHelpItem.Visible = true;
-            toolStripSeparator6.Visible = true;
-            CheckUpdateItem.Visible = false;
+            ExportReportItem!.Visible = true;
+            toolStripSeparator1!.Visible = true;
+            OpenPresetItem!.Visible = true;
+            SavePresetItem!.Visible = true;
+            SavePresetAsItem!.Visible = true;
+            toolStripSeparator2!.Visible = true;
+            ImportPresetItem!.Visible = true;
+            ExportPresetItem!.Visible = true;
+            AssociateItem!.Visible = true;
+            toolStripSeparator7!.Visible = false;
+            CliParamsHelpItem!.Visible = true;
+            toolStripSeparator6!.Visible = true;
+            CheckUpdateItem!.Visible = false;
 
-            PersistentAddressCheckBox.Visible = true;
+            PersistentAddressCheckBox!.Visible = true;
         }
 
         private void PresetNewButton_Click(object sender, EventArgs e)
@@ -1015,14 +1022,14 @@ namespace Dzmac.Forms
 
             _presets.Add(dialog.Preset);
             BindPresetList();
-            _presetListBox.SelectedIndex = _presets.Count - 1;
+            _presetListBox!.SelectedIndex = _presets.Count - 1;
         }
 
         private void PresetEditButton_Click(object sender, EventArgs e)
         {
-            var selectedIndex = _presetListBox.SelectedIndex;
+            var selectedIndex = _presetListBox!.SelectedIndex;
             var selected = GetSelectedPreset();
-            if (selected == null)
+            if (selected is null)
             {
                 return;
             }
@@ -1050,7 +1057,7 @@ namespace Dzmac.Forms
 
         private void PresetDeleteButton_Click(object sender, EventArgs e)
         {
-            var selectedIndex = _presetListBox.SelectedIndex;
+            var selectedIndex = _presetListBox!.SelectedIndex;
             if (selectedIndex < 0 || selectedIndex >= _presets.Count)
             {
                 return;
@@ -1075,7 +1082,7 @@ namespace Dzmac.Forms
         {
             var selectedPreset = GetSelectedPreset();
             var selectedConnection = _selected;
-            if (selectedPreset == null || selectedConnection == null)
+            if (selectedPreset is null || selectedConnection is null)
             {
                 return;
             }
@@ -1090,12 +1097,11 @@ namespace Dzmac.Forms
                 return;
             }
 
-            var progress = new Progress<string>(status => MainStatusBar.Text = status);
-            MainStatusBar.Text = $"Applying preset '{selectedPreset.Name}' to '{selectedConnection.Name}'...";
+            var progress = new Progress<string>(status => MainStatusBar!.Text = status);
+            MainStatusBar!.Text = $"Applying preset '{selectedPreset.Name}' to '{selectedConnection.Name}'...";
             await Task.Yield();
 
-            var (macApplied, macError) = await Task.Run(() =>
-            {
+            var (macApplied, macError) = await Task.Run(() => {
                 var success = TryApplyPresetMac(selectedPreset, selectedConnection, progress, out var error);
                 return (success, error);
             });
@@ -1107,8 +1113,7 @@ namespace Dzmac.Forms
                 return;
             }
 
-            var (ipv4Applied, ipv4Error) = await Task.Run(() =>
-            {
+            var (ipv4Applied, ipv4Error) = await Task.Run(() => {
                 var success = TryApplyPresetIpv4(selectedPreset.Ipv4, selectedConnection, out var error);
                 return (success, error);
             });
@@ -1124,7 +1129,7 @@ namespace Dzmac.Forms
             _ = RefreshConnectionsBackground();
         }
 
-        private bool TryApplyPresetMac(TpfPreset preset, NetworkConnection selectedConnection, IProgress<string> progress, out string error)
+        private bool TryApplyPresetMac(TpfPreset preset, NetworkConnection selectedConnection, IProgress<string> progress, out string? error)
         {
             error = string.Empty;
 
@@ -1158,10 +1163,8 @@ namespace Dzmac.Forms
             }
         }
 
-        private bool TryApplyRandomMac(NetworkConnection selectedConnection, bool useLocallyAdministeredFirstOctet, IProgress<string> progress, out string error)
+        private bool TryApplyRandomMac(NetworkConnection selectedConnection, bool useLocallyAdministeredFirstOctet, IProgress<string> progress, out string? error)
         {
-            error = string.Empty;
-
             Vendor randomVendor;
             try
             {
@@ -1195,10 +1198,10 @@ namespace Dzmac.Forms
             return false;
         }
 
-        private bool TryApplyPresetIpv4(TpfIpv4Settings ipv4, NetworkConnection selectedConnection, out string error)
+        private bool TryApplyPresetIpv4(TpfIpv4Settings? ipv4, NetworkConnection selectedConnection, out string error)
         {
             error = string.Empty;
-            if (ipv4 == null || !ipv4.Enabled)
+            if (ipv4 is null || !ipv4.Enabled)
             {
                 return true;
             }
@@ -1268,7 +1271,7 @@ namespace Dzmac.Forms
 
         private void BindPresetList()
         {
-            _presetListBox.BeginUpdate();
+            _presetListBox!.BeginUpdate();
             _presetListBox.Items.Clear();
             foreach (var preset in _presets)
             {
@@ -1281,11 +1284,11 @@ namespace Dzmac.Forms
 
         private void BindSelectedPresetDetails()
         {
-            _presetPropertyListView.BeginUpdate();
+            _presetPropertyListView!.BeginUpdate();
             _presetPropertyListView.Items.Clear();
 
             var selected = GetSelectedPreset();
-            if (selected != null)
+            if (selected is not null)
             {
                 foreach (var pair in TpfPresetFormatter.ToProperties(selected))
                 {
@@ -1296,9 +1299,9 @@ namespace Dzmac.Forms
             _presetPropertyListView.EndUpdate();
         }
 
-        private TpfPreset GetSelectedPreset()
+        private TpfPreset? GetSelectedPreset()
         {
-            var index = _presetListBox.SelectedIndex;
+            var index = _presetListBox!.SelectedIndex;
             if (index < 0 || index >= _presets.Count)
             {
                 return null;
@@ -1307,14 +1310,12 @@ namespace Dzmac.Forms
             return _presets[index];
         }
 
-        private static TpfPreset ClonePreset(TpfPreset preset)
+        private static TpfPreset ClonePreset(TpfPreset preset) => new TpfPreset
         {
-            return new TpfPreset
-            {
-                Name = preset.Name,
-                MacMode = preset.MacMode,
-                CustomMac = preset.CustomMac,
-                Ipv4 = preset.Ipv4 == null
+            Name = preset.Name,
+            MacMode = preset.MacMode,
+            CustomMac = preset.CustomMac,
+            Ipv4 = preset.Ipv4 is null
                     ? null
                     : new TpfIpv4Settings
                     {
@@ -1328,8 +1329,7 @@ namespace Dzmac.Forms
                         DnsEnabled = preset.Ipv4.DnsEnabled,
                         PrimaryDnsServer = preset.Ipv4.PrimaryDnsServer
                     }
-            };
-        }
+        };
 
         private bool IsDuplicatePresetName(string presetName, int excludeIndex = -1)
         {
@@ -1350,8 +1350,20 @@ namespace Dzmac.Forms
             return false;
         }
 
-        private void LoadPresetFileIfExists(string path, bool mustExist = false)
+        private void LoadPresetFileIfExists(string? path, bool mustExist = false)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                if (mustExist)
+                {
+                    MessageBox.Show("Preset file path is empty.", "Open Preset", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    _currentPresetFilePath = path;
+                    _presets.Clear();
+                    BindPresetList();
+                }
+                return;
+            }
+
             if (!System.IO.File.Exists(path))
             {
                 if (mustExist)
@@ -1371,24 +1383,24 @@ namespace Dzmac.Forms
 
                 if (_presets.Count > 0)
                 {
-                    _presetListBox.SelectedIndex = defaultFile.SelectedPresetIndex < _presets.Count
+                    _presetListBox!.SelectedIndex = defaultFile.SelectedPresetIndex < _presets.Count
                         ? defaultFile.SelectedPresetIndex
                         : 0;
                 }
 
                 SavePresetsToCurrentPath();
-                MainStatusBar.Text = $"Created default preset file at {path}.";
+                MainStatusBar!.Text = $"Created default preset file at {path}.";
                 return;
             }
 
             try
             {
-                var file = TpfSerializer.Load(path);
+                var file = TpfSerializer.Load(path!);
                 _presets.Clear();
                 _presets.AddRange(file.Presets.Select(ClonePreset));
                 _currentPresetFilePath = path;
                 BindPresetList();
-                MainStatusBar.Text = $"Loaded {_presets.Count} preset(s) from {path}.";
+                MainStatusBar!.Text = $"Loaded {_presets.Count} preset(s) from {path}.";
             }
             catch (Exception ex)
             {
@@ -1406,13 +1418,13 @@ namespace Dzmac.Forms
                     file.Presets.Add(ClonePreset(preset));
                 }
 
-                if (_presetListBox.SelectedIndex >= 0 && _presetListBox.SelectedIndex < _presets.Count)
+                if (_presetListBox!.SelectedIndex >= 0 && _presetListBox.SelectedIndex < _presets.Count)
                 {
                     file.SelectedPresetIndex = (byte)_presetListBox.SelectedIndex;
                 }
 
-                TpfSerializer.Save(_currentPresetFilePath, file);
-                MainStatusBar.Text = $"Saved {_presets.Count} preset(s) to {_currentPresetFilePath}.";
+                TpfSerializer.Save(_currentPresetFilePath!, file);
+                MainStatusBar!.Text = $"Saved {_presets.Count} preset(s) to {_currentPresetFilePath}.";
             }
             catch (Exception ex)
             {
@@ -1428,13 +1440,13 @@ namespace Dzmac.Forms
 
         private static NetworkReportEntry ToReportEntry(NetworkConnection connection)
         {
-            if (connection == null)
+            if (connection is null)
             {
                 throw new ArgumentNullException(nameof(connection));
             }
 
             var ipv4Addresses = new List<NetworkReportIpv4Address>();
-            if (connection.Ipv4Addresses != null)
+            if (connection.Ipv4Addresses is not null)
             {
                 foreach (var address in connection.Ipv4Addresses)
                 {
@@ -1493,13 +1505,12 @@ namespace Dzmac.Forms
             _isVendorListLoading = true;
             if (!IsDisposed)
             {
-                MainStatusBar.Text = Resources.StatusLoadingVendorList;
+                MainStatusBar!.Text = Resources.StatusLoadingVendorList;
             }
 
             try
             {
-                await Task.Run(() =>
-                {
+                await Task.Run(() => {
                     _ = _vm.Count;
                 });
                 if (IsDisposed)
@@ -1507,18 +1518,17 @@ namespace Dzmac.Forms
                     return;
                 }
 
-                BeginInvoke(new Action(() =>
-                {
+                BeginInvoke(new Action(() => {
                     if (IsDisposed)
                     {
                         return;
                     }
 
-                    VendorComboBox.Enabled = true;
+                    VendorComboBox!.Enabled = true;
                     _isVendorListReady = true;
                     UpdateSelectionState();
 
-                    if (MainStatusBar.Text == Resources.StatusLoadingVendorList)
+                    if (MainStatusBar!.Text == Resources.StatusLoadingVendorList)
                     {
                         MainStatusBar.Text = Resources.StatusReady;
                     }
@@ -1528,14 +1538,13 @@ namespace Dzmac.Forms
             {
                 if (!IsDisposed)
                 {
-                    BeginInvoke(new Action(() =>
-                    {
+                    BeginInvoke(new Action(() => {
                         if (IsDisposed)
                         {
                             return;
                         }
 
-                        MainStatusBar.Text = Resources.StatusVendorListFailed;
+                        MainStatusBar!.Text = Resources.StatusVendorListFailed;
                         _ = MessageBox.Show(ex.Message, Resources.VendorListFailed_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }));
                 }
@@ -1554,7 +1563,7 @@ namespace Dzmac.Forms
             }
 
             _isVendorComboLoading = true;
-            var existingStatus = MainStatusBar.Text;
+            var existingStatus = MainStatusBar!.Text;
             MainStatusBar.Text = Resources.StatusPreparingVendorList;
 
             try
@@ -1569,7 +1578,7 @@ namespace Dzmac.Forms
                     return;
                 }
 
-                if (VendorComboBox.Items.Count == 0)
+                if (VendorComboBox!.Items.Count == 0)
                 {
                     VendorComboBox.BeginUpdate();
                     try
@@ -1603,7 +1612,7 @@ namespace Dzmac.Forms
 
         private async Task AppendNextVendorBatchAsync()
         {
-            if (_isAppendingVendorBatch || _vendorComboItems == null || _vendorComboLoadedCount >= _vendorComboItems.Count || IsDisposed)
+            if (_isAppendingVendorBatch || _vendorComboItems is null || _vendorComboLoadedCount >= _vendorComboItems.Count || IsDisposed)
             {
                 return;
             }
@@ -1621,7 +1630,7 @@ namespace Dzmac.Forms
                     return;
                 }
 
-                VendorComboBox.BeginUpdate();
+                VendorComboBox!.BeginUpdate();
                 try
                 {
                     VendorComboBox.Items.AddRange(batch.Cast<object>().ToArray());
@@ -1642,7 +1651,7 @@ namespace Dzmac.Forms
 
         private async Task TryLoadNextVendorBatchIfNeededAsync()
         {
-            if (!VendorComboBox.DroppedDown || _vendorComboItems == null || _vendorComboLoadedCount >= _vendorComboItems.Count)
+            if (!VendorComboBox!.DroppedDown || _vendorComboItems is null || _vendorComboLoadedCount >= _vendorComboItems.Count)
             {
                 return;
             }
@@ -1660,12 +1669,12 @@ namespace Dzmac.Forms
             }
         }
 
-        private void ResetVendorComboData(string preserveText = null)
+        private void ResetVendorComboData(string? preserveText = null)
         {
             _vendorComboItems = null;
             _vendorComboLoadedCount = 0;
             _isAppendingVendorBatch = false;
-            VendorComboBox.BeginUpdate();
+            VendorComboBox!.BeginUpdate();
             try
             {
                 VendorComboBox.DataSource = null;
@@ -1684,7 +1693,7 @@ namespace Dzmac.Forms
 
         private void PopulateIpv4AddressRows(IEnumerable<AdapterIpv4Address> addresses)
         {
-            Ipv4AddressListView.BeginUpdate();
+            Ipv4AddressListView!.BeginUpdate();
             Ipv4AddressListView.Items.Clear();
 
             foreach (var entry in addresses)
@@ -1703,7 +1712,7 @@ namespace Dzmac.Forms
 
         private void PopulateIpv6AddressRows(IEnumerable<AdapterIpv6Address> addresses)
         {
-            Ipv6AddressListView.BeginUpdate();
+            Ipv6AddressListView!.BeginUpdate();
             Ipv6AddressListView.Items.Clear();
 
             foreach (var entry in addresses)
@@ -1737,9 +1746,8 @@ namespace Dzmac.Forms
 
             try
             {
-                var physicalOnly = !ShowAllAdaptersItem.Checked;
-                var updatedConnections = await Task.Run(() =>
-                {
+                var physicalOnly = !ShowAllAdaptersItem!.Checked;
+                var updatedConnections = await Task.Run(() => {
                     cancellationToken.ThrowIfCancellationRequested();
 
                     var adapters = NetworkAdapterFactory
@@ -1749,7 +1757,7 @@ namespace Dzmac.Forms
                         .ToList();
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    return adapters.Select(adapter => new NetworkConnection(adapter, ShowSpeedInKBytesPerSecItem.Checked, _adminService)).ToList();
+                    return adapters.Select(adapter => new NetworkConnection(adapter, ShowSpeedInKBytesPerSecItem!.Checked, _adminService)).ToList();
                 }, cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested || IsDisposed)
@@ -1758,8 +1766,7 @@ namespace Dzmac.Forms
                     return;
                 }
 
-                RunOnUiThread(() =>
-                {
+                RunOnUiThread(() => {
                     if (IsDisposed)
                     {
                         DisposeConnections(updatedConnections);
@@ -1776,7 +1783,7 @@ namespace Dzmac.Forms
                             .ToList();
                     }
 
-                    ConnectionsGrid.BeginUpdate();
+                    ConnectionsGrid!.BeginUpdate();
                     DisposeConnections(NetworkConnections, new HashSet<NetworkConnection>(retainedDisabledConnections));
                     NetworkConnections = updatedConnections;
                     ConnectionsGrid.DataSource = NetworkConnections;
@@ -1784,21 +1791,21 @@ namespace Dzmac.Forms
                     ConnectionsGrid.AutoResizeColumns();
                     RestoreSelection(selectedConfigId);
                     BindSelection();
-                    MainStatusBar.Text = $"Loaded {NetworkConnections.Count} adapters.";
+                    MainStatusBar!.Text = $"Loaded {NetworkConnections.Count} adapters.";
                 });
             }
             catch (OperationCanceledException)
             {
                 if (!IsDisposed)
                 {
-                    MainStatusBar.Text = Resources.StatusAdapterLoadCancelled;
+                    MainStatusBar!.Text = Resources.StatusAdapterLoadCancelled;
                 }
             }
             catch (Exception ex)
             {
                 if (!IsDisposed)
                 {
-                    MainStatusBar.Text = Resources.StatusFailedLoadAdapters;
+                    MainStatusBar!.Text = Resources.StatusFailedLoadAdapters;
                     _ = MessageBox.Show(ex.Message, Resources.AdapterDiscoveryFailed_Title, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -1806,8 +1813,7 @@ namespace Dzmac.Forms
             {
                 if (!IsDisposed)
                 {
-                    RunOnUiThread(() =>
-                    {
+                    RunOnUiThread(() => {
                         if (!IsDisposed)
                         {
                             SetLoadingState(false, false);
@@ -1820,13 +1826,13 @@ namespace Dzmac.Forms
         private void SetLoadingState(bool isLoading, bool clearListWhileLoading)
         {
             _isRefreshing = isLoading;
-            RefreshItem.Enabled = !isLoading;
-            ConnectionsGrid.Enabled = !isLoading;
+            RefreshItem!.Enabled = !isLoading;
+            ConnectionsGrid!.Enabled = !isLoading;
             if (isLoading)
             {
-                _loadingPanel.Visible = true;
-                _loadingProgressBar.Value = _loadingProgressBar.Minimum;
-                if (_loadingProgressTimer != null && !_loadingProgressTimer.Enabled)
+                _loadingPanel!.Visible = true;
+                _loadingProgressBar!.Value = _loadingProgressBar.Minimum;
+                if (_loadingProgressTimer is not null && !_loadingProgressTimer.Enabled)
                 {
                     _loadingProgressTimer.Start();
                 }
@@ -1841,30 +1847,30 @@ namespace Dzmac.Forms
             }
             else
             {
-                _loadingPanel.Visible = false;
-                if (_loadingProgressTimer != null && _loadingProgressTimer.Enabled)
+                _loadingPanel!.Visible = false;
+                if (_loadingProgressTimer is not null && _loadingProgressTimer.Enabled)
                 {
                     _loadingProgressTimer.Stop();
                 }
-                _loadingProgressBar.Value = _loadingProgressBar.Minimum;
+                _loadingProgressBar!.Value = _loadingProgressBar.Minimum;
                 ConnectionsGrid.EmptyListMsg = Resources.StatusNoAdaptersLoaded;
             }
 
             UpdateSelectionState();
         }
 
-        private void RestoreSelection(string selectedConfigId)
+        private void RestoreSelection(string? selectedConfigId)
         {
-            if (string.IsNullOrWhiteSpace(selectedConfigId) || NetworkConnections == null || NetworkConnections.Count == 0)
+            if (string.IsNullOrWhiteSpace(selectedConfigId) || NetworkConnections is null || NetworkConnections.Count == 0)
             {
-                ConnectionsGrid.SelectedItem = ConnectionsGrid.GetItem(0);
+                ConnectionsGrid!.SelectedItem = ConnectionsGrid.GetItem(0);
                 _selected = ConnectionsGrid.SelectedItem?.RowObject as NetworkConnection;
                 return;
             }
 
-            foreach (OLVListItem item in ConnectionsGrid.Items)
+            foreach (OLVListItem item in ConnectionsGrid!.Items)
             {
-                if (!(item.RowObject is NetworkConnection row))
+                if (item.RowObject is not NetworkConnection row)
                 {
                     continue;
                 }
@@ -1881,9 +1887,9 @@ namespace Dzmac.Forms
             _selected = ConnectionsGrid.SelectedItem?.RowObject as NetworkConnection;
         }
 
-        private void RunOnUiThread(Action action)
+        private void RunOnUiThread(Action? action)
         {
-            if (IsDisposed)
+            if (IsDisposed || action is null)
             {
                 return;
             }
@@ -1899,23 +1905,23 @@ namespace Dzmac.Forms
 
         private void UpdateSelectionState()
         {
-            var hasSelection = _selected != null;
+            var hasSelection = _selected is not null;
             var enableActions = hasSelection && !_isRefreshing;
 
-            ChangeMacButton.Enabled = enableActions;
-            RestoreMacButton.Enabled = enableActions;
-            RandomMacButton.Enabled = enableActions && _isVendorListReady;
-            DhcpEnabledItem.Enabled = enableActions;
-            DhcpRenewIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
-            DhcpReleaseIpItem.Enabled = enableActions && _selected != null && _selected.IsDhcpEnabled;
-            DeleteItem.Enabled = enableActions;
-            ToggleAdapterEnabledItem.Enabled = enableActions;
-            ToggleAdapterEnabledItem.Text = !hasSelection || !(ConnectionsGrid?.SelectedObject is NetworkConnection selectedConnection) || selectedConnection.Enabled ? Resources.ToggleDisableAdapter : Resources.ToggleEnableAdapter;
+            ChangeMacButton!.Enabled = enableActions;
+            RestoreMacButton!.Enabled = enableActions;
+            RandomMacButton!.Enabled = enableActions && _isVendorListReady;
+            DhcpEnabledItem!.Enabled = enableActions;
+            DhcpRenewIpItem!.Enabled = enableActions && _selected is not null && _selected.IsDhcpEnabled;
+            DhcpReleaseIpItem!.Enabled = enableActions && _selected is not null && _selected.IsDhcpEnabled;
+            DeleteItem!.Enabled = enableActions;
+            ToggleAdapterEnabledItem!.Enabled = enableActions;
+            ToggleAdapterEnabledItem.Text = !hasSelection || ConnectionsGrid?.SelectedObject is not NetworkConnection selectedConnection || selectedConnection.Enabled ? Resources.ToggleDisableAdapter : Resources.ToggleEnableAdapter;
         }
 
         private List<NetworkConnection> GetRetainedDisabledConnections(IReadOnlyCollection<NetworkConnection> refreshedConnections, bool physicalOnly)
         {
-            if (NetworkConnections == null || NetworkConnections.Count == 0)
+            if (NetworkConnections is null || NetworkConnections.Count == 0)
             {
                 return new List<NetworkConnection>();
             }
@@ -1943,7 +1949,7 @@ namespace Dzmac.Forms
 
         private async Task ToggleAdapterEnabledAsync(NetworkConnection connection)
         {
-            if (_isRefreshing || connection == null)
+            if (_isRefreshing || connection is null)
             {
                 return;
             }
@@ -1961,21 +1967,21 @@ namespace Dzmac.Forms
 
             if (approvalResult != DialogResult.Yes)
             {
-                MainStatusBar.Text = $"Adapter {targetState} canceled for {selectedAdapterName}.";
+                MainStatusBar!.Text = $"Adapter {targetState} canceled for {selectedAdapterName}.";
                 Diagnostics.Info("adapter_toggle_cancelled", ("adapter", selectedAdapterName), ("targetState", targetState));
                 return;
             }
 
-            MainStatusBar.Text = $"{(shouldEnable ? "Enabling" : "Disabling")} {selectedAdapterName}...";
+            MainStatusBar!.Text = $"{(shouldEnable ? "Enabling" : "Disabling")} {selectedAdapterName}...";
 
             var operationResult = await Task.Run(() => connection.TrySetEnabled(shouldEnable));
             if (operationResult.IsSuccess)
             {
-                MainStatusBar.Text = $"{(shouldEnable ? "Enabled" : "Disabled")} {selectedAdapterName}.";
+                MainStatusBar!.Text = $"{(shouldEnable ? "Enabled" : "Disabled")} {selectedAdapterName}.";
                 Diagnostics.Info("adapter_toggle_succeeded", ("adapter", selectedAdapterName), ("targetState", targetState));
                 _selected = connection;
                 UpdateSelectionState();
-                ConnectionsGrid.RefreshObject(connection);
+                ConnectionsGrid!.RefreshObject(connection);
                 _ = RefreshConnectionsBackground();
                 return;
             }
@@ -1992,7 +1998,7 @@ namespace Dzmac.Forms
                 Resources.AdapterStateChangeFailed_Title,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-            ConnectionsGrid.RefreshObject(connection);
+            ConnectionsGrid!.RefreshObject(connection);
         }
 
         private static string FormatBitsPerSecond(long bitsPerSecond)
@@ -2030,11 +2036,11 @@ namespace Dzmac.Forms
             return $"{value:F2} {units[unitIndex]}";
         }
 
-        private bool IsPerformanceTabVisible() => InfoTabs.SelectedTab == InformationPage;
+        private bool IsPerformanceTabVisible() => InfoTabs!.SelectedTab == InformationPage;
 
         private void DrawSampleSeries(Graphics graphics, double[] samples, double maxSample, Color color)
         {
-            if (samples.Length < 2 || _performanceGraphPanel.Width < 2 || _performanceGraphPanel.Height < 2)
+            if (samples.Length < 2 || _performanceGraphPanel!.Width < 2 || _performanceGraphPanel.Height < 2)
             {
                 return;
             }
@@ -2142,20 +2148,19 @@ namespace Dzmac.Forms
 
                     if (Interlocked.CompareExchange(ref _performanceUiUpdatePending, 1, 0) == 0)
                     {
-                        BeginInvoke(new Action(() =>
-                        {
+                        BeginInvoke(new Action(() => {
                             try
                             {
-                                if (IsDisposed || cancellationToken.IsCancellationRequested || _selectedNetworkInterface == null || _selectedNetworkInterface.Id != networkInterface.Id || !IsPerformanceTabVisible())
+                                if (IsDisposed || cancellationToken.IsCancellationRequested || _selectedNetworkInterface is null || _selectedNetworkInterface.Id != networkInterface.Id || !IsPerformanceTabVisible())
                                 {
                                     return;
                                 }
 
-                                _performanceReceivedLabel.Text = $"Received: {FormatDataSize(receivedBytes)}";
-                                _performanceReceivedSpeedLabel.Text = $"-Speed  : {FormatBitsPerSecond(receivedBitsPerSecond)} (Peak {FormatBitsPerSecond(peakReceivedBitsPerSecond)})";
-                                _performanceSentLabel.Text = $"Sent    : {FormatDataSize(sentBytes)}";
-                                _performanceSentSpeedLabel.Text = $"-Speed  : {FormatBitsPerSecond(sentBitsPerSecond)} (Peak {FormatBitsPerSecond(peakSentBitsPerSecond)})";
-                                _performanceGraphPanel.Invalidate();
+                                _performanceReceivedLabel!.Text = $"Received: {FormatDataSize(receivedBytes)}";
+                                _performanceReceivedSpeedLabel!.Text = $"-Speed  : {FormatBitsPerSecond(receivedBitsPerSecond)} (Peak {FormatBitsPerSecond(peakReceivedBitsPerSecond)})";
+                                _performanceSentLabel!.Text = $"Sent    : {FormatDataSize(sentBytes)}";
+                                _performanceSentSpeedLabel!.Text = $"-Speed  : {FormatBitsPerSecond(sentBitsPerSecond)} (Peak {FormatBitsPerSecond(peakSentBitsPerSecond)})";
+                                _performanceGraphPanel!.Invalidate();
                             }
                             finally
                             {
@@ -2190,36 +2195,36 @@ namespace Dzmac.Forms
 
             if (shouldResetPerformanceState)
             {
-                _performanceReceivedLabel.Text = Resources.PerfReceivedResolving;
-                _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedWaiting;
-                _performanceSentLabel.Text = Resources.PerfSentResolving;
-                _performanceSentSpeedLabel.Text = Resources.PerfSpeedWaiting;
+                _performanceReceivedLabel!.Text = Resources.PerfReceivedResolving;
+                _performanceReceivedSpeedLabel!.Text = Resources.PerfSpeedWaiting;
+                _performanceSentLabel!.Text = Resources.PerfSentResolving;
+                _performanceSentSpeedLabel!.Text = Resources.PerfSpeedWaiting;
                 ResetPerformanceBuffers();
-                _performanceGraphPanel.Invalidate();
+                _performanceGraphPanel!.Invalidate();
             }
 
             _networkInterfacesById.TryGetValue(networkConfigId, out var resolvedInterface);
 
-            if (IsDisposed || resolveVersion != _performanceResolveVersion || !IsPerformanceTabVisible() || _selected == null || _selected.ConfigId != networkConfigId)
+            if (IsDisposed || resolveVersion != _performanceResolveVersion || !IsPerformanceTabVisible() || _selected is null || _selected.ConfigId != networkConfigId)
             {
                 return Task.CompletedTask;
             }
 
             _selectedNetworkInterface = resolvedInterface;
-            if (resolvedInterface == null)
+            if (resolvedInterface is null)
             {
                 _performanceHistoryConfigId = null;
-                _performanceReceivedLabel.Text = Resources.PerfReceivedUnavailable;
-                _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedUnavailable;
-                _performanceSentLabel.Text = Resources.PerfSentUnavailable;
-                _performanceSentSpeedLabel.Text = Resources.PerfSpeedUnavailable;
+                _performanceReceivedLabel!.Text = Resources.PerfReceivedUnavailable;
+                _performanceReceivedSpeedLabel!.Text = Resources.PerfSpeedUnavailable;
+                _performanceSentLabel!.Text = Resources.PerfSentUnavailable;
+                _performanceSentSpeedLabel!.Text = Resources.PerfSpeedUnavailable;
                 return Task.CompletedTask;
             }
 
-            _performanceReceivedLabel.Text = Resources.PerfReceivedWaiting;
-            _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedWaiting;
-            _performanceSentLabel.Text = Resources.PerfSentWaiting;
-            _performanceSentSpeedLabel.Text = Resources.PerfSpeedWaiting;
+            _performanceReceivedLabel!.Text = Resources.PerfReceivedWaiting;
+            _performanceReceivedSpeedLabel!.Text = Resources.PerfSpeedWaiting;
+            _performanceSentLabel!.Text = Resources.PerfSentWaiting;
+            _performanceSentSpeedLabel!.Text = Resources.PerfSpeedWaiting;
 
             _performanceLoopCancellation = new CancellationTokenSource();
             _performanceHistoryConfigId = networkConfigId;
@@ -2239,11 +2244,11 @@ namespace Dzmac.Forms
             {
                 _performanceHistoryConfigId = null;
                 ResetPerformanceBuffers();
-                _performanceReceivedLabel.Text = Resources.PerfReceivedZero;
-                _performanceReceivedSpeedLabel.Text = Resources.PerfSpeedZero;
-                _performanceSentLabel.Text = Resources.PerfSentZero;
-                _performanceSentSpeedLabel.Text = Resources.PerfSpeedZero;
-                _performanceGraphPanel.Invalidate();
+                _performanceReceivedLabel!.Text = Resources.PerfReceivedZero;
+                _performanceReceivedSpeedLabel!.Text = Resources.PerfSpeedZero;
+                _performanceSentLabel!.Text = Resources.PerfSentZero;
+                _performanceSentSpeedLabel!.Text = Resources.PerfSpeedZero;
+                _performanceGraphPanel!.Invalidate();
             }
         }
 

@@ -1,10 +1,7 @@
-#nullable enable
-
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Dzmac.Core;
 
 namespace Dzmac.Core.Presets
 {
@@ -18,7 +15,7 @@ namespace Dzmac.Core.Presets
 
         public static TpfFile Load(string path)
         {
-            if (path == null)
+            if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(nameof(path));
             }
@@ -29,7 +26,7 @@ namespace Dzmac.Core.Presets
 
         public static TpfFile Load(byte[] bytes)
         {
-            if (bytes == null)
+            if (bytes is null)
             {
                 throw new ArgumentNullException(nameof(bytes));
             }
@@ -64,7 +61,7 @@ namespace Dzmac.Core.Presets
                 try
                 {
                     var preset = ReadPreset(bytes, ref offset);
-                    if (preset != null)
+                    if (preset is not null)
                     {
                         file.Presets.Add(preset);
                     }
@@ -125,12 +122,12 @@ namespace Dzmac.Core.Presets
 
         public static void Save(string path, TpfFile file)
         {
-            if (path == null)
+            if (path is null)
             {
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (file == null)
+            if (file is null)
             {
                 throw new ArgumentNullException(nameof(file));
             }
@@ -141,13 +138,19 @@ namespace Dzmac.Core.Presets
 
         public static byte[] Save(TpfFile file)
         {
-            if (file == null)
+            if (file is null)
             {
                 throw new ArgumentNullException(nameof(file));
             }
 
             Diagnostics.Info("tpf_save_start", ("presetCount", file.Presets.Count));
             using var ms = new MemoryStream();
+            if (file.Presets.Count > 255)
+            {
+                Diagnostics.Warning("tpf_preset_count_truncated", "Preset count exceeds 255; extra presets will not be saved.",
+                    ("totalCount", file.Presets.Count), ("savedCount", 255));
+            }
+
             var serializedPresetCount = Math.Min(255, file.Presets.Count);
             var selectedPresetIndex = serializedPresetCount == 0
                 ? 0
@@ -235,7 +238,7 @@ namespace Dzmac.Core.Presets
                 preset.CustomMac = string.Join("-", Enumerable.Range(0, 6).Select(i => normalizedMac.Substring(i * 2, 2).ToUpperInvariant()));
             }
 
-            if (preset.Ipv4 == null || !preset.Ipv4.Enabled)
+            if (preset.Ipv4 is null || !preset.Ipv4.Enabled)
             {
                 return;
             }
@@ -287,7 +290,7 @@ namespace Dzmac.Core.Presets
 
         private static void WritePreset(Stream stream, TpfPreset preset)
         {
-            if (preset == null)
+            if (preset is null)
             {
                 throw new ArgumentNullException(nameof(preset));
             }
@@ -390,7 +393,7 @@ namespace Dzmac.Core.Presets
 
         private static void WriteIpv4(Stream stream, TpfIpv4Settings? ipv4)
         {
-            if (ipv4 == null || !ipv4.Enabled)
+            if (ipv4 is null || !ipv4.Enabled)
             {
                 WriteUInt16(stream, 0);
                 return;

@@ -10,7 +10,7 @@ namespace Dzmac.Forms
         {
             InitializeComponent();
             Icon = AppIconProvider.GetIcon();
-            HelpTextBox.Text = CommandLineHelpContent.Text;
+            HelpTextBox!.Text = CommandLineHelpContent.Text;
         }
     }
 }

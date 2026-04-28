@@ -44,7 +44,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void GetNewMacForOuiShouldThrowWhenOuiIsNull()
         {
-            _ = Assert.ThrowsException<ArgumentNullException>(() => MacAddress.GetNewMac((string)null));
+            _ = Assert.ThrowsException<ArgumentNullException>(() => MacAddress.GetNewMac(null));
         }
 
         [TestMethod]
