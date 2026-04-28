@@ -22,6 +22,7 @@ namespace Dzmac.Core
         private static int _eventLogInitStarted;
         private static long _nextEventLogInitRetryTicks;
         private static volatile bool _eventLogReady;
+        private static int _queueOverflowWarned;
 
         public static void Info(string eventName, params (string Key, object? Value)[] context) =>
             Write(TraceEventType.Information, eventName, null, context);
@@ -161,6 +162,11 @@ namespace Dzmac.Core
             if (count <= PendingQueueLimit)
             {
                 return;
+            }
+
+            if (Interlocked.CompareExchange(ref _queueOverflowWarned, 1, 0) == 0)
+            {
+                Trace.TraceWarning($"event=diagnostics_queue_overflow, limit={PendingQueueLimit}: oldest entries will be dropped.");
             }
 
             if (PendingEntries.TryDequeue(out _))

@@ -185,6 +185,11 @@ namespace Dzmac.Forms
                     _ = MessageBox.Show(updateResult.Message, Resources.MacAddressChange_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            catch (Exception ex)
+            {
+                MainStatusBar!.Text = Resources.Failure_Title;
+                _ = MessageBox.Show(ex.Message, Resources.MacAddressChange_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             finally
             {
                 UpdateSelectionState();
@@ -721,6 +726,11 @@ namespace Dzmac.Forms
                     MainStatusBar.Text = $"Failed to restore original MAC address for {selected.Name}.";
                     _ = MessageBox.Show(Resources.MacAddressRestoreFailed, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            catch (Exception ex)
+            {
+                MainStatusBar!.Text = Resources.Failure_Title;
+                _ = MessageBox.Show(ex.Message, Resources.MacAddressRestore_Title, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

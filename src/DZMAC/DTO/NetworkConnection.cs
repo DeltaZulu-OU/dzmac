@@ -104,6 +104,10 @@ namespace Dzmac.DTO
             {
                 _enabled = shouldEnable;
             }
+            else
+            {
+                Diagnostics.Warning("adapter_enable_toggle_failed", result.Message, ("adapter", Name), ("shouldEnable", shouldEnable));
+            }
 
             return result;
         }

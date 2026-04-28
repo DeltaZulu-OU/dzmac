@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Dzmac.Core;
 using Dzmac.Core.Presets;
@@ -164,7 +165,14 @@ namespace Dzmac.Forms
                 parts[i] = row.Cells[i].Value?.ToString() ?? string.Empty;
             }
 
-            Clipboard.SetText(string.Join("\t", parts));
+            try
+            {
+                Clipboard.SetText(string.Join("\t", parts));
+            }
+            catch (ExternalException)
+            {
+                // ignore: clipboard locked by another process
+            }
         }
 
         private static DataGridViewRow? GetSelectedRow(DataGridView grid)

@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 
 namespace Dzmac.Core
@@ -267,13 +268,25 @@ namespace Dzmac.Core
                 var rollbackSuccess = enableDhcpResult && emptyDnsResult;
                 if (rollbackSuccess)
                 {
-                    Diagnostics.Warning("dhcp_disable_failed_rollback_success", "DHCP disable failed and automatic rollback succeeded.", ("adapter", Name));
+                    Diagnostics.Warning("dhcp_disable_failed_rollback_success", "DHCP disable failed and automatic rollback succeeded.",
+                        ("adapter", Name),
+                        ("enableStaticCode", enableStaticCode),
+                        ("setGatewayCode", setGatewayCode),
+                        ("setDnsCode", setDnsCode),
+                        ("enableDhcpCode", enableDhcpCode),
+                        ("emptyDnsCode", emptyDnsCode));
                     return false;
                 }
                 else
                 {
                     // something we cannot handle here.
-                    Diagnostics.Error("dhcp_disable_failed_rollback_failed", null, "DHCP disable failed and rollback did not complete.", ("adapter", Name));
+                    Diagnostics.Error("dhcp_disable_failed_rollback_failed", null, "DHCP disable failed and rollback did not complete.",
+                        ("adapter", Name),
+                        ("enableStaticCode", enableStaticCode),
+                        ("setGatewayCode", setGatewayCode),
+                        ("setDnsCode", setDnsCode),
+                        ("enableDhcpCode", enableDhcpCode),
+                        ("emptyDnsCode", emptyDnsCode));
 
                     // Display an error dialog to the user
                     throw new DZMACException("Failed to disable DHCP");
@@ -331,13 +344,25 @@ namespace Dzmac.Core
                 var rollbackSuccess = rollbackStaticResult && rollbackGatewayResult && rollbackDnsResult;
                 if (rollbackSuccess)
                 {
-                    Diagnostics.Warning("dhcp_enable_failed_rollback_success", "DHCP enable failed and automatic rollback succeeded.", ("adapter", Name));
+                    Diagnostics.Warning("dhcp_enable_failed_rollback_success", "DHCP enable failed and automatic rollback succeeded.",
+                        ("adapter", Name),
+                        ("enableDhcpCode", enableDhcpCode),
+                        ("emptyDnsCode", emptyDnsCode),
+                        ("rollbackStaticCode", rollbackStaticCode),
+                        ("rollbackGatewayCode", rollbackGatewayCode),
+                        ("rollbackDnsCode", rollbackDnsCode));
                     return false;
                 }
                 else
                 {
                     // something we cannot handle here.
-                    Diagnostics.Error("dhcp_enable_failed_rollback_failed", null, "DHCP enable failed and rollback did not complete.", ("adapter", Name));
+                    Diagnostics.Error("dhcp_enable_failed_rollback_failed", null, "DHCP enable failed and rollback did not complete.",
+                        ("adapter", Name),
+                        ("enableDhcpCode", enableDhcpCode),
+                        ("emptyDnsCode", emptyDnsCode),
+                        ("rollbackStaticCode", rollbackStaticCode),
+                        ("rollbackGatewayCode", rollbackGatewayCode),
+                        ("rollbackDnsCode", rollbackDnsCode));
 
                     // Display an error dialog to the user
                     throw new DZMACException("Failed to enable DHCP");
@@ -539,7 +564,14 @@ namespace Dzmac.Core
 
             try
             {
-                _adapter.Get();
+                // _adapter.Get() can hang indefinitely when AV/VPN drivers make WMI
+                // unresponsive without ever throwing. Run it with a 2-second timeout so
+                // the calling polling loop can still honour its CancellationToken.
+                if (!Task.Run(() => _adapter.Get()).Wait(TimeSpan.FromSeconds(2)))
+                {
+                    Diagnostics.Warning("adapter_wmi_get_timeout", "WMI Get() timed out after 2 s.", ("adapter", Name));
+                    return false;
+                }
             }
             catch
             {

@@ -17,10 +17,10 @@ namespace Dzmac.Forms
 
             var productName = AssemblyProduct;
             Text = $"About {productName}";
-            ProductNameLabel!.Text = $"   {productName}";
+            ProductNameLabel!.Text = productName;
             ProductNameLabel!.Image = AppIconProvider.GetBitmap(new Size(16, 16));
             ProductNameLabel!.ImageAlign = ContentAlignment.MiddleLeft;
-            ProductNameLabel!.Padding = new Padding(0, 0, 0, 0);
+            ProductNameLabel!.TextAlign = ContentAlignment.MiddleLeft;
             VersionLabel!.Text = $"Version {AssemblyVersion}";
             CopyrightLabel!.Text = AssemblyCopyright;
             DescriptionLabel!.Text = AssemblyDescription;
@@ -83,7 +83,14 @@ namespace Dzmac.Forms
         private void ProjectLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             ProjectLinkLabel!.LinkVisited = true;
-            Process.Start("https://github.com/DeltaZulu-OU/dzmac");
+            try
+            {
+                Process.Start("https://github.com/DeltaZulu-OU/dzmac");
+            }
+            catch
+            {
+                // ignore: no browser registered or URL scheme blocked
+            }
         }
 
         private string GetDebuggerDisplay() => "About";
