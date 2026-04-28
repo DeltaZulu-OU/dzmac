@@ -16,9 +16,9 @@ namespace Dzmac.Core
             RetryCount = Math.Max(1, retryCount);
         }
 
-        public static AdapterAdminPolicy FromConfig(IAppSettings settings)
+        public static AdapterAdminPolicy FromConfig(IAppSettings? settings)
         {
-            if (settings == null)
+            if (settings is null)
             {
                 throw new ArgumentNullException(nameof(settings));
             }
@@ -60,9 +60,9 @@ namespace Dzmac.Core
             _policy = policy ?? throw new ArgumentNullException(nameof(policy));
         }
 
-        public async Task<AdapterAdminResult> ExecuteAsync(AdapterAdminCommand command, CancellationToken cancellationToken = default)
+        public async Task<AdapterAdminResult> ExecuteAsync(AdapterAdminCommand? command, CancellationToken cancellationToken = default)
         {
-            if (command == null)
+            if (command is null)
             {
                 return AdapterAdminResult.Failed(AdapterAdminResultCode.InvalidArgument, "Command cannot be null.");
             }
@@ -262,7 +262,7 @@ namespace Dzmac.Core
 
         private Task<AdapterAdminResult> ExecuteAsync(NetworkAdapter adapter, string operationName, Func<CancellationToken, (bool Success, string Message)> operation, CancellationToken cancellationToken)
         {
-            if (adapter == null)
+            if (adapter is null)
             {
                 return Task.FromResult(AdapterAdminResult.Failed(AdapterAdminResultCode.InvalidArgument, "Adapter cannot be null."));
             }

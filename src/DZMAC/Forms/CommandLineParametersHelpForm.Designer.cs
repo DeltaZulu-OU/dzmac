@@ -1,12 +1,14 @@
-﻿namespace Dzmac.Forms
+﻿#nullable enable
+
+namespace Dzmac.Forms
 {
     internal partial class CommandLineParametersHelpForm
     {
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer? components = null;
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
             }

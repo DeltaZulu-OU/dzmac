@@ -1,4 +1,5 @@
 using System.Reflection;
+using Dzmac.Cli;
 
 namespace Dzmac.Tests
 {
@@ -12,7 +13,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void TryParseShouldRejectMissingConnectionNameValueWhenNextTokenIsAnotherOption()
         {
-            var args = new object[] { new[] { "-n", "-m" }, null, null };
+            var args = new object?[] { new[] { "-n", "-m" }, null, null };
 
             var parsed = (bool)TryParseMethod.Invoke(null, args)!;
 
@@ -23,7 +24,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void TryParseShouldRejectMissingIpv4ValueWhenNextTokenIsAnotherOption()
         {
-            var args = new object[] { new[] { "-i", "-g", "10.0.0.1/1" }, null, null };
+            var args = new object?[] { new string?[] { "-i", "-g", "10.0.0.1/1" }, null, null };
 
             var parsed = (bool)TryParseMethod.Invoke(null, args)!;
 

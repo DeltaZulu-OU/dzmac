@@ -83,7 +83,7 @@ namespace Dzmac.Core
         /// <summary>
         ///     Checks if there is a registry MAC address defined to override vendor-provided address
         /// </summary>
-        public bool Changed => ActiveMacAddress != null;
+        public bool Changed => ActiveMacAddress is not null;
 
         /// <summary>
         ///     Gets the identifier of the network adapter.
@@ -103,7 +103,7 @@ namespace Dzmac.Core
             get
             {
                 EnsureWmiObjects();
-                if (_adapter == null)
+                if (_adapter is null)
                 {
                     return string.Empty;
                 }
@@ -233,7 +233,7 @@ namespace Dzmac.Core
         public bool TryDhcpDisable()
         {
             EnsureWmiObjects();
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 Diagnostics.Warning("dhcp_disable_skipped", "Adapter configuration object is unavailable.", ("adapter", Name));
                 return false;
@@ -296,7 +296,7 @@ namespace Dzmac.Core
         public bool TryDhcpEnable()
         {
             EnsureWmiObjects();
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 Diagnostics.Warning("dhcp_enable_skipped", "Adapter configuration object is unavailable.", ("adapter", Name));
                 return false;
@@ -354,7 +354,7 @@ namespace Dzmac.Core
         public bool TrySetIPv4Addresses(string[] ipAddresses, string[] subnetMasks)
         {
             EnsureWmiObjects();
-            if (_adapterConfig == null || ipAddresses == null || subnetMasks == null || ipAddresses.Length == 0 || ipAddresses.Length != subnetMasks.Length)
+            if (_adapterConfig is null || ipAddresses is null || subnetMasks is null || ipAddresses.Length == 0 || ipAddresses.Length != subnetMasks.Length)
             {
                 return false;
             }
@@ -371,7 +371,7 @@ namespace Dzmac.Core
         public bool TrySetIPv4Gateways(string[] gateways, int[] metrics)
         {
             EnsureWmiObjects();
-            if (_adapterConfig == null || gateways == null || metrics == null || gateways.Length == 0 || gateways.Length != metrics.Length)
+            if (_adapterConfig is null || gateways is null || metrics is null || gateways.Length == 0 || gateways.Length != metrics.Length)
             {
                 return false;
             }
@@ -388,7 +388,7 @@ namespace Dzmac.Core
         public bool TrySetIPv4DnsServers(string[] dnsServers)
         {
             EnsureWmiObjects();
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 return false;
             }
@@ -501,7 +501,7 @@ namespace Dzmac.Core
         {
             var action = enable ? "enable" : "disable";
             EnsureWmiObjects();
-            if (_adapter == null)
+            if (_adapter is null)
             {
                 Diagnostics.Warning($"adapter_{action}_skipped", "Adapter WMI object is unavailable.", ("adapter", Name));
                 return false;
@@ -509,7 +509,7 @@ namespace Dzmac.Core
 
             var method = enable ? "Enable" : "Disable";
             var result = _adapter.InvokeMethod(method, null);
-            if (result == null)
+            if (result is null)
             {
                 Diagnostics.Warning($"adapter_{action}_failed", $"{(enable ? "Enable" : "Disable")} command returned null.", ("adapter", Name));
                 return false;
@@ -532,7 +532,7 @@ namespace Dzmac.Core
         public bool IsAdapterEnabled()
         {
             EnsureWmiObjects();
-            if (_adapter == null)
+            if (_adapter is null)
             {
                 return false;
             }
@@ -555,7 +555,7 @@ namespace Dzmac.Core
             {
                 var liveInterface = NetworkInterface.GetAllNetworkInterfaces()
                     .FirstOrDefault(i => string.Equals(i.Id, _networkInterface.Id, StringComparison.OrdinalIgnoreCase));
-                if (liveInterface == null)
+                if (liveInterface is null)
                 {
                     return null;
                 }
@@ -598,7 +598,7 @@ namespace Dzmac.Core
 
             try
             {
-                var targetMac = mac != null ? mac.ToString() : string.Empty;
+                var targetMac = mac is not null ? mac.ToString() : string.Empty;
                 Diagnostics.Info("registry_mac_update_started", ("adapter", Name), ("targetMac", string.IsNullOrEmpty(targetMac) ? "<restore>" : targetMac));
                 return UpdateRegistryMac(GetRegistryKey(), targetMac, _networkInterface.Description, persistOriginalRecord, out shouldReenable);
             }
@@ -649,7 +649,7 @@ namespace Dzmac.Core
 
         private int ExtractDeviceNumber()
         {
-            if (_adapter == null)
+            if (_adapter is null)
             {
                 return -1;
             }
@@ -665,7 +665,7 @@ namespace Dzmac.Core
                 return -1;
             }
 
-            if (match == null || !int.TryParse(match.Groups[1].Value, out var deviceNumber))
+            if (match is null || !int.TryParse(match.Groups[1].Value, out var deviceNumber))
             {
                 return -1;
             }
@@ -676,7 +676,7 @@ namespace Dzmac.Core
         private bool TryExtractDnsConfig(out ManagementBaseObject? dnsParams)
         {
             dnsParams = null;
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] DNS extraction failed for adapter '{Name}': adapter config object is null.");
                 return false;
@@ -691,7 +691,7 @@ namespace Dzmac.Core
         private bool TryExtractGateway(out ManagementBaseObject? gatewayParams)
         {
             gatewayParams = null;
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] Gateway extraction failed for adapter '{Name}': adapter config object is null.");
                 return false;
@@ -706,12 +706,12 @@ namespace Dzmac.Core
         private bool TryExtractIPConfig(out ManagementBaseObject? ipParams)
         {
             ipParams = null;
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] IP extraction failed for adapter '{Name}': adapter config object is null.");
                 return false;
             }
-            if (!(_adapterConfig.GetPropertyValue("IPAddress") is string[] ipAddresses) || !(_adapterConfig.GetPropertyValue("IPSubnet") is string[] subnetMasks) || ipAddresses.Length == 0 || subnetMasks.Length == 0)
+            if (_adapterConfig.GetPropertyValue("IPAddress") is not string[] ipAddresses || _adapterConfig.GetPropertyValue("IPSubnet") is not string[] subnetMasks || ipAddresses.Length == 0 || subnetMasks.Length == 0)
             {
                 Debug.WriteLine($"[{nameof(NetworkAdapter)}] IP extraction failed for adapter '{Name}': missing IPAddress/IPSubnet values.");
                 return false;
@@ -728,7 +728,7 @@ namespace Dzmac.Core
 
         private MacAddress? GetActiveMac()
         {
-            object address;
+            object? address;
             try
             {
                 var registryKey = GetRegistryKey();
@@ -738,7 +738,7 @@ namespace Dzmac.Core
                 }
 
                 address = _registryClient.ReadValue(registryKey, RegistryMacOverrideValueName);
-                if (address == null)
+                if (address is null)
                 {
                     return null;
                 }
@@ -754,18 +754,18 @@ namespace Dzmac.Core
 
         private string? GetActiveVendor()
         {
-            if (ActiveMacAddress == null)
+            if (ActiveMacAddress is null)
             {
                 return OriginalVendor;
             }
 
-            if (_manager == null)
+            if (_manager is null)
             {
                 return null;
             }
 
             var vendor = _manager.FindByMac(ActiveMacAddress, true);
-            if (vendor == null)
+            if (vendor is null)
             {
                 return UnknownVendorIdentifier;
             }
@@ -783,7 +783,7 @@ namespace Dzmac.Core
 
             // CIM_NetworkAdapter fallback: 2 = Enabled
             var enabledState = _adapter?["EnabledState"];
-            if (enabledState != null && ushort.TryParse(enabledState.ToString(), out var state))
+            if (enabledState is not null && ushort.TryParse(enabledState.ToString(), out var state))
             {
                 return state == 2;
             }
@@ -824,7 +824,7 @@ namespace Dzmac.Core
                 }
 
                 var address = _registryClient.ReadValue(registryKey, TmacOriginalMacValueName);
-                if (address != null)
+                if (address is not null)
                 {
                     var macString = address.ToString().Replace("-", string.Empty).ToUpperInvariant();
                     return new MacAddress(macString);
@@ -852,19 +852,19 @@ namespace Dzmac.Core
 
         private string? GetOriginalVendor()
         {
-            if (OriginalMacAddress == null)
+            if (OriginalMacAddress is null)
             {
                 return null;
             }
 
-            if (_manager == null)
+            if (_manager is null)
             {
                 return null;
             }
 
             var vendor = _manager.FindByMac(OriginalMacAddress);
 
-            if (vendor == null)
+            if (vendor is null)
             {
                 return UnknownVendorIdentifier;
             }
@@ -942,7 +942,7 @@ namespace Dzmac.Core
 
         internal static ManagementObject? CreateBoundManagementObject(ManagementObject? sourceObject)
         {
-            if (sourceObject == null)
+            if (sourceObject is null)
             {
                 return null;
             }
@@ -975,7 +975,7 @@ namespace Dzmac.Core
         private bool TryInvokeAdapterConfigMethod(string methodName, ManagementBaseObject? inParameters, out int returnCode)
         {
             returnCode = -1;
-            if (_adapterConfig == null)
+            if (_adapterConfig is null)
             {
                 Diagnostics.Warning("adapter_config_method_skipped", "Adapter configuration object is unavailable.", ("adapter", Name), ("method", methodName));
                 return false;
@@ -984,7 +984,7 @@ namespace Dzmac.Core
             try
             {
                 var result = _adapterConfig.InvokeMethod(methodName, inParameters, null);
-                if (result == null)
+                if (result is null)
                 {
                     Diagnostics.Warning("adapter_config_method_failed", "WMI method returned null result.", ("adapter", Name), ("method", methodName));
                     return false;
@@ -1156,7 +1156,7 @@ namespace Dzmac.Core
 
         public bool TryUpdateRegistryMacValue(MacAddress? mac, bool persistOriginalRecord = true)
         {
-            var targetMac = mac != null ? mac.ToString() : string.Empty;
+            var targetMac = mac is not null ? mac.ToString() : string.Empty;
             var registryKey = GetRegistryKey();
 
             if (!_registryClient.TryValidateAdapterDescription(registryKey, _networkInterface.Description))

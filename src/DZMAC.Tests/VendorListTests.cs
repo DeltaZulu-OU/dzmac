@@ -295,14 +295,14 @@ namespace Dzmac.Tests
             var temp = vendorList[index];
             Assert.AreNotEqual(default(Vendor), temp);
 
-            var vendor = vendorList[temp?.Oui];
+            var vendor = vendorList[temp!.Value.Oui];
             Assert.IsNotNull(vendor);
             Assert.IsNotNull(temp);
             Assert.AreNotEqual(default(Vendor), vendor);
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor?.Oui));
-            Assert.AreEqual(temp?.Oui, vendor?.Oui);
+            Assert.AreEqual(temp!.Value.Oui, vendor!.Value.Oui);
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor?.VendorName));
-            Assert.AreEqual(temp?.VendorName, vendor?.VendorName);
+            Assert.AreEqual(temp!.Value.VendorName, vendor!.Value.VendorName);
         }
 
         [TestMethod]
@@ -598,7 +598,7 @@ namespace Dzmac.Tests
 
             var vendor = vendorList.GetRandom();
 
-            Assert.AreNotEqual(default(Vendor), vendor);
+            Assert.AreNotEqual(default, vendor);
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor.Oui));
             Assert.IsFalse(string.IsNullOrWhiteSpace(vendor.VendorName));
         }

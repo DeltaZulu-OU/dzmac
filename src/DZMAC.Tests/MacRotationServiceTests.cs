@@ -7,7 +7,7 @@ namespace Dzmac.Tests
     [TestClass]
     public class MacRotationServiceTests
     {
-        private NetworkInterface _loopback;
+        private NetworkInterface? _loopback;
 
         [TestInitialize]
         public void Initialize() => _loopback = Array.Find(
@@ -17,7 +17,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void TryRotateMac_ReturnsRegDenied_WhenEnsureNetworkAddressThrowsUnauthorizedAccess()
         {
-            if (_loopback == null)
+            if (_loopback is null)
             {
                 Assert.Inconclusive("No loopback interface available.");
             }
@@ -36,7 +36,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void TryRotateMac_ReturnsRegDenied_WhenEnsureNetworkAddressThrowsSecurityException()
         {
-            if (_loopback == null)
+            if (_loopback is null)
             {
                 Assert.Inconclusive("No loopback interface available.");
             }
@@ -55,7 +55,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void TryRotateMac_ReturnsWmiFail_WhenAdapterWmiUnavailable()
         {
-            if (_loopback == null)
+            if (_loopback is null)
             {
                 Assert.Inconclusive("No loopback interface available.");
             }
@@ -74,7 +74,7 @@ namespace Dzmac.Tests
         [TestMethod]
         public void TryRotateMac_ThrowsArgumentNull_WhenProgressIsNull()
         {
-            if (_loopback == null)
+            if (_loopback is null)
             {
                 Assert.Inconclusive("No loopback interface available.");
             }
@@ -98,7 +98,7 @@ namespace Dzmac.Tests
                 _resolves = resolves;
             }
 
-            public override bool TryResolveByConfigId(string configId, out ManagementObject adapter, out ManagementObject adapterConfig)
+            public override bool TryResolveByConfigId(string configId, out ManagementObject? adapter, out ManagementObject? adapterConfig)
             {
                 adapter = null;
                 adapterConfig = null;
@@ -108,9 +108,9 @@ namespace Dzmac.Tests
 
         private sealed class FakeRegistryClient : AdapterRegistryClient
         {
-            private readonly Exception _throwOnEnsure;
+            private readonly Exception? _throwOnEnsure;
 
-            public FakeRegistryClient(Exception throwOnEnsure)
+            public FakeRegistryClient(Exception? throwOnEnsure)
             {
                 _throwOnEnsure = throwOnEnsure;
             }
@@ -118,7 +118,7 @@ namespace Dzmac.Tests
             public override string TryResolveRegistryKey(string registryClassKey, string configId)
                 => @"SYSTEM\FakeClass\0000";
 
-            public override object ReadValue(string registryKey, string valueName) => null;
+            public override object? ReadValue(string registryKey, string valueName) => null;
 
             public override bool TryValidateAdapterDescription(string registryKey, string description) => true;
 
@@ -133,7 +133,7 @@ namespace Dzmac.Tests
 
             public override void EnsureNetworkAddressParameter(string registryKey)
             {
-                if (_throwOnEnsure != null)
+                if (_throwOnEnsure is not null)
                 {
                     throw _throwOnEnsure;
                 }

@@ -45,7 +45,7 @@ namespace Dzmac.Core.Presets
     {
         public static string ToMacDisplay(TpfPreset preset)
         {
-            if (preset == null)
+            if (preset is null)
             {
                 throw new ArgumentNullException(nameof(preset));
             }
@@ -67,14 +67,14 @@ namespace Dzmac.Core.Presets
 
         public static IEnumerable<KeyValuePair<string, string>> ToProperties(TpfPreset preset)
         {
-            if (preset == null)
+            if (preset is null)
             {
                 throw new ArgumentNullException(nameof(preset));
             }
 
             yield return new KeyValuePair<string, string>("MAC Address", ToMacDisplay(preset));
 
-            if (preset.Ipv4 != null && preset.Ipv4.Enabled)
+            if (preset.Ipv4 is not null && preset.Ipv4.Enabled)
             {
                 if (!string.IsNullOrWhiteSpace(preset.Ipv4.Address) || !string.IsNullOrWhiteSpace(preset.Ipv4.SubnetMask))
                 {

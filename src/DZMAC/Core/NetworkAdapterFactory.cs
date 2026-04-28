@@ -49,7 +49,7 @@ namespace Dzmac.Core
                 foreach (var adapter in searcher.Get().Cast<ManagementObject>())
                 {
                     var guid = adapter["InterfaceGuid"] as string;
-                    if (string.IsNullOrWhiteSpace(guid) || map.ContainsKey(guid))
+                    if (string.IsNullOrWhiteSpace(guid) || map.ContainsKey(guid!))
                     {
                         continue;
                     }
@@ -57,7 +57,7 @@ namespace Dzmac.Core
                     var hardwareInterface = adapter["HardwareInterface"];
                     if (hardwareInterface is bool isPhysical)
                     {
-                        map[guid] = new AdapterClassification(isPhysical, AdapterClassificationSource.MsftNetAdapter);
+                        map[guid!] = new AdapterClassification(isPhysical, AdapterClassificationSource.MsftNetAdapter);
                     }
                 }
             }
@@ -80,7 +80,7 @@ namespace Dzmac.Core
                 foreach (var adapter in searcher.Get().Cast<ManagementObject>())
                 {
                     var guid = adapter["GUID"] as string;
-                    if (string.IsNullOrWhiteSpace(guid) || map.ContainsKey(guid))
+                    if (string.IsNullOrWhiteSpace(guid) || map.ContainsKey(guid!))
                     {
                         continue;
                     }
@@ -88,7 +88,7 @@ namespace Dzmac.Core
                     var physicalAdapter = adapter["PhysicalAdapter"];
                     if (physicalAdapter is bool isPhysical)
                     {
-                        map[guid] = new AdapterClassification(isPhysical, AdapterClassificationSource.Win32PhysicalAdapter);
+                        map[guid!] = new AdapterClassification(isPhysical, AdapterClassificationSource.Win32PhysicalAdapter);
                     }
                 }
             }
@@ -128,7 +128,7 @@ namespace Dzmac.Core
         /// <returns>Instances of <see cref="NetworkAdapter"/>.</returns>
         public static IEnumerable<NetworkAdapter> GetNetworkAdapters(VendorList? vendorManager = null, bool physicalOnly = false)
         {
-            Diagnostics.Info("adapter_discovery_started", ("vendorManagerProvided", vendorManager != null));
+            Diagnostics.Info("adapter_discovery_started", ("vendorManagerProvided", vendorManager is not null));
             var networkInterfaces = GetAll();
             var hardwareIdsByConfigId = GetPnpDeviceIdsByConfigId();
             var classificationByConfigId = AdapterClassificationResolver.BuildByConfigIdMap(hardwareIdsByConfigId);
@@ -186,7 +186,7 @@ namespace Dzmac.Core
                 return false;
             }
 
-            return PhysicalBusPrefixes.Any(prefix => pnpDeviceId.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+            return PhysicalBusPrefixes.Any(prefix => pnpDeviceId!.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
         }
 
         private static NetworkInterface[] GetAll()
@@ -196,7 +196,7 @@ namespace Dzmac.Core
             try
             {
                 var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-                if (interfaces != null)
+                if (interfaces is not null)
                 {
                     networkInterfaces = interfaces;
                 }
@@ -222,7 +222,7 @@ namespace Dzmac.Core
 
                     if (!string.IsNullOrWhiteSpace(guid) && !string.IsNullOrWhiteSpace(pnpDeviceId))
                     {
-                        map[guid] = pnpDeviceId;
+                        map[guid!] = pnpDeviceId!;
                     }
                 }
             }

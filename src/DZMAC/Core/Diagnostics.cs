@@ -70,7 +70,7 @@ namespace Dzmac.Core
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                logMessage += $", message=\"{message.Replace("\"", "'")}\"";
+                logMessage += $", message=\"{message!.Replace("\"", "'")}\"";
             }
 
             if (!string.IsNullOrWhiteSpace(contextText))
@@ -78,7 +78,7 @@ namespace Dzmac.Core
                 logMessage += $", {contextText}";
             }
 
-            if (exception != null)
+            if (exception is not null)
             {
                 logMessage += $", exceptionType={exception.GetType().Name}, exceptionDetail=\"{NormalizeValue(exception)}\"";
             }
@@ -242,7 +242,7 @@ namespace Dzmac.Core
 
         private static string NormalizeValue(object? value)
         {
-            if (value == null)
+            if (value is null)
             {
                 return "null";
             }

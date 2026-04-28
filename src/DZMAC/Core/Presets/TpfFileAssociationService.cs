@@ -30,7 +30,7 @@ namespace Dzmac.Core.Presets
 
             using (var extensionKey = Registry.CurrentUser.CreateSubKey(ExtensionKeyPath))
             {
-                if (extensionKey == null)
+                if (extensionKey is null)
                 {
                     throw new InvalidOperationException($"Failed to create registry key '{ExtensionKeyPath}'.");
                 }
@@ -40,7 +40,7 @@ namespace Dzmac.Core.Presets
 
             using (var classKey = Registry.CurrentUser.CreateSubKey(ClassKeyPath))
             {
-                if (classKey == null)
+                if (classKey is null)
                 {
                     throw new InvalidOperationException($"Failed to create registry key '{ClassKeyPath}'.");
                 }
@@ -50,7 +50,7 @@ namespace Dzmac.Core.Presets
 
             using (var openCommandKey = Registry.CurrentUser.CreateSubKey(OpenCommandKeyPath))
             {
-                if (openCommandKey == null)
+                if (openCommandKey is null)
                 {
                     throw new InvalidOperationException($"Failed to create registry key '{OpenCommandKeyPath}'.");
                 }
@@ -60,7 +60,7 @@ namespace Dzmac.Core.Presets
 
             using (var defaultIconKey = Registry.CurrentUser.CreateSubKey(DefaultIconKeyPath))
             {
-                if (defaultIconKey == null)
+                if (defaultIconKey is null)
                 {
                     throw new InvalidOperationException($"Failed to create registry key '{DefaultIconKeyPath}'.");
                 }

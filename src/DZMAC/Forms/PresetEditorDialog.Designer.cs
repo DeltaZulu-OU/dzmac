@@ -1,12 +1,14 @@
+#nullable enable
+
 namespace Dzmac.Forms
 {
     internal sealed partial class PresetEditorDialog
     {
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer? components = null;
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing && (components is not null))
             {
                 components.Dispose();
             }
@@ -635,46 +637,46 @@ namespace Dzmac.Forms
 
         #endregion
 
-        private System.Windows.Forms.TableLayoutPanel MainLayoutPanel;
-        private System.Windows.Forms.TabControl EditorTabControl;
-        private System.Windows.Forms.TabPage MacTabPage;
-        private System.Windows.Forms.TabPage Ipv4TabPage;
-        private System.Windows.Forms.TabPage Ipv6TabPage;
-        private System.Windows.Forms.TableLayoutPanel MacLayoutPanel;
-        private System.Windows.Forms.GroupBox PresetNameGroupBox;
-        private System.Windows.Forms.FlowLayoutPanel PresetNameFlowPanel;
-        private System.Windows.Forms.Label PresetNameLabel;
-        private System.Windows.Forms.GroupBox MacGroupBox;
-        private System.Windows.Forms.TableLayoutPanel MacInnerLayoutPanel;
-        private System.Windows.Forms.FlowLayoutPanel CustomMacFlowPanel;
-        private System.Windows.Forms.GroupBox ProxyGroupBox;
-        private System.Windows.Forms.Label ProxyPlaceholderLabel;
-        private System.Windows.Forms.TableLayoutPanel Ipv4LayoutPanel;
-        private System.Windows.Forms.GroupBox Ipv4LeftGroupBox;
-        private System.Windows.Forms.TableLayoutPanel Ipv4LeftLayoutPanel;
-        private System.Windows.Forms.TableLayoutPanel Ipv4RightLayoutPanel;
-        private System.Windows.Forms.Label Ipv6PlaceholderLabel;
-        private System.Windows.Forms.FlowLayoutPanel ButtonFlowPanel;
-        private System.Windows.Forms.Button CancelDialogButton;
-        private System.Windows.Forms.Button SaveButton;
-        private System.Windows.Forms.TextBox _presetNameTextBox;
-        private System.Windows.Forms.CheckBox _includeMacCheckBox;
-        private System.Windows.Forms.RadioButton _useRandomMacRadio;
-        private System.Windows.Forms.RadioButton _useRandom02MacRadio;
-        private System.Windows.Forms.RadioButton _useOriginalMacRadio;
-        private System.Windows.Forms.RadioButton _useCustomMacRadio;
-        private System.Windows.Forms.TextBox _customMacTextBox;
-        private System.Windows.Forms.CheckBox _includeIpv4CheckBox;
-        private System.Windows.Forms.CheckBox _dhcpIpv4CheckBox;
-        private System.Windows.Forms.CheckBox _ipv4AddressCheckBox;
-        private System.Windows.Forms.CheckBox _ipv4GatewayCheckBox;
-        private System.Windows.Forms.CheckBox _ipv4DnsCheckBox;
-        private System.Windows.Forms.GroupBox _ipv4RightGroup;
-        private System.Windows.Forms.GroupBox _ipv4AddressGroup;
-        private System.Windows.Forms.GroupBox _ipv4GatewayGroup;
-        private System.Windows.Forms.GroupBox _ipv4DnsGroup;
-        private System.Windows.Forms.DataGridView _ipv4AddressGrid;
-        private System.Windows.Forms.DataGridView _ipv4GatewayGrid;
-        private System.Windows.Forms.DataGridView _ipv4DnsGrid;
+        private System.Windows.Forms.TableLayoutPanel? MainLayoutPanel;
+        private System.Windows.Forms.TabControl? EditorTabControl;
+        private System.Windows.Forms.TabPage? MacTabPage;
+        private System.Windows.Forms.TabPage? Ipv4TabPage;
+        private System.Windows.Forms.TabPage? Ipv6TabPage;
+        private System.Windows.Forms.TableLayoutPanel? MacLayoutPanel;
+        private System.Windows.Forms.GroupBox? PresetNameGroupBox;
+        private System.Windows.Forms.FlowLayoutPanel? PresetNameFlowPanel;
+        private System.Windows.Forms.Label? PresetNameLabel;
+        private System.Windows.Forms.GroupBox? MacGroupBox;
+        private System.Windows.Forms.TableLayoutPanel? MacInnerLayoutPanel;
+        private System.Windows.Forms.FlowLayoutPanel? CustomMacFlowPanel;
+        private System.Windows.Forms.GroupBox? ProxyGroupBox;
+        private System.Windows.Forms.Label? ProxyPlaceholderLabel;
+        private System.Windows.Forms.TableLayoutPanel? Ipv4LayoutPanel;
+        private System.Windows.Forms.GroupBox? Ipv4LeftGroupBox;
+        private System.Windows.Forms.TableLayoutPanel? Ipv4LeftLayoutPanel;
+        private System.Windows.Forms.TableLayoutPanel? Ipv4RightLayoutPanel;
+        private System.Windows.Forms.Label? Ipv6PlaceholderLabel;
+        private System.Windows.Forms.FlowLayoutPanel? ButtonFlowPanel;
+        private System.Windows.Forms.Button? CancelDialogButton;
+        private System.Windows.Forms.Button? SaveButton;
+        private System.Windows.Forms.TextBox? _presetNameTextBox;
+        private System.Windows.Forms.CheckBox? _includeMacCheckBox;
+        private System.Windows.Forms.RadioButton? _useRandomMacRadio;
+        private System.Windows.Forms.RadioButton? _useRandom02MacRadio;
+        private System.Windows.Forms.RadioButton? _useOriginalMacRadio;
+        private System.Windows.Forms.RadioButton? _useCustomMacRadio;
+        private System.Windows.Forms.TextBox? _customMacTextBox;
+        private System.Windows.Forms.CheckBox? _includeIpv4CheckBox;
+        private System.Windows.Forms.CheckBox? _dhcpIpv4CheckBox;
+        private System.Windows.Forms.CheckBox? _ipv4AddressCheckBox;
+        private System.Windows.Forms.CheckBox? _ipv4GatewayCheckBox;
+        private System.Windows.Forms.CheckBox? _ipv4DnsCheckBox;
+        private System.Windows.Forms.GroupBox? _ipv4RightGroup;
+        private System.Windows.Forms.GroupBox? _ipv4AddressGroup;
+        private System.Windows.Forms.GroupBox? _ipv4GatewayGroup;
+        private System.Windows.Forms.GroupBox? _ipv4DnsGroup;
+        private System.Windows.Forms.DataGridView? _ipv4AddressGrid;
+        private System.Windows.Forms.DataGridView? _ipv4GatewayGrid;
+        private System.Windows.Forms.DataGridView? _ipv4DnsGrid;
     }
 }

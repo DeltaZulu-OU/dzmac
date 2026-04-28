@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Dzmac.Cli;
 using Dzmac.Core;
 using Dzmac.Properties;
 
-namespace Dzmac
+namespace Dzmac.Cli
 {
     internal static class CliHandler
     {
@@ -23,6 +22,11 @@ namespace Dzmac
                 if (!TryParse(args, out var options, out var parseError))
                 {
                     return ExitWithError(parseError);
+                }
+
+                if (options is null)
+                {
+                    return ExitWithError("Failed to parse command-line arguments.");
                 }
 
                 if (options.UnsupportedOptions.Count > 0)
@@ -48,7 +52,7 @@ namespace Dzmac
                         return ExitWithError(Resources.CliRestoreOriginalFailed);
                     }
 
-                    if (options.MacOperation != null)
+                    if (options.MacOperation is not null)
                     {
                         var mac = ResolveMac(options.MacOperation, vendorManager);
                         if (!adapter.TrySetRegistryMac(mac))
@@ -123,7 +127,7 @@ namespace Dzmac
 
         private static bool HasFlag(IEnumerable<string> args, string flag) => args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
 
-        private static MacAddress ResolveMac(MacOperation macOperation, VendorList manager)
+        private static MacAddress? ResolveMac(MacOperation macOperation, VendorList manager)
         {
             if (macOperation.IsRestore)
             {
@@ -156,12 +160,18 @@ namespace Dzmac
 
         private static void ShowHelp() => Console.WriteLine(CommandLineHelpContent.Text);
 
-        private static bool TryGetAdapter(string connectionName, out NetworkAdapter adapter)
+        private static bool TryGetAdapter(string? connectionName, out NetworkAdapter adapter)
         {
+            if (string.IsNullOrWhiteSpace(connectionName))
+            {
+                adapter = null!;
+                return false;
+            }
+
             adapter = NetworkAdapterFactory.GetNetworkAdapters()
                 .FirstOrDefault(a => string.Equals(a.Name, connectionName, StringComparison.OrdinalIgnoreCase)
                                      || string.Equals(a.DeviceDescription, connectionName, StringComparison.OrdinalIgnoreCase));
-            return adapter != null;
+            return adapter is not null;
         }
 
         private static bool TryParse(IReadOnlyList<string> args, out CliOptions options, out string error)
@@ -450,14 +460,9 @@ namespace Dzmac
                 return false;
             }
 
-            if (TryReadOptionalValue(args, ref index, out var macAddress))
-            {
-                options.MacOperation = new MacOperation(macAddress, force02);
-            }
-            else
-            {
-                options.MacOperation = new MacOperation(string.Empty, force02);
-            }
+            options.MacOperation = TryReadOptionalValue(args, ref index, out var macAddress)
+                ? new MacOperation(macAddress, force02)
+                : new MacOperation(string.Empty, force02);
 
             macOptionSeen = true;
             return true;
@@ -465,14 +470,14 @@ namespace Dzmac
 
         private sealed class CliOptions
         {
-            public string ConnectionName { get; set; }
+            public string? ConnectionName { get; set; }
             public bool DisableAdapter { get; set; }
             public bool EnableAdapter { get; set; }
             public bool EnableDhcpV4 { get; set; }
             public List<Ipv4AddressSpec> Ipv4Addresses { get; } = new List<Ipv4AddressSpec>();
             public List<string> Ipv4DnsServers { get; } = new List<string>();
             public List<Ipv4GatewaySpec> Ipv4Gateways { get; } = new List<Ipv4GatewaySpec>();
-            public MacOperation MacOperation { get; set; }
+            public MacOperation? MacOperation { get; set; }
             public bool ReleaseDhcpV4 { get; set; }
             public bool RenewDhcpV4 { get; set; }
             public bool ResetAdapter { get; set; }
@@ -521,7 +526,7 @@ namespace Dzmac
             public bool Force02 { get; }
             public bool IsRandom { get; }
             public bool IsRestore => !IsRandom && string.IsNullOrWhiteSpace(MacAddress);
-            public string MacAddress { get; }
+            public string? MacAddress { get; } = null;
         }
     }
 }
